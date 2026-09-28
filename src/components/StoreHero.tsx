@@ -395,10 +395,10 @@ function ParticleField() {
   return (
     <points ref={pointsRef}>
       <pointsMaterial
-        size={0.5}
+        size={0.08}
         sizeAttenuation
         transparent
-        opacity={0.8}
+        opacity={0.6}
         vertexColors
         fog={false}
         map={createParticleTexture()}
