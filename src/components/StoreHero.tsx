@@ -441,7 +441,7 @@ function MysteryCanvas({ selectedAssets }: MysteryCanvasProps) {
     hyperboloid: { base: 0xf59e0b, emissive: 0xfbbf24 }, // 주황색
     enneper: { base: 0x06b6d4, emissive: 0x22d3ee },     // 청록색
     dini: { base: 0xffffff, emissive: 0xffffff },        // 완전 흰색
-    seashell: { base: 0xf43f5e, emissive: 0xfb7185 },    // 빨간색
+    seashell: { base: 0xff3366, emissive: 0xff66aa },    // 핑크 빨간색
     boys: { base: 0x14b8a6, emissive: 0x2dd4bf },        // 하늘색
     rhodonea: { base: 0xeab308, emissive: 0xfde047 },    // 황금색
   }
