@@ -1,72 +1,115 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Canvas, useFrame } from '@react-three/fiber'
+import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
 import { playPanelBeep } from '../lib/sciFiFx'
 import { withLang } from '../i18n/languages'
 
 const STORE_URL = 'https://store.cometest.com/'
 
-// 3D 별 모양
-function StarObject() {
+// 뫼비우스 띠 (Möbius Strip)
+function MoebiusStrip() {
   const groupRef = useRef<THREE.Group>(null)
 
   useEffect(() => {
     if (!groupRef.current) return
 
-    const geometry = new THREE.IcosahedronGeometry(1, 2)
-    geometry.scale(1.5, 1, 1.5)
+    const geometry = new THREE.BufferGeometry()
+    const vertices: number[] = []
+    const indices: number[] = []
+
+    const width = 5
+    const depth = 30
+
+    for (let i = 0; i <= depth; i++) {
+      const u = (i / depth) * Math.PI * 2
+      for (let j = 0; j <= width; j++) {
+        const v = (j / width - 0.5) * 0.5
+        const x = (1 + v * Math.cos(u / 2)) * Math.cos(u)
+        const y = (1 + v * Math.cos(u / 2)) * Math.sin(u)
+        const z = v * Math.sin(u / 2)
+
+        vertices.push(x * 2, y * 2, z * 2)
+      }
+    }
+
+    for (let i = 0; i < depth; i++) {
+      for (let j = 0; j < width; j++) {
+        const a = i * (width + 1) + j
+        const b = a + width + 1
+
+        indices.push(a, b, a + 1)
+        indices.push(b, b + 1, a + 1)
+      }
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3))
+    geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1))
+    geometry.computeVertexNormals()
 
     const material = new THREE.MeshStandardMaterial({
-      color: 0xff6b9d,
-      emissive: 0xff1493,
+      color: 0xa855f7,
+      emissive: 0xd946ef,
+      emissiveIntensity: 0.5,
+      metalness: 0.5,
+      roughness: 0.3,
+      wireframe: false,
+      side: THREE.DoubleSide,
+    })
+
+    const mesh = new THREE.Mesh(geometry, material)
+    groupRef.current.add(mesh)
+  }, [])
+
+  useFrame(() => {
+    if (groupRef.current) {
+      groupRef.current.rotation.x += 0.001
+      groupRef.current.rotation.y += 0.003
+    }
+  })
+
+  return <group ref={groupRef} position={[0, 0, 0]} />
+}
+
+// 무한 루프 (8자 모양)
+function InfinityLoop() {
+  const groupRef = useRef<THREE.Group>(null)
+
+  useEffect(() => {
+    if (!groupRef.current) return
+
+    const points: THREE.Vector3[] = []
+    for (let i = 0; i <= 100; i++) {
+      const t = (i / 100) * Math.PI * 2
+      const a = 2
+      const x = (a * Math.cos(t)) / (1 + Math.sin(t) ** 2)
+      const y = (a * Math.sin(t) * Math.cos(t)) / (1 + Math.sin(t) ** 2)
+      points.push(new THREE.Vector3(x * 2, y * 2, 0))
+    }
+
+    const curve = new THREE.CatmullRomCurve3(points)
+    const tubeGeometry = new THREE.TubeGeometry(curve, 64, 0.25, 8, false)
+
+    const material = new THREE.MeshStandardMaterial({
+      color: 0x06b6d4,
+      emissive: 0x0891b2,
       emissiveIntensity: 0.6,
       metalness: 0.6,
       roughness: 0.2,
     })
 
-    const mesh = new THREE.Mesh(geometry, material)
+    const mesh = new THREE.Mesh(tubeGeometry, material)
     groupRef.current.add(mesh)
   }, [])
 
   useFrame(() => {
     if (groupRef.current) {
-      groupRef.current.rotation.x += 0.004
-      groupRef.current.rotation.y += 0.007
+      groupRef.current.rotation.z += 0.004
     }
   })
 
-  return <group ref={groupRef} position={[-3, 1, -2]} />
-}
-
-// 결정체 (크리스탈)
-function CrystalObject() {
-  const groupRef = useRef<THREE.Group>(null)
-
-  useEffect(() => {
-    if (!groupRef.current) return
-
-    const geometry = new THREE.OctahedronGeometry(1.2, 2)
-    const material = new THREE.MeshStandardMaterial({
-      color: 0x00d4ff,
-      emissive: 0x0099cc,
-      emissiveIntensity: 0.5,
-      metalness: 0.7,
-      roughness: 0.1,
-    })
-
-    const mesh = new THREE.Mesh(geometry, material)
-    groupRef.current.add(mesh)
-  }, [])
-
-  useFrame(() => {
-    if (groupRef.current) {
-      groupRef.current.rotation.x += 0.006
-      groupRef.current.rotation.z += 0.008
-    }
-  })
-
-  return <group ref={groupRef} position={[3, -1, -2]} />
+  return <group ref={groupRef} position={[0, 0, -2]} />
 }
 
 // 회전하는 Wireframe 구
@@ -183,8 +226,19 @@ function ParticleField() {
 }
 
 function MysteryCanvas() {
+  const [cursorColor, setCursorColor] = useState('#a855f7')
+
   return (
-    <Canvas camera={{ position: [0, 0, 8], fov: 45 }} dpr={[1, 2]}>
+    <Canvas
+      camera={{ position: [0, 0, 8], fov: 45 }}
+      dpr={[1, 2]}
+      onMouseMove={(e) => {
+        const colors = ['#d946ef', '#06b6d4', '#fbbf24', '#a855f7']
+        const randomColor = colors[Math.floor(Math.random() * colors.length)]
+        setCursorColor(randomColor)
+      }}
+      style={{ cursor: `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><circle cx="16" cy="16" r="8" fill="${cursorColor}"/></svg>') 16 16, auto` }}
+    >
       <color attach="background" args={['#0d1117']} />
 
       {/* 다중 조명으로 복잡한 그림자 효과 */}
@@ -194,12 +248,15 @@ function MysteryCanvas() {
       <pointLight position={[0, 0, 8]} intensity={0.8} color="#fbbf24" />
       <pointLight position={[5, -5, -5]} intensity={0.9} color="#a855f7" />
 
-      {/* 복잡한 미스테리한 객체들 */}
-      <StarObject />
-      <CrystalObject />
+      {/* 뫼비우스 띠 + 무한 루프*/}
+      <MoebiusStrip />
+      <InfinityLoop />
       <WireframeOrb />
       <ComplexTorus />
       <ParticleField />
+
+      {/* 드래그 가능하게 */}
+      <OrbitControls enableZoom={true} enablePan={true} autoRotate autoRotateSpeed={1} />
     </Canvas>
   )
 }
