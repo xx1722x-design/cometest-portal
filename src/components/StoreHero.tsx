@@ -38,7 +38,7 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
       const vertices: number[] = []
       const colors: number[] = []
       const indices: number[] = []
-      const width = 12, depth = 60
+      const width = 20, depth = 100
       for (let i = 0; i <= depth; i++) {
         const u = (i / depth) * Math.PI * 2
         for (let j = 0; j <= width; j++) {
@@ -71,8 +71,8 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
       const vertices: number[] = []
       const colors: number[] = []
       const indices: number[] = []
-      for (let u = 0; u <= 50; u++) {
-        for (let v = 0; v <= 50; v++) {
+      for (let u = 0; u <= 80; u++) {
+        for (let v = 0; v <= 80; v++) {
           const uu = (u / 50) * 2 * Math.PI
           const vv = (v / 50) * 2 * Math.PI
           const x = (2 + Math.cos(uu / 2) * Math.sin(vv)) * Math.cos(uu)
@@ -97,7 +97,7 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
       break
     }
     case 'torus':
-      geometry = new THREE.TorusGeometry(1.2, 0.5, 32, 100)
+      geometry = new THREE.TorusGeometry(1.2, 0.5, 64, 200)
       break
     case 'knot': {
       const points: THREE.Vector3[] = []
@@ -130,8 +130,8 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
       const vertices: number[] = []
       const colors: number[] = []
       const indices: number[] = []
-      for (let u = 0; u <= 40; u++) {
-        for (let v = 0; v <= 40; v++) {
+      for (let u = 0; u <= 70; u++) {
+        for (let v = 0; v <= 70; v++) {
           const uu = (u / 40) * 2 * Math.PI
           const vv = (v / 40 - 0.5) * 3
           const x = Math.cosh(vv) * Math.cos(uu)
@@ -160,8 +160,8 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
       const vertices: number[] = []
       const colors: number[] = []
       const indices: number[] = []
-      for (let u = 0; u <= 30; u++) {
-        for (let v = 0; v <= 30; v++) {
+      for (let u = 0; u <= 60; u++) {
+        for (let v = 0; v <= 60; v++) {
           const uu = (u / 30) * 4 - 2
           const vv = (v / 30) * 4 - 2
           const x = uu - (uu ** 3) / 3 + uu * (vv ** 2)
