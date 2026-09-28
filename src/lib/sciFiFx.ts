@@ -13,45 +13,61 @@ function getAudioContext(): AudioContext | null {
   return audioCtx
 }
 
-// 미래지향적 버튼 소리: 상승하는 톤 + 명확한 확인음
+// 철컹 기계음: 메탈릭하고 기계적인 느낌
 export function playPanelBeep() {
   const ctx = getAudioContext()
   if (!ctx) return
   const now = ctx.currentTime
 
   const master = ctx.createGain()
-  master.gain.value = 0.18
+  master.gain.value = 0.2
   master.connect(ctx.destination)
 
-  // 1) 상승음: sine 600Hz → 1200Hz, 밝고 미래지향적 (140ms)
-  const rise = ctx.createOscillator()
-  const riseGain = ctx.createGain()
-  rise.type = 'sine'
-  rise.frequency.setValueAtTime(600, now)
-  rise.frequency.exponentialRampToValueAtTime(1200, now + 0.14)
-  riseGain.gain.setValueAtTime(0.0001, now)
-  riseGain.gain.exponentialRampToValueAtTime(0.6, now + 0.01)
-  riseGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.15)
-  rise.connect(riseGain).connect(master)
-  rise.start(now)
-  rise.stop(now + 0.16)
+  // 1) 철컹: square wave 1400Hz → 250Hz, 급격한 하강 (50ms)
+  const clang = ctx.createOscillator()
+  const clangGain = ctx.createGain()
+  const clangFilter = ctx.createBiquadFilter()
+  clang.type = 'square'
+  clang.frequency.setValueAtTime(1400, now)
+  clang.frequency.exponentialRampToValueAtTime(250, now + 0.05)
+  clangFilter.type = 'highpass'
+  clangFilter.frequency.value = 1000
+  clangGain.gain.setValueAtTime(0.0001, now)
+  clangGain.gain.exponentialRampToValueAtTime(0.7, now + 0.002)
+  clangGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.06)
+  clang.connect(clangFilter).connect(clangGain).connect(master)
+  clang.start(now)
+  clang.stop(now + 0.07)
 
-  // 2) 확인 하강음: sine 1200Hz → 800Hz, 더 깊은 톤으로 안정감
-  const confirm = ctx.createOscillator()
-  const confirmGain = ctx.createGain()
-  const t2 = now + 0.08
-  confirm.type = 'sine'
-  confirm.frequency.setValueAtTime(1200, t2)
-  confirm.frequency.exponentialRampToValueAtTime(800, t2 + 0.12)
-  confirmGain.gain.setValueAtTime(0.0001, t2)
-  confirmGain.gain.exponentialRampToValueAtTime(0.5, t2 + 0.01)
-  confirmGain.gain.exponentialRampToValueAtTime(0.0001, t2 + 0.13)
-  confirm.connect(confirmGain).connect(master)
-  confirm.start(t2)
-  confirm.stop(t2 + 0.14)
+  // 2) 공명음: sine 300Hz, 기계적인 울림 (180ms)
+  const resonance = ctx.createOscillator()
+  const resonanceGain = ctx.createGain()
+  const t1 = now + 0.01
+  resonance.type = 'sine'
+  resonance.frequency.setValueAtTime(320, t1)
+  resonance.frequency.exponentialRampToValueAtTime(150, t1 + 0.18)
+  resonanceGain.gain.setValueAtTime(0.0001, t1)
+  resonanceGain.gain.exponentialRampToValueAtTime(0.5, t1 + 0.01)
+  resonanceGain.gain.exponentialRampToValueAtTime(0.0001, t1 + 0.19)
+  resonance.connect(resonanceGain).connect(master)
+  resonance.start(t1)
+  resonance.stop(t1 + 0.2)
+
+  // 3) 기계음 펄스: 저주파 클릭감
+  const pulse = ctx.createOscillator()
+  const pulseGain = ctx.createGain()
+  const t2 = now + 0.04
+  pulse.type = 'square'
+  pulse.frequency.setValueAtTime(180, t2)
+  pulseGain.gain.setValueAtTime(0.0001, t2)
+  pulseGain.gain.exponentialRampToValueAtTime(0.3, t2 + 0.01)
+  pulseGain.gain.exponentialRampToValueAtTime(0.0001, t2 + 0.12)
+  pulse.connect(pulseGain).connect(master)
+  pulse.start(t2)
+  pulse.stop(t2 + 0.13)
 
   // 노드 정리
-  confirm.onended = () => master.disconnect()
+  pulse.onended = () => master.disconnect()
 }
 
 const prefersReducedMotion = () =>
