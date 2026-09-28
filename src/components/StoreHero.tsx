@@ -432,7 +432,7 @@ function MysteryCanvas() {
     dini: { base: 0xffffff, emissive: 0xffffff },        // 완전 흰색
     seashell: { base: 0xf43f5e, emissive: 0xfb7185 },    // 빨간색
     boys: { base: 0x14b8a6, emissive: 0x2dd4bf },        // 청색
-    rhodonea: { base: 0xeab308, emissive: 0xfde047 },    // 황록색
+    rhodonea: { base: 0xeab308, emissive: 0xfde047 },    // 황금색
   }
 
   return (
