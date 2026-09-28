@@ -100,29 +100,29 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
       geometry = new THREE.TorusGeometry(1.2, 0.5, 32, 100)
       break
     case 'knot': {
-      geometry = new THREE.BufferGeometry()
-      const vertices: number[] = []
-      for (let i = 0; i < 1000; i++) {
-        const t = (i / 1000) * 20 * Math.PI
+      const points: THREE.Vector3[] = []
+      for (let i = 0; i < 200; i++) {
+        const t = (i / 200) * 20 * Math.PI
         const x = Math.cos(t) * (2 + Math.cos(t * 1.5))
         const y = Math.sin(t) * (2 + Math.cos(t * 1.5))
         const z = Math.sin(t * 1.5)
-        vertices.push(x * 0.5, y * 0.5, z * 0.5)
+        points.push(new THREE.Vector3(x * 0.5, y * 0.5, z * 0.5))
       }
-      geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3))
+      const knotCurve = new THREE.CatmullRomCurve3(points, true)
+      geometry = new THREE.TubeGeometry(knotCurve, 64, 0.15, 6, false)
       break
     }
     case 'helix': {
-      geometry = new THREE.BufferGeometry()
-      const vertices: number[] = []
-      for (let i = 0; i < 500; i++) {
-        const t = (i / 500) * 8 * Math.PI
+      const points: THREE.Vector3[] = []
+      for (let i = 0; i < 200; i++) {
+        const t = (i / 200) * 8 * Math.PI
         const x = Math.cos(t) * 1.5
         const y = t * 0.3
         const z = Math.sin(t) * 1.5
-        vertices.push(x, y, z)
+        points.push(new THREE.Vector3(x, y, z))
       }
-      geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3))
+      const helixCurve = new THREE.CatmullRomCurve3(points)
+      geometry = new THREE.TubeGeometry(helixCurve, 32, 0.12, 6, false)
       break
     }
     case 'hyperboloid': {
