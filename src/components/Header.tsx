@@ -1,8 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { LanguageSelector } from './LanguageSelector'
 import { useDarkMode } from '../theme'
+import { searchPortal, type SearchItem } from '../config/searchData'
 
 const CATEGORIES = [
   { key: 'home', i18nKey: 'home', path: '/' },
@@ -31,22 +32,69 @@ export function Header() {
   const { pathname } = useLocation()
   const [isDarkMode, toggleDarkMode] = useDarkMode()
   const [searchQuery, setSearchQuery] = useState('')
+  const [searchResults, setSearchResults] = useState<SearchItem[]>([])
+  const [showDropdown, setShowDropdown] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const searchInputRef = useRef<HTMLInputElement>(null)
+  const dropdownRef = useRef<HTMLDivElement>(null)
 
   // 페이지 이동 시 모바일 메뉴 닫기
   useEffect(() => setMenuOpen(false), [pathname])
 
-  // Esc 로 모바일 메뉴 닫기
+  // 실시간 검색
   useEffect(() => {
-    if (!menuOpen) return
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && setMenuOpen(false)
+    if (searchQuery.trim()) {
+      const results = searchPortal(searchQuery)
+      setSearchResults(results)
+      setShowDropdown(true)
+    } else {
+      setSearchResults([])
+      setShowDropdown(false)
+    }
+  }, [searchQuery])
+
+  // Esc 로 드롭다운/메뉴 닫기
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setShowDropdown(false)
+        setMenuOpen(false)
+      }
+    }
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
-  }, [menuOpen])
+  }, [])
+
+  // 드롭다운 외부 클릭 시 닫기
+  useEffect(() => {
+    const onClickOutside = (e: MouseEvent) => {
+      if (
+        dropdownRef.current &&
+        searchInputRef.current &&
+        !dropdownRef.current.contains(e.target as Node) &&
+        !searchInputRef.current.contains(e.target as Node)
+      ) {
+        setShowDropdown(false)
+      }
+    }
+
+    if (showDropdown) {
+      document.addEventListener('mousedown', onClickOutside)
+      return () => document.removeEventListener('mousedown', onClickOutside)
+    }
+  }, [showDropdown])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    console.log('Search:', searchQuery)
+    if (searchResults.length > 0) {
+      handleSelectResult(searchResults[0])
+    }
+  }
+
+  const handleSelectResult = (result: SearchItem) => {
+    navigate(result.path)
+    setSearchQuery('')
+    setShowDropdown(false)
   }
 
   return (
@@ -67,15 +115,102 @@ export function Header() {
           </span>
         </a>
 
-        <form className="site-search" role="search" onSubmit={handleSearch}>
+        <form className="site-search" role="search" onSubmit={handleSearch} style={{ position: 'relative' }}>
           <input
+            ref={searchInputRef}
             type="search"
             placeholder={t('search_placeholder')}
             aria-label={t('search_placeholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            autoComplete="off"
           />
           <button type="submit">{t('search_button')}</button>
+
+          {/* 검색 결과 드롭다운 */}
+          {showDropdown && (
+            <div
+              ref={dropdownRef}
+              className="search-dropdown"
+              style={{
+                position: 'absolute',
+                top: '100%',
+                left: 0,
+                right: 0,
+                backgroundColor: isDarkMode ? '#1a1a1a' : '#ffffff',
+                border: `1px solid ${isDarkMode ? '#333333' : '#e0e0e0'}`,
+                borderTop: 'none',
+                borderRadius: '0 0 8px 8px',
+                maxHeight: '400px',
+                overflowY: 'auto',
+                zIndex: 1000,
+                boxShadow: isDarkMode ? '0 4px 12px rgba(0,0,0,0.4)' : '0 4px 12px rgba(0,0,0,0.1)',
+              }}
+            >
+              {searchResults.length > 0 ? (
+                <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+                  {searchResults.map((result) => (
+                    <li
+                      key={result.id}
+                      onClick={() => handleSelectResult(result)}
+                      style={{
+                        padding: '12px 16px',
+                        cursor: 'pointer',
+                        borderBottom: `1px solid ${isDarkMode ? '#2a2a2a' : '#f0f0f0'}`,
+                        transition: 'background-color 0.2s',
+                        backgroundColor: isDarkMode ? '#1a1a1a' : '#ffffff',
+                        color: isDarkMode ? '#ffffff' : '#1a1a1a',
+                      }}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.backgroundColor = isDarkMode ? '#2a2a2a' : '#f5f5f5'
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.backgroundColor = isDarkMode ? '#1a1a1a' : '#ffffff'
+                      }}
+                    >
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+                        <span style={{ fontSize: '18px' }}>{result.icon}</span>
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 500 }}>{result.title}</div>
+                          {result.description && (
+                            <div
+                              style={{
+                                fontSize: '12px',
+                                opacity: 0.7,
+                                marginTop: '4px',
+                              }}
+                            >
+                              {result.description}
+                            </div>
+                          )}
+                          <div
+                            style={{
+                              fontSize: '11px',
+                              opacity: 0.5,
+                              marginTop: '4px',
+                              color: isDarkMode ? '#888' : '#666',
+                            }}
+                          >
+                            {result.type === 'category' ? '📂 카테고리' : '🎮 시뮬레이션'}
+                          </div>
+                        </div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div
+                  style={{
+                    padding: '24px',
+                    textAlign: 'center',
+                    color: isDarkMode ? '#888' : '#666',
+                  }}
+                >
+                  {t('search_no_results') || '검색 결과가 없습니다'}
+                </div>
+              )}
+            </div>
+          )}
         </form>
 
         <div className="site-header__actions">
