@@ -488,7 +488,7 @@ export function StoreHero() {
 
   // 초기에 2개 에셋을 미리 선택해서 시작
   const [selectedAssets] = useState<AssetType[]>(() => {
-    const allAssets: AssetType[] = ['mobius', 'infinity', 'klein', 'torus', 'knot', 'helix', 'hyperboloid', 'enneper', 'dini', 'seashell', 'boys', 'rhodonea']
+    const allAssets: AssetType[] = ['mobius', 'infinity', 'lissajous', 'torus', 'knot', 'helix', 'hyperboloid', 'enneper', 'dini', 'spherical', 'boys', 'villarceau']
     const shuffled = [...allAssets].sort(() => Math.random() - 0.5)
     return shuffled.slice(0, 2)
   })
