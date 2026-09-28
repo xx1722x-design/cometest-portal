@@ -239,7 +239,7 @@ export function Index() {
       description: t('asset_store_description'),
       thumbnail: '',
       category: 'banner',
-      link: '/store',
+      link: 'https://store.cometest.com',
       icon: '🛒',
     },
   ]
