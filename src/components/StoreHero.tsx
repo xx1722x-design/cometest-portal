@@ -314,6 +314,26 @@ function DynamicAsset({ type, position, baseColor, emissiveColor, speed }: Dynam
   )
 }
 
+function createParticleTexture() {
+  const canvas = document.createElement('canvas')
+  canvas.width = 64
+  canvas.height = 64
+  const ctx = canvas.getContext('2d')!
+
+  // 그래디언트 원형 텍스처 생성 (중심이 밝고 가장자리가 어두움)
+  const gradient = ctx.createRadialGradient(32, 32, 0, 32, 32, 32)
+  gradient.addColorStop(0, 'rgba(255, 255, 255, 1)')
+  gradient.addColorStop(0.5, 'rgba(255, 255, 255, 0.5)')
+  gradient.addColorStop(1, 'rgba(255, 255, 255, 0)')
+
+  ctx.fillStyle = gradient
+  ctx.beginPath()
+  ctx.arc(32, 32, 32, 0, Math.PI * 2)
+  ctx.fill()
+
+  return new THREE.CanvasTexture(canvas)
+}
+
 function ParticleField() {
   const pointsRef = useRef<THREE.Points>(null)
 
@@ -381,6 +401,7 @@ function ParticleField() {
         opacity={0.7}
         vertexColors
         fog={false}
+        map={createParticleTexture()}
       />
     </points>
   )
