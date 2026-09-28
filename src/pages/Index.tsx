@@ -1,6 +1,7 @@
+import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Header } from '../components/Header'
-import { StoreHero } from '../components/StoreHero'
+import { HeroSection3D } from '../components/HeroSection3D'
 import { BentoSection } from '../components/BentoSection'
 import { SiteFooter } from '../components/SiteFooter'
 import type { ContentItem } from '../components/ContentCard'
@@ -23,6 +24,14 @@ const SECTIONS: { id: string; titleKey: string; itemIds: string[]; featured?: bo
 
 export function Index() {
   const { t } = useTranslation()
+  const [isDarkMode, setIsDarkMode] = useState(true)
+
+  useEffect(() => {
+    const savedMode = localStorage.getItem('darkMode')
+    if (savedMode !== null) {
+      setIsDarkMode(JSON.parse(savedMode))
+    }
+  }, [])
   const contentItems: ContentItem[] = [
     {
       id: 'cat-1',
@@ -244,8 +253,8 @@ export function Index() {
     >
       <Header />
 
-      {/* 전체 폭 스토어 히어로 */}
-      <StoreHero />
+      {/* 히어로 섹션 - 랜덤 3D 우주 에셋 */}
+      <HeroSection3D isDarkMode={isDarkMode} />
 
       {/* 추천 + 주제별 벤토 그리드 */}
       <main className="sections">
