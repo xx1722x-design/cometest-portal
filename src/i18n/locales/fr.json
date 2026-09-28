@@ -92,13 +92,12 @@
   "footer_login": "Se connecter",
   "footer_signup": "Inscription",
   "footer_pricing": "Tarifs",
-  "scroll_prev": "Précédent",
-  "scroll_next": "Suivant",
   "sample_sim_1_title": "Simulation d'exemple 1",
   "sample_sim_1_desc": "Une simulation d'exemple pour cette catégorie.",
   "sample_sim_2_title": "Simulation d'exemple 2",
   "sample_sim_2_desc": "Un autre exemple de simulation 3D interactive.",
   "select_language": "Choisir la langue",
   "languages_available": "{{count}} langues disponibles",
-  "current_language": "Actuelle"
+  "current_language": "Actuelle",
+  "featured_title": "À la une"
 }

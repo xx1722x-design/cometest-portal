@@ -92,13 +92,12 @@
   "footer_login": "تسجيل الدخول",
   "footer_signup": "إنشاء حساب",
   "footer_pricing": "الأسعار",
-  "scroll_prev": "السابق",
-  "scroll_next": "التالي",
   "sample_sim_1_title": "محاكاة تجريبية 1",
   "sample_sim_1_desc": "محاكاة تجريبية لهذه الفئة.",
   "sample_sim_2_title": "محاكاة تجريبية 2",
   "sample_sim_2_desc": "مثال آخر على محاكاة تفاعلية ثلاثية الأبعاد.",
   "select_language": "اختر اللغة",
   "languages_available": "{{count}} لغات متاحة",
-  "current_language": "الحالية"
+  "current_language": "الحالية",
+  "featured_title": "مميز"
 }

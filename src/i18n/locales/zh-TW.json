@@ -92,13 +92,12 @@
   "footer_login": "登入",
   "footer_signup": "註冊",
   "footer_pricing": "價格",
-  "scroll_prev": "上一頁",
-  "scroll_next": "下一頁",
   "sample_sim_1_title": "範例模擬 1",
   "sample_sim_1_desc": "本分類的範例模擬內容。",
   "sample_sim_2_title": "範例模擬 2",
   "sample_sim_2_desc": "另一個互動 3D 模擬範例。",
   "select_language": "選擇語言",
   "languages_available": "支援 {{count}} 種語言",
-  "current_language": "目前"
+  "current_language": "目前",
+  "featured_title": "精選"
 }

@@ -92,13 +92,12 @@
   "footer_login": "登录",
   "footer_signup": "注册",
   "footer_pricing": "价格",
-  "scroll_prev": "上一页",
-  "scroll_next": "下一页",
   "sample_sim_1_title": "示例仿真 1",
   "sample_sim_1_desc": "本分类的示例仿真内容。",
   "sample_sim_2_title": "示例仿真 2",
   "sample_sim_2_desc": "另一个互动 3D 仿真示例。",
   "select_language": "选择语言",
   "languages_available": "支持 {{count}} 种语言",
-  "current_language": "当前"
+  "current_language": "当前",
+  "featured_title": "精选"
 }

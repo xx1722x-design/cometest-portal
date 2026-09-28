@@ -2,21 +2,24 @@ import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Header } from '../components/Header'
 import { StoreHero } from '../components/StoreHero'
-import { CategoryRow } from '../components/CategoryRow'
+import { BentoSection } from '../components/BentoSection'
 import { SiteFooter } from '../components/SiteFooter'
 import type { ContentItem } from '../components/ContentCard'
 
-// 메인 페이지 가로 Row 구성: 주제별로 카드 id 를 묶는다
-const ROWS: { id: string; titleKey: string; itemIds: string[] }[] = [
-  { id: 'physics', titleKey: 'row_physics', itemIds: ['cat-1', 'cat-3', 'cat-5', 'cat-2', 'cat-4', 'cat-6', 'cat-14'] },
+// 메인 페이지 섹션 구성 (벤토 그리드).
+// featured: 가장 눈길을 끄는 카드 — 플레이 가능한 버거 게임(2×2)과 마법진 이펙트(2×1).
+// 인기 지표 데이터가 아직 없어 '실제로 플레이 가능 + 시각 효과' 기준으로 골랐다.
+// 추천에 올린 카드는 아래 주제 섹션에서 빼 중복 노출을 막는다.
+const SECTIONS: { id: string; titleKey: string; itemIds: string[]; featured?: boolean }[] = [
+  { id: 'featured', titleKey: 'featured_title', itemIds: ['game-1', 'cat-23', 'cat-14', 'coming-soon'], featured: true },
+  { id: 'physics', titleKey: 'row_physics', itemIds: ['cat-1', 'cat-3', 'cat-5', 'cat-2', 'cat-4', 'cat-6'] },
   { id: 'nature', titleKey: 'row_nature', itemIds: ['cat-7', 'cat-8', 'cat-9', 'cat-10'] },
   { id: 'math-tech', titleKey: 'row_math_tech', itemIds: ['cat-11', 'cat-12', 'cat-13'] },
   {
     id: 'mystery',
     titleKey: 'row_mystery',
-    itemIds: ['cat-15', 'cat-16', 'cat-17', 'cat-18', 'cat-19', 'cat-20', 'cat-21', 'cat-22', 'cat-23'],
+    itemIds: ['cat-15', 'cat-16', 'cat-17', 'cat-18', 'cat-19', 'cat-20', 'cat-21', 'cat-22'],
   },
-  { id: 'games', titleKey: 'web_games', itemIds: ['game-1', 'coming-soon'] },
 ]
 
 export function Index() {
@@ -241,9 +244,9 @@ export function Index() {
   ]
 
   const itemsById = new Map(contentItems.map((item) => [item.id, item]))
-  const rows = ROWS.map((row) => ({
-    ...row,
-    items: row.itemIds.map((id) => itemsById.get(id)).filter((item): item is ContentItem => Boolean(item)),
+  const sections = SECTIONS.map((section) => ({
+    ...section,
+    items: section.itemIds.map((id) => itemsById.get(id)).filter((item): item is ContentItem => Boolean(item)),
   }))
 
   return (
@@ -260,12 +263,18 @@ export function Index() {
       {/* 전체 폭 스토어 히어로 */}
       <StoreHero />
 
-      {/* 주제별 가로 캐러셀 */}
-      <main className="rows">
-        {rows.map((row) => (
-          <CategoryRow key={row.id} id={row.id} title={t(row.titleKey)} items={row.items} />
+      {/* 추천 + 주제별 벤토 그리드 */}
+      <main className="sections">
+        {sections.map((section) => (
+          <BentoSection
+            key={section.id}
+            id={section.id}
+            title={t(section.titleKey)}
+            items={section.items}
+            featured={section.featured}
+          />
         ))}
-        <p className="rows__more">{t('continuing_content')}</p>
+        <p className="sections__more">{t('continuing_content')}</p>
       </main>
 
       <SiteFooter />

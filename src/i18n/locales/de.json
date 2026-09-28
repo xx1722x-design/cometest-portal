@@ -92,13 +92,12 @@
   "footer_login": "Anmelden",
   "footer_signup": "Registrieren",
   "footer_pricing": "Preise",
-  "scroll_prev": "Zurück",
-  "scroll_next": "Weiter",
   "sample_sim_1_title": "Beispielsimulation 1",
   "sample_sim_1_desc": "Eine Beispielsimulation für diese Kategorie.",
   "sample_sim_2_title": "Beispielsimulation 2",
   "sample_sim_2_desc": "Ein weiteres Beispiel für eine interaktive 3D-Simulation.",
   "select_language": "Sprache wählen",
   "languages_available": "{{count}} Sprachen verfügbar",
-  "current_language": "Aktuell"
+  "current_language": "Aktuell",
+  "featured_title": "Empfohlen"
 }

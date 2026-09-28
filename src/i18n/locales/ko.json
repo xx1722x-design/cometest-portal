@@ -92,13 +92,12 @@
   "footer_login": "로그인",
   "footer_signup": "회원가입",
   "footer_pricing": "가격 안내",
-  "scroll_prev": "이전",
-  "scroll_next": "다음",
   "sample_sim_1_title": "샘플 시뮬레이션 1",
   "sample_sim_1_desc": "이 카테고리의 샘플 시뮬레이션 콘텐츠입니다.",
   "sample_sim_2_title": "샘플 시뮬레이션 2",
   "sample_sim_2_desc": "인터랙티브 3D 시뮬레이션의 또 다른 예시입니다.",
   "select_language": "언어 선택",
   "languages_available": "{{count}}개 언어 지원",
-  "current_language": "현재"
+  "current_language": "현재",
+  "featured_title": "추천"
 }
