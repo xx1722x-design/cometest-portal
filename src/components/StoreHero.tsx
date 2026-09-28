@@ -190,10 +190,10 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
       const vertices: number[] = []
       const colors: number[] = []
       const indices: number[] = []
-      for (let u = 0; u <= 35; u++) {
-        for (let v = 0; v <= 35; v++) {
-          const uu = (u / 35) * 4 * Math.PI
-          const vv = (v / 35) * 2 + 0.1
+      for (let u = 0; u <= 100; u++) {
+        for (let v = 0; v <= 100; v++) {
+          const uu = (u / 100) * 4 * Math.PI
+          const vv = (v / 100) * 2 + 0.1
           const x = Math.cos(uu) * Math.sinh(vv)
           const y = Math.sin(uu) * Math.sinh(vv)
           const z = uu + Math.cosh(vv) * Math.cos(Math.PI / 8)
@@ -201,10 +201,10 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
           colors.push((u / 35), 0.5, (v / 35))
         }
       }
-      for (let u = 0; u < 35; u++) {
-        for (let v = 0; v < 35; v++) {
-          const a = u * 36 + v
-          const b = a + 36
+      for (let u = 0; u < 100; u++) {
+        for (let v = 0; v < 100; v++) {
+          const a = u * 101 + v
+          const b = a + 101
           indices.push(a, b, a + 1)
           indices.push(b, b + 1, a + 1)
         }
