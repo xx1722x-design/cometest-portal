@@ -323,14 +323,35 @@ function ParticleField() {
     const count = 1000
     const geometry = new THREE.BufferGeometry()
     const positions = new Float32Array(count * 3)
+    const colors = new Float32Array(count * 3)
 
-    for (let i = 0; i < count * 3; i += 3) {
-      positions[i] = (Math.random() - 0.5) * 15
-      positions[i + 1] = (Math.random() - 0.5) * 12
-      positions[i + 2] = (Math.random() - 0.5) * 10
+    const spaceColors = [
+      [1.0, 0.3, 1.0],       // 보라색
+      [0.2, 0.8, 1.0],       // 하늘색
+      [1.0, 0.2, 0.8],       // 분홍색
+      [0.5, 1.0, 0.2],       // 라임
+      [1.0, 1.0, 1.0],       // 흰색
+      [0.2, 1.0, 1.0],       // 청록색
+      [0.8, 0.2, 1.0],       // 자주색
+      [1.0, 0.6, 0.2],       // 주황색
+      [0.3, 0.8, 1.0],       // 밝은 파랑
+      [1.0, 0.4, 0.6],       // 장미색
+    ]
+
+    for (let i = 0; i < count; i++) {
+      positions[i * 3] = (Math.random() - 0.5) * 15
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 12
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 10
+
+      const colorIdx = Math.floor(Math.random() * spaceColors.length)
+      const color = spaceColors[colorIdx]
+      colors[i * 3] = color[0]
+      colors[i * 3 + 1] = color[1]
+      colors[i * 3 + 2] = color[2]
     }
 
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
     pointsRef.current.geometry = geometry
   }, [])
 
@@ -342,7 +363,7 @@ function ParticleField() {
 
   return (
     <points ref={pointsRef}>
-      <pointsMaterial color={0xfbbf24} size={0.04} sizeAttenuation transparent opacity={0.5} />
+      <pointsMaterial size={0.04} sizeAttenuation transparent opacity={0.6} vertexColors />
     </points>
   )
 }
@@ -386,23 +407,23 @@ function MysteryCanvas() {
       <pointLight position={[0, 0, 8]} intensity={0.8} color="#fbbf24" />
       <pointLight position={[5, -5, -5]} intensity={0.9} color="#a855f7" />
 
-      {selectedAssets.length > 0 && (
-        <DynamicAsset
-          type={selectedAssets[0]}
-          position={[-2.5, 0, 0]}
-          baseColor={colors[0].base}
-          emissiveColor={colors[0].emissive}
-          speed={1}
-        />
-      )}
-      {selectedAssets.length > 1 && (
-        <DynamicAsset
-          type={selectedAssets[1]}
-          position={[2.5, 0, 1]}
-          baseColor={colors[1].base}
-          emissiveColor={colors[1].emissive}
-          speed={0.9}
-        />
+      {selectedAssets.length === 2 && (
+        <>
+          <DynamicAsset
+            type={selectedAssets[0]}
+            position={[-2.5, 0, 0]}
+            baseColor={colors[0].base}
+            emissiveColor={colors[0].emissive}
+            speed={1}
+          />
+          <DynamicAsset
+            type={selectedAssets[1]}
+            position={[2.5, 0, 1]}
+            baseColor={colors[1].base}
+            emissiveColor={colors[1].emissive}
+            speed={0.9}
+          />
+        </>
       )}
       <ParticleField />
 
