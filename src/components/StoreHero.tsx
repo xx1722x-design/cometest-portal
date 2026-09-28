@@ -198,7 +198,7 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
           const y = Math.sin(uu) * Math.sinh(vv)
           const z = uu + Math.cosh(vv) * Math.cos(Math.PI / 8)
           vertices.push(x * 0.3, y * 0.3, z * 0.1)
-          colors.push((u / 35), 0.5, (v / 35))
+          colors.push(0.9 + (u / 100) * 0.1, 0.8 + (v / 100) * 0.2, 1.0)
         }
       }
       for (let u = 0; u < 100; u++) {
