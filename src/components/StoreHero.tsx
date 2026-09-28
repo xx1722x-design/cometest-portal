@@ -309,8 +309,8 @@ function DynamicAsset({ type, position, baseColor, emissiveColor, speed }: Dynam
           color={baseColor}
           emissive={emissiveColor}
           emissiveIntensity={2.0}
-          metalness={0.4}
-          roughness={0.4}
+          metalness={0.95}
+          roughness={0.15}
           vertexColors={true}
           side={THREE.DoubleSide}
           toneMapped={true}
