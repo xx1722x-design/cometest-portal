@@ -453,7 +453,7 @@ function MysteryCanvas({ selectedAssets }: MysteryCanvasProps) {
       <color attach="background" args={['#0d1117']} />
 
       {/* 환경 맵: 금속 재질의 반사 효과 */}
-      <Environment preset="night" intensity={1.2} blur={0.6} />
+      <Environment preset="night" blur={0.6} background={false} />
 
       <ambientLight intensity={0.7} color="#ffffff" />
       <pointLight position={[10, 10, 5]} intensity={1.4} color="#d946ef" />
