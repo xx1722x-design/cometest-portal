@@ -1,37 +1,28 @@
-import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Header } from '../components/Header'
-import { ContentGrid } from '../components/ContentGrid'
-import { Sidebar } from '../components/Sidebar'
-import { HeroSection3D } from '../components/HeroSection3D'
+import { StoreHero } from '../components/StoreHero'
+import { BentoSection } from '../components/BentoSection'
+import { SiteFooter } from '../components/SiteFooter'
+import type { ContentItem } from '../components/ContentCard'
 
-interface ContentItem {
-  id: string
-  title: string
-  description: string
-  thumbnail: string
-  category: 'simulation' | 'game' | 'banner'
-  link?: string
-  icon?: string
-}
+// 메인 페이지 섹션 구성 (벤토 그리드).
+// featured: 가장 눈길을 끄는 카드 — 플레이 가능한 버거 게임(2×2)과 마법진 이펙트(2×1).
+// 인기 지표 데이터가 아직 없어 '실제로 플레이 가능 + 시각 효과' 기준으로 골랐다.
+// 추천에 올린 카드는 아래 주제 섹션에서 빼 중복 노출을 막는다.
+const SECTIONS: { id: string; titleKey: string; itemIds: string[]; featured?: boolean }[] = [
+  { id: 'featured', titleKey: 'featured_title', itemIds: ['game-1', 'cat-23', 'cat-14', 'coming-soon'], featured: true },
+  { id: 'physics', titleKey: 'row_physics', itemIds: ['cat-1', 'cat-3', 'cat-5', 'cat-2', 'cat-4', 'cat-6'] },
+  { id: 'nature', titleKey: 'row_nature', itemIds: ['cat-7', 'cat-8', 'cat-9', 'cat-10'] },
+  { id: 'math-tech', titleKey: 'row_math_tech', itemIds: ['cat-11', 'cat-12', 'cat-13'] },
+  {
+    id: 'mystery',
+    titleKey: 'row_mystery',
+    itemIds: ['cat-15', 'cat-16', 'cat-17', 'cat-18', 'cat-19', 'cat-20', 'cat-21', 'cat-22'],
+  },
+]
 
 export function Index() {
   const { t } = useTranslation()
-  const [isDarkMode, setIsDarkMode] = useState(true)
-
-  useEffect(() => {
-    const savedMode = localStorage.getItem('darkMode')
-    if (savedMode !== null) {
-      setIsDarkMode(JSON.parse(savedMode))
-    }
-  }, [])
-
-  const handleToggleDarkMode = () => {
-    const newMode = !isDarkMode
-    setIsDarkMode(newMode)
-    localStorage.setItem('darkMode', JSON.stringify(newMode))
-  }
-
   const contentItems: ContentItem[] = [
     {
       id: 'cat-1',
@@ -220,7 +211,7 @@ export function Index() {
     {
       id: 'game-1',
       title: t('web_games'),
-      description: 'Experience high-quality 3D burger cooking in this interactive clicking game!',
+      description: t('web_games_desc'),
       thumbnail: '',
       category: 'game',
       link: '/game',
@@ -234,102 +225,43 @@ export function Index() {
       category: 'simulation',
       icon: '🚀',
     },
-    {
-      id: 'market-banner',
-      title: t('original_asset_store'),
-      description: t('asset_store_description'),
-      thumbnail: '',
-      category: 'banner',
-      link: '/store',
-      icon: '🛒',
-    },
   ]
 
-  const darkBg = '#0a0a0a'
-  const lightBg = '#f5f5f5'
-  const currentBg = isDarkMode ? darkBg : lightBg
+  const itemsById = new Map(contentItems.map((item) => [item.id, item]))
+  const sections = SECTIONS.map((section) => ({
+    ...section,
+    items: section.itemIds.map((id) => itemsById.get(id)).filter((item): item is ContentItem => Boolean(item)),
+  }))
 
   return (
     <div
+      className="portal-bg"
       style={{
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        backgroundColor: currentBg,
-        transition: 'background-color 0.3s ease',
       }}
     >
-      {/* 헤더 */}
-      <Header isDarkMode={isDarkMode} onToggleDarkMode={handleToggleDarkMode} />
+      <Header />
 
-      {/* 메인 콘텐츠 영역 */}
-      <div
-        style={{
-          display: 'flex',
-          flex: 1,
-        }}
-      >
-        {/* 그리드 콘텐츠 */}
-        <main
-          style={{
-            flex: 1,
-            backgroundColor: currentBg,
-            overflow: 'auto',
-            transition: 'background-color 0.3s ease',
-          }}
-        >
-          {/* 히어로 섹션 - 3D 우주 에셋 */}
-          <HeroSection3D isDarkMode={isDarkMode} />
+      {/* 전체 폭 스토어 히어로 */}
+      <StoreHero />
 
-          {/* 콘텐츠 그리드 */}
-          <ContentGrid items={contentItems} />
+      {/* 추천 + 주제별 벤토 그리드 */}
+      <main className="sections">
+        {sections.map((section) => (
+          <BentoSection
+            key={section.id}
+            id={section.id}
+            title={t(section.titleKey)}
+            items={section.items}
+            featured={section.featured}
+          />
+        ))}
+        <p className="sections__more">{t('continuing_content')}</p>
+      </main>
 
-          {/* 페이지네이션 (나중에 추가) */}
-          <div
-            style={{
-              padding: '2rem',
-              textAlign: 'center',
-              color: '#888888',
-              fontSize: '14px',
-            }}
-          >
-            <p>{t('continuing_content')}</p>
-          </div>
-        </main>
-
-        {/* 우측 사이드바 */}
-        <Sidebar />
-      </div>
-
-      {/* 푸터 */}
-      <footer
-        style={{
-          backgroundColor: isDarkMode ? '#151515' : '#f0f0f0',
-          color: isDarkMode ? '#888888' : '#666666',
-          padding: '2rem',
-          textAlign: 'center',
-          fontSize: '12px',
-          borderTop: isDarkMode ? '1px solid #333333' : '1px solid #e0e0e0',
-          transition: 'all 0.3s ease',
-        }}
-      >
-        <div style={{ marginBottom: '1rem' }}>
-          <p style={{ margin: '0.5rem 0' }}>{t('copyright')}</p>
-          <p style={{ margin: '0.5rem 0', fontSize: '11px' }}>
-            <a href="#" style={{ color: isDarkMode ? '#666666' : '#999999', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = isDarkMode ? '#999999' : '#666666'} onMouseLeave={(e) => e.currentTarget.style.color = isDarkMode ? '#666666' : '#999999'}>
-              {t('privacy_policy')}
-            </a>
-            {' | '}
-            <a href="#" style={{ color: isDarkMode ? '#666666' : '#999999', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = isDarkMode ? '#999999' : '#666666'} onMouseLeave={(e) => e.currentTarget.style.color = isDarkMode ? '#666666' : '#999999'}>
-              {t('terms_of_service')}
-            </a>
-            {' | '}
-            <a href="#" style={{ color: isDarkMode ? '#666666' : '#999999', textDecoration: 'none', transition: 'color 0.2s' }} onMouseEnter={(e) => e.currentTarget.style.color = isDarkMode ? '#999999' : '#666666'} onMouseLeave={(e) => e.currentTarget.style.color = isDarkMode ? '#666666' : '#999999'}>
-              {t('contact')}
-            </a>
-          </p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }

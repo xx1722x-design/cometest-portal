@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Header } from '../components/Header'
 import { ContentGrid } from '../components/ContentGrid'
 import { Sidebar } from '../components/Sidebar'
+import { SiteFooter } from '../components/SiteFooter'
 
 interface ContentItem {
   id: string
@@ -53,16 +54,16 @@ export function Category() {
   const sampleContent: ContentItem[] = [
     {
       id: 'sample-1',
-      title: 'Sample Simulation 1',
-      description: 'This is a sample simulation content for the category.',
+      title: t('sample_sim_1_title'),
+      description: t('sample_sim_1_desc'),
       thumbnail: '',
       category: 'simulation',
       icon: '🎬',
     },
     {
       id: 'sample-2',
-      title: 'Sample Simulation 2',
-      description: 'Another example of interactive 3D simulation.',
+      title: t('sample_sim_2_title'),
+      description: t('sample_sim_2_desc'),
       thumbnail: '',
       category: 'simulation',
       icon: '🎨',
@@ -70,106 +71,31 @@ export function Category() {
   ]
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexDirection: 'column',
-        minHeight: '100vh',
-        backgroundColor: '#fafafa',
-      }}
-    >
+    <div className="portal-bg" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Header />
 
-      <div
-        style={{
-          display: 'flex',
-          flex: 1,
-        }}
-      >
-        <main
-          style={{
-            flex: 1,
-            backgroundColor: '#fafafa',
-            overflow: 'auto',
-          }}
-        >
-          {/* 카테고리 헤더 */}
-          <div
-            style={{
-              backgroundColor: 'linear-gradient(135deg, #007bff 0%, #0056b3 100%)',
-              color: 'white',
-              padding: '3rem 2rem',
-              textAlign: 'center',
-            }}
-          >
-            <h2
-              style={{
-                margin: '0 0 0.5rem 0',
-                fontSize: '32px',
-                fontWeight: '700',
-              }}
-            >
-              {categoryEmojis[categoryId || '']} {categoryTitles[categoryId || '']}
-            </h2>
-            <p
-              style={{
-                margin: 0,
-                fontSize: '16px',
-                opacity: 0.9,
-              }}
-            >
-              {t('portal_subtitle')}
-            </p>
+      <div className="category-layout">
+        <main className="category-main">
+          {/* 카테고리 헤더 — 짙은 그라데이션 위 흰 글씨라 다크/라이트 모두 선명 */}
+          <div className="category-hero">
+            <h1 className="category-hero__title">
+              <span aria-hidden="true">{categoryEmojis[categoryId || '']}</span> {categoryTitles[categoryId || '']}
+            </h1>
+            <p className="category-hero__subtitle">{t('portal_subtitle')}</p>
           </div>
 
           {/* 콘텐츠 그리드 */}
           <ContentGrid items={sampleContent} />
 
           {/* 준비 중 메시지 */}
-          <div
-            style={{
-              padding: '2rem',
-              textAlign: 'center',
-              color: '#888',
-              fontSize: '14px',
-            }}
-          >
-            <p>{t('continuing_content')}</p>
-          </div>
+          <p className="category-main__more">{t('continuing_content')}</p>
         </main>
 
         {/* 우측 사이드바 */}
         <Sidebar />
       </div>
 
-      {/* 푸터 */}
-      <footer
-        style={{
-          backgroundColor: '#333',
-          color: '#ccc',
-          padding: '2rem',
-          textAlign: 'center',
-          fontSize: '12px',
-          borderTop: '1px solid #555',
-        }}
-      >
-        <div style={{ marginBottom: '1rem' }}>
-          <p style={{ margin: '0.5rem 0' }}>© 2026 cometest. All rights reserved.</p>
-          <p style={{ margin: '0.5rem 0', fontSize: '11px' }}>
-            <a href="#" style={{ color: '#aaa', textDecoration: 'none' }}>
-              {t('privacy_policy')}
-            </a>
-            {' | '}
-            <a href="#" style={{ color: '#aaa', textDecoration: 'none' }}>
-              {t('terms_of_service')}
-            </a>
-            {' | '}
-            <a href="#" style={{ color: '#aaa', textDecoration: 'none' }}>
-              {t('contact')}
-            </a>
-          </p>
-        </div>
-      </footer>
+      <SiteFooter />
     </div>
   )
 }
