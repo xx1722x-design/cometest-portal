@@ -78,7 +78,7 @@ function MoebiusStrip() {
     }
   })
 
-  return <group ref={groupRef} position={[0, 0, 0]} />
+  return <group ref={groupRef} position={[0, 0, 0]} scale={0.8} />
 }
 
 // HSL to RGB 변환
@@ -131,7 +131,7 @@ function InfinityLoop() {
     }
   })
 
-  return <group ref={groupRef} position={[0, 0, -2]} />
+  return <group ref={groupRef} position={[0, 0, 0]} scale={0.9} />
 }
 
 // 회전하는 Wireframe 구
@@ -248,16 +248,6 @@ function ParticleField() {
 }
 
 function MysteryCanvas() {
-  const [selectedAssets, setSelectedAssets] = useState<number[]>([])
-
-  useEffect(() => {
-    // 페이지 로드마다 랜덤으로 1~2개 에셋 선택
-    const assetTypes = [1, 2] // 1=MoebiusStrip, 2=InfinityLoop
-    const count = Math.random() > 0.5 ? 1 : 2
-    const shuffled = assetTypes.sort(() => Math.random() - 0.5)
-    setSelectedAssets(shuffled.slice(0, count))
-  }, [])
-
   return (
     <Canvas
       camera={{ position: [0, 0, 8], fov: 45 }}
@@ -281,9 +271,13 @@ function MysteryCanvas() {
       <pointLight position={[0, 0, 8]} intensity={0.8} color="#fbbf24" />
       <pointLight position={[5, -5, -5]} intensity={0.9} color="#a855f7" />
 
-      {/* 랜덤 에셋 렌더링 */}
-      {selectedAssets.includes(1) && <MoebiusStrip />}
-      {selectedAssets.includes(2) && <InfinityLoop />}
+      {/* 2개 에셋 - 서로 겹치지 않게 배치 */}
+      <group position={[-2.5, 0, 0]}>
+        <MoebiusStrip />
+      </group>
+      <group position={[2.5, 0, 1]}>
+        <InfinityLoop />
+      </group>
       <ParticleField />
 
       {/* 드래그 가능하게 */}
