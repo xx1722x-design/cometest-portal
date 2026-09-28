@@ -114,15 +114,15 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
     }
     case 'helix': {
       const points: THREE.Vector3[] = []
-      for (let i = 0; i < 200; i++) {
-        const t = (i / 200) * 8 * Math.PI
+      for (let i = 0; i < 1000; i++) {
+        const t = (i / 1000) * 8 * Math.PI
         const x = Math.cos(t) * 1.5
         const y = t * 0.3
         const z = Math.sin(t) * 1.5
         points.push(new THREE.Vector3(x, y, z))
       }
       const helixCurve = new THREE.CatmullRomCurve3(points)
-      geometry = new THREE.TubeGeometry(helixCurve, 120, 0.18, 48, false)
+      geometry = new THREE.TubeGeometry(helixCurve, 600, 0.18, 512, false)
       break
     }
     case 'hyperboloid': {
@@ -261,15 +261,15 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
     case 'infinity': {
       geometry = new THREE.BufferGeometry()
       const points: THREE.Vector3[] = []
-      for (let i = 0; i < 100; i++) {
-        const t = (i / 100) * Math.PI * 2
+      for (let i = 0; i < 1000; i++) {
+        const t = (i / 1000) * Math.PI * 2
         const a = 2
         const x = (a * Math.cos(t)) / (1 + Math.sin(t) ** 2)
         const y = (a * Math.sin(t) * Math.cos(t)) / (1 + Math.sin(t) ** 2)
         points.push(new THREE.Vector3(x * 2, y * 2, 0))
       }
       const curve = new THREE.CatmullRomCurve3(points, true)
-      const tubeGeometry = new THREE.TubeGeometry(curve, 120, 0.3, 48, false)
+      const tubeGeometry = new THREE.TubeGeometry(curve, 600, 0.3, 512, false)
       geometry = tubeGeometry
       break
     }
