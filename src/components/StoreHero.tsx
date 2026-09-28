@@ -248,18 +248,29 @@ function ParticleField() {
 }
 
 function MysteryCanvas() {
-  const [cursorColor, setCursorColor] = useState('#a855f7')
+  const [selectedAssets, setSelectedAssets] = useState<number[]>([])
+
+  useEffect(() => {
+    // 페이지 로드마다 랜덤으로 1~2개 에셋 선택
+    const assetTypes = [1, 2] // 1=MoebiusStrip, 2=InfinityLoop
+    const count = Math.random() > 0.5 ? 1 : 2
+    const shuffled = assetTypes.sort(() => Math.random() - 0.5)
+    setSelectedAssets(shuffled.slice(0, count))
+  }, [])
 
   return (
     <Canvas
       camera={{ position: [0, 0, 8], fov: 45 }}
       dpr={[1, 2]}
-      onMouseMove={(e) => {
-        const colors = ['#d946ef', '#06b6d4', '#fbbf24', '#a855f7']
-        const randomColor = colors[Math.floor(Math.random() * colors.length)]
-        setCursorColor(randomColor)
+      style={{ cursor: 'grab' }}
+      onPointerDown={() => {
+        const canvas = document.querySelector('canvas')
+        if (canvas) canvas.style.cursor = 'grabbing'
       }}
-      style={{ cursor: `url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32"><circle cx="16" cy="16" r="8" fill="${cursorColor}"/></svg>') 16 16, auto` }}
+      onPointerUp={() => {
+        const canvas = document.querySelector('canvas')
+        if (canvas) canvas.style.cursor = 'grab'
+      }}
     >
       <color attach="background" args={['#0d1117']} />
 
@@ -270,11 +281,9 @@ function MysteryCanvas() {
       <pointLight position={[0, 0, 8]} intensity={0.8} color="#fbbf24" />
       <pointLight position={[5, -5, -5]} intensity={0.9} color="#a855f7" />
 
-      {/* 뫼비우스 띠 + 무한 루프*/}
-      <MoebiusStrip />
-      <InfinityLoop />
-      <WireframeOrb />
-      <ComplexTorus />
+      {/* 랜덤 에셋 렌더링 */}
+      {selectedAssets.includes(1) && <MoebiusStrip />}
+      {selectedAssets.includes(2) && <InfinityLoop />}
       <ParticleField />
 
       {/* 드래그 가능하게 */}
