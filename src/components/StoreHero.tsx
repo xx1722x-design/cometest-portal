@@ -443,7 +443,7 @@ function MysteryCanvas({ selectedAssets }: MysteryCanvasProps) {
     dini: { base: 0xffffff, emissive: 0xffffff },        // 완전 흰색
     seashell: { base: 0xff3366, emissive: 0xff66aa },    // 핑크 빨간색
     boys: { base: 0x14b8a6, emissive: 0x2dd4bf },        // 하늘색
-    rhodonea: { base: 0xbbff00, emissive: 0xffff00 },    // 라임 노란색
+    rhodonea: { base: 0xffffff, emissive: 0xffffff },    // 순수 흰색
   }
 
   return (
