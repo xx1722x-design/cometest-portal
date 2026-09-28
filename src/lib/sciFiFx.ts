@@ -23,15 +23,15 @@ export function playPanelBeep() {
   master.gain.value = 0.2
   master.connect(ctx.destination)
 
-  // 1) 철컹: square wave 1400Hz → 250Hz, 급격한 하강 (50ms)
+  // 1) 철컹: square wave 2200Hz → 800Hz, 급격한 하강 (50ms) - 하이톤
   const clang = ctx.createOscillator()
   const clangGain = ctx.createGain()
   const clangFilter = ctx.createBiquadFilter()
   clang.type = 'square'
-  clang.frequency.setValueAtTime(1400, now)
-  clang.frequency.exponentialRampToValueAtTime(250, now + 0.05)
+  clang.frequency.setValueAtTime(2200, now)
+  clang.frequency.exponentialRampToValueAtTime(800, now + 0.05)
   clangFilter.type = 'highpass'
-  clangFilter.frequency.value = 1000
+  clangFilter.frequency.value = 1200
   clangGain.gain.setValueAtTime(0.0001, now)
   clangGain.gain.exponentialRampToValueAtTime(0.7, now + 0.002)
   clangGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.06)
@@ -39,13 +39,13 @@ export function playPanelBeep() {
   clang.start(now)
   clang.stop(now + 0.07)
 
-  // 2) 공명음: sine 300Hz, 기계적인 울림 (180ms)
+  // 2) 공명음: sine 700Hz → 350Hz, 하이톤 울림 (180ms)
   const resonance = ctx.createOscillator()
   const resonanceGain = ctx.createGain()
   const t1 = now + 0.01
   resonance.type = 'sine'
-  resonance.frequency.setValueAtTime(320, t1)
-  resonance.frequency.exponentialRampToValueAtTime(150, t1 + 0.18)
+  resonance.frequency.setValueAtTime(700, t1)
+  resonance.frequency.exponentialRampToValueAtTime(350, t1 + 0.18)
   resonanceGain.gain.setValueAtTime(0.0001, t1)
   resonanceGain.gain.exponentialRampToValueAtTime(0.5, t1 + 0.01)
   resonanceGain.gain.exponentialRampToValueAtTime(0.0001, t1 + 0.19)
@@ -53,12 +53,12 @@ export function playPanelBeep() {
   resonance.start(t1)
   resonance.stop(t1 + 0.2)
 
-  // 3) 기계음 펄스: 저주파 클릭감
+  // 3) 기계음 펄스: 하이톤 클릭감 360Hz
   const pulse = ctx.createOscillator()
   const pulseGain = ctx.createGain()
   const t2 = now + 0.04
   pulse.type = 'square'
-  pulse.frequency.setValueAtTime(180, t2)
+  pulse.frequency.setValueAtTime(360, t2)
   pulseGain.gain.setValueAtTime(0.0001, t2)
   pulseGain.gain.exponentialRampToValueAtTime(0.3, t2 + 0.01)
   pulseGain.gain.exponentialRampToValueAtTime(0.0001, t2 + 0.12)
