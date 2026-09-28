@@ -224,7 +224,7 @@ export function Index() {
     {
       id: 'game-1',
       title: t('web_games'),
-      description: 'Experience high-quality 3D burger cooking in this interactive clicking game!',
+      description: t('web_games_desc'),
       thumbnail: '',
       category: 'game',
       link: '/game',

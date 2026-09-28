@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { ContentCard, type ContentItem } from './ContentCard'
 
 interface CategoryRowProps {
@@ -10,6 +11,7 @@ interface CategoryRowProps {
 // 넷플릭스식 가로 캐러셀 한 줄. 좌우 화살표는 더 넘길 내용이 있을 때만 보인다.
 // 스타일은 src/styles/portal.css 의 .row / .row__track 참고.
 export function CategoryRow({ id, title, items }: CategoryRowProps) {
+  const { t } = useTranslation()
   const trackRef = useRef<HTMLDivElement>(null)
   const [canPrev, setCanPrev] = useState(false)
   const [canNext, setCanNext] = useState(false)
@@ -17,8 +19,10 @@ export function CategoryRow({ id, title, items }: CategoryRowProps) {
   const updateArrows = useCallback(() => {
     const el = trackRef.current
     if (!el) return
-    setCanPrev(el.scrollLeft > 4)
-    setCanNext(el.scrollLeft + el.clientWidth < el.scrollWidth - 4)
+    // RTL(아랍어)에선 scrollLeft 가 0 에서 음수로 진행하므로 절댓값으로 판정
+    const offset = Math.abs(el.scrollLeft)
+    setCanPrev(offset > 4)
+    setCanNext(offset + el.clientWidth < el.scrollWidth - 4)
   }, [])
 
   useEffect(() => {
@@ -37,7 +41,9 @@ export function CategoryRow({ id, title, items }: CategoryRowProps) {
   const scrollByPage = (dir: 1 | -1) => {
     const el = trackRef.current
     if (!el) return
-    el.scrollBy({ left: dir * el.clientWidth * 0.85, behavior: 'smooth' })
+    const rtl = getComputedStyle(el).direction === 'rtl'
+    const reduceMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches
+    el.scrollBy({ left: (rtl ? -dir : dir) * el.clientWidth * 0.85, behavior: reduceMotion ? 'auto' : 'smooth' })
   }
 
   const headingId = `row-${id}-title`
@@ -54,7 +60,7 @@ export function CategoryRow({ id, title, items }: CategoryRowProps) {
           type="button"
           className="row__arrow row__arrow--prev"
           onClick={() => scrollByPage(-1)}
-          aria-label="Scroll left"
+          aria-label={t('scroll_prev')}
           hidden={!canPrev}
         >
           ‹
@@ -70,7 +76,7 @@ export function CategoryRow({ id, title, items }: CategoryRowProps) {
           type="button"
           className="row__arrow row__arrow--next"
           onClick={() => scrollByPage(1)}
-          aria-label="Scroll right"
+          aria-label={t('scroll_next')}
           hidden={!canNext}
         >
           ›

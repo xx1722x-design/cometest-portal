@@ -1,26 +1,19 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { LanguageSelector } from './LanguageSelector'
 
 interface HeaderProps {
-  onLanguageChange?: (lang: string) => void
   isDarkMode?: boolean
   onToggleDarkMode?: () => void
 }
 
-export function Header({ onLanguageChange, isDarkMode = true, onToggleDarkMode }: HeaderProps) {
+export function Header({ isDarkMode = true, onToggleDarkMode }: HeaderProps) {
   const navigate = useNavigate()
-  const { t, i18n } = useTranslation()
-  const [showLanguageMenu, setShowLanguageMenu] = useState(false)
+  const { t } = useTranslation()
   const [searchQuery, setSearchQuery] = useState('')
   // 활성 탭은 현재 URL 기준 (헤더는 페이지마다 다시 마운트되므로 로컬 state로는 유지되지 않음)
   const { pathname } = useLocation()
-
-  const handleLanguageSelect = (lang: string) => {
-    i18n.changeLanguage(lang)
-    onLanguageChange?.(lang)
-    setShowLanguageMenu(false)
-  }
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
@@ -30,19 +23,6 @@ export function Header({ onLanguageChange, isDarkMode = true, onToggleDarkMode }
   const handleCategoryClick = (path: string) => {
     navigate(path)
   }
-
-  const languages = [
-    { code: 'en', name: 'English' },
-    { code: 'fr', name: 'Français' },
-    { code: 'es', name: 'Español' },
-    { code: 'de', name: 'Deutsch' },
-    { code: 'ru', name: 'Русский' },
-    { code: 'ar', name: 'العربية' },
-    { code: 'zh', name: '简体中文' },
-    { code: 'zh-TW', name: '繁體中文' },
-    { code: 'ja', name: '日本語' },
-    { code: 'ko', name: '한국어' },
-  ]
 
   const categories = [
     { key: 'home', i18nKey: 'home', path: '/' },
@@ -224,90 +204,8 @@ export function Header({ onLanguageChange, isDarkMode = true, onToggleDarkMode }
             {isDarkMode ? '🌙' : '☀️'}
           </button>
 
-          {/* 언어 선택 드롭다운 */}
-          <div
-            style={{
-              position: 'relative',
-            }}
-          >
-            <button
-              onClick={() => setShowLanguageMenu(!showLanguageMenu)}
-              style={{
-                padding: '0.75rem 1rem',
-                backgroundColor: isDarkMode ? '#2a2a2a' : '#f5f5f5',
-                border: isDarkMode ? '1px solid #444444' : '1px solid #d0d0d0',
-                borderRadius: '6px',
-                cursor: 'pointer',
-                fontFamily: 'inherit',
-                fontSize: '14px',
-                fontWeight: '500',
-                whiteSpace: 'nowrap',
-                color: isDarkMode ? '#ffffff' : '#1a1a1a',
-                transition: 'all 0.2s',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = '#7c3aed'
-                e.currentTarget.style.color = '#7c3aed'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = isDarkMode ? '#444444' : '#d0d0d0'
-                e.currentTarget.style.color = isDarkMode ? '#ffffff' : '#1a1a1a'
-              }}
-            >
-              🌐 {languages.find((l) => l.code === i18n.language)?.name}
-            </button>
-          {showLanguageMenu && (
-            <div
-              style={{
-                position: 'absolute',
-                top: '100%',
-                right: 0,
-                backgroundColor: isDarkMode ? '#2a2a2a' : '#ffffff',
-                border: isDarkMode ? '1px solid #444444' : '1px solid #d0d0d0',
-                borderRadius: '6px',
-                marginTop: '0.5rem',
-                boxShadow: isDarkMode ? '0 4px 12px rgba(0,0,0,0.5)' : '0 4px 12px rgba(0,0,0,0.08)',
-                zIndex: 101,
-                maxHeight: '400px',
-                overflowY: 'auto',
-                transition: 'all 0.3s',
-              }}
-            >
-              {languages.map((lang) => (
-                <button
-                  key={lang.code}
-                  onClick={() => handleLanguageSelect(lang.code)}
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    padding: '0.75rem 1rem',
-                    border: 'none',
-                    backgroundColor: i18n.language === lang.code
-                      ? (isDarkMode ? '#3a3a3a' : '#f0f0f0')
-                      : 'transparent',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    fontFamily: 'inherit',
-                    fontSize: '14px',
-                    fontWeight: i18n.language === lang.code ? '600' : '400',
-                    color: i18n.language === lang.code ? '#7c3aed' : (isDarkMode ? '#ffffff' : '#1a1a1a'),
-                    transition: 'all 0.2s',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = isDarkMode ? '#3a3a3a' : '#f0f0f0'
-                  }}
-                  onMouseLeave={(e) => {
-                    if (i18n.language !== lang.code) {
-                      e.currentTarget.style.backgroundColor = 'transparent'
-                    }
-                  }}
-                >
-                  {lang.code === i18n.language && '✓ '} {lang.name}
-                </button>
-              ))}
-              </div>
-            )}
-          </div>
+          {/* 언어 선택 드롭다운 (store.cometest.com 과 동일 컴포넌트) */}
+          <LanguageSelector />
         </div>
       </div>
 

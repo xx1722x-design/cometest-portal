@@ -53,16 +53,16 @@ export function Category() {
   const sampleContent: ContentItem[] = [
     {
       id: 'sample-1',
-      title: 'Sample Simulation 1',
-      description: 'This is a sample simulation content for the category.',
+      title: t('sample_sim_1_title'),
+      description: t('sample_sim_1_desc'),
       thumbnail: '',
       category: 'simulation',
       icon: '🎬',
     },
     {
       id: 'sample-2',
-      title: 'Sample Simulation 2',
-      description: 'Another example of interactive 3D simulation.',
+      title: t('sample_sim_2_title'),
+      description: t('sample_sim_2_desc'),
       thumbnail: '',
       category: 'simulation',
       icon: '🎨',
@@ -155,7 +155,7 @@ export function Category() {
         }}
       >
         <div style={{ marginBottom: '1rem' }}>
-          <p style={{ margin: '0.5rem 0' }}>© 2026 cometest. All rights reserved.</p>
+          <p style={{ margin: '0.5rem 0' }}>{t('copyright')}</p>
           <p style={{ margin: '0.5rem 0', fontSize: '11px' }}>
             <a href="#" style={{ color: '#aaa', textDecoration: 'none' }}>
               {t('privacy_policy')}

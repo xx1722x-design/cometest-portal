@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { playPanelBeep } from '../lib/sciFiFx'
+import { withLang } from '../i18n/languages'
 
 const STORE_URL = 'https://store.cometest.com/'
 
@@ -18,7 +19,7 @@ function Cube({ className }: { className: string }) {
 // 헤더 바로 아래 전체 폭을 차지하는 넷플릭스식 히어로 섹션 (스토어 소개).
 // 스타일은 src/styles/portal.css 의 .hero 참고.
 export function StoreHero() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
 
   return (
     <section className="hero" aria-labelledby="hero-title">
@@ -45,7 +46,7 @@ export function StoreHero() {
         <div className="hero__actions">
           <a
             className="hero__cta"
-            href={STORE_URL}
+            href={withLang(STORE_URL, i18n.language)}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => playPanelBeep()}
