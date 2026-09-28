@@ -308,7 +308,7 @@ function DynamicAsset({ type, position, baseColor, emissiveColor, speed }: Dynam
         <meshStandardMaterial
           color={baseColor}
           emissive={emissiveColor}
-          emissiveIntensity={2.0}
+          emissiveIntensity={0.6}
           metalness={0.95}
           roughness={0.15}
           vertexColors={true}
