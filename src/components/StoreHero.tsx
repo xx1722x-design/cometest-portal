@@ -38,7 +38,7 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
       const vertices: number[] = []
       const colors: number[] = []
       const indices: number[] = []
-      const width = 20, depth = 100
+      const width = 50, depth = 300
       for (let i = 0; i <= depth; i++) {
         const u = (i / depth) * Math.PI * 2
         for (let j = 0; j <= width; j++) {
@@ -71,20 +71,20 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
       const vertices: number[] = []
       const colors: number[] = []
       const indices: number[] = []
-      for (let u = 0; u <= 80; u++) {
-        for (let v = 0; v <= 80; v++) {
-          const uu = (u / 50) * 2 * Math.PI
-          const vv = (v / 50) * 2 * Math.PI
+      for (let u = 0; u <= 200; u++) {
+        for (let v = 0; v <= 200; v++) {
+          const uu = (u / 150) * 2 * Math.PI
+          const vv = (v / 150) * 2 * Math.PI
           const x = (2 + Math.cos(uu / 2) * Math.sin(vv)) * Math.cos(uu)
           const y = (2 + Math.cos(uu / 2) * Math.sin(vv)) * Math.sin(uu)
           const z = Math.sin(uu / 2) * Math.sin(vv)
           vertices.push(x * 0.8, y * 0.8, z * 0.8)
-          colors.push((u / 50), (v / 50), 0.7)
+          colors.push((u / 150), (v / 150), 0.7)
         }
       }
-      for (let u = 0; u < 50; u++) {
-        for (let v = 0; v < 50; v++) {
-          const a = u * 51 + v
+      for (let u = 0; u < 200; u++) {
+        for (let v = 0; v < 200; v++) {
+          const a = u * 201 + v
           const b = a + 51
           indices.push(a, b, a + 1)
           indices.push(b, b + 1, a + 1)
@@ -97,7 +97,7 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
       break
     }
     case 'torus':
-      geometry = new THREE.TorusGeometry(1.2, 0.5, 64, 200)
+      geometry = new THREE.TorusGeometry(1.2, 0.5, 256, 512)
       break
     case 'knot': {
       const points: THREE.Vector3[] = []
@@ -130,20 +130,20 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
       const vertices: number[] = []
       const colors: number[] = []
       const indices: number[] = []
-      for (let u = 0; u <= 70; u++) {
-        for (let v = 0; v <= 70; v++) {
-          const uu = (u / 40) * 2 * Math.PI
-          const vv = (v / 40 - 0.5) * 3
+      for (let u = 0; u <= 200; u++) {
+        for (let v = 0; v <= 200; v++) {
+          const uu = (u / 150) * 2 * Math.PI
+          const vv = (v / 150 - 0.5) * 3
           const x = Math.cosh(vv) * Math.cos(uu)
           const y = Math.cosh(vv) * Math.sin(uu)
           const z = Math.sinh(vv)
           vertices.push(x * 0.4, y * 0.4, z * 0.4)
-          colors.push((u / 40), 0.5, (v / 40))
+          colors.push((u / 150), 0.5, (v / 150))
         }
       }
-      for (let u = 0; u < 40; u++) {
-        for (let v = 0; v < 40; v++) {
-          const a = u * 41 + v
+      for (let u = 0; u < 200; u++) {
+        for (let v = 0; v < 200; v++) {
+          const a = u * 201 + v
           const b = a + 41
           indices.push(a, b, a + 1)
           indices.push(b, b + 1, a + 1)
@@ -160,20 +160,20 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
       const vertices: number[] = []
       const colors: number[] = []
       const indices: number[] = []
-      for (let u = 0; u <= 60; u++) {
-        for (let v = 0; v <= 60; v++) {
-          const uu = (u / 30) * 4 - 2
-          const vv = (v / 30) * 4 - 2
+      for (let u = 0; u <= 200; u++) {
+        for (let v = 0; v <= 200; v++) {
+          const uu = (u / 150) * 4 - 2
+          const vv = (v / 150) * 4 - 2
           const x = uu - (uu ** 3) / 3 + uu * (vv ** 2)
           const y = vv - (vv ** 3) / 3 + vv * (uu ** 2)
           const z = (uu ** 2) - (vv ** 2)
           vertices.push(x * 0.15, y * 0.15, z * 0.15)
-          colors.push((u / 30), (v / 30), 0.8)
+          colors.push((u / 150), (v / 150), 0.8)
         }
       }
-      for (let u = 0; u < 30; u++) {
-        for (let v = 0; v < 30; v++) {
-          const a = u * 31 + v
+      for (let u = 0; u < 200; u++) {
+        for (let v = 0; v < 200; v++) {
+          const a = u * 201 + v
           const b = a + 31
           indices.push(a, b, a + 1)
           indices.push(b, b + 1, a + 1)
@@ -190,10 +190,10 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
       const vertices: number[] = []
       const colors: number[] = []
       const indices: number[] = []
-      for (let u = 0; u <= 100; u++) {
-        for (let v = 0; v <= 100; v++) {
-          const uu = (u / 100) * 4 * Math.PI
-          const vv = (v / 100) * 2 + 0.1
+      for (let u = 0; u <= 300; u++) {
+        for (let v = 0; v <= 300; v++) {
+          const uu = (u / 300) * 4 * Math.PI
+          const vv = (v / 300) * 2 + 0.1
           const x = Math.cos(uu) * Math.sinh(vv)
           const y = Math.sin(uu) * Math.sinh(vv)
           const z = uu + Math.cosh(vv) * Math.cos(Math.PI / 8)
@@ -201,10 +201,10 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
           colors.push(1.0, 1.0, 1.0)
         }
       }
-      for (let u = 0; u < 100; u++) {
-        for (let v = 0; v < 100; v++) {
-          const a = u * 101 + v
-          const b = a + 101
+      for (let u = 0; u < 300; u++) {
+        for (let v = 0; v < 300; v++) {
+          const a = u * 301 + v
+          const b = a + 301
           indices.push(a, b, a + 1)
           indices.push(b, b + 1, a + 1)
         }
@@ -219,15 +219,15 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
       geometry = new THREE.BufferGeometry()
       const vertices: number[] = []
       const colors: number[] = []
-      for (let u = 0; u < 200; u++) {
-        for (let v = 0; v < 100; v++) {
-          const uu = (u / 200) * 6 * Math.PI
-          const vv = (v / 100) * Math.PI
+      for (let u = 0; u < 400; u++) {
+        for (let v = 0; v < 300; v++) {
+          const uu = (u / 400) * 6 * Math.PI
+          const vv = (v / 300) * Math.PI
           const x = 0.5 * (1 - uu / (6 * Math.PI)) * Math.cos(uu) * Math.sin(vv)
           const y = 0.5 * (1 - uu / (6 * Math.PI)) * Math.sin(uu) * Math.sin(vv)
           const z = 0.5 * (1 - uu / (6 * Math.PI)) * Math.cos(vv) + uu / (2 * Math.PI)
           vertices.push(x, y, z * 0.3)
-          colors.push((u / 200), (v / 100), 0.6)
+          colors.push((u / 400), (v / 300), 0.6)
         }
       }
       geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3))
@@ -235,23 +235,23 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
       break
     }
     case 'boys':
-      geometry = new THREE.IcosahedronGeometry(1.2, 6)
+      geometry = new THREE.IcosahedronGeometry(1.2, 8)
       break
     case 'rhodonea': {
       geometry = new THREE.BufferGeometry()
       const vertices: number[] = []
       const colors: number[] = []
-      for (let u = 0; u < 300; u++) {
-        for (let v = 0; v < 100; v++) {
-          const uu = (u / 300) * 4 * Math.PI
-          const vv = (v / 100) * Math.PI
+      for (let u = 0; u < 600; u++) {
+        for (let v = 0; v < 300; v++) {
+          const uu = (u / 600) * 4 * Math.PI
+          const vv = (v / 300) * Math.PI
           const k = 5
           const r = Math.cos(k * uu)
           const x = r * Math.sin(vv) * Math.cos(uu)
           const y = r * Math.sin(vv) * Math.sin(uu)
           const z = r * Math.cos(vv)
           vertices.push(x * 0.8, y * 0.8, z * 0.8)
-          colors.push((u / 300), 0.5, (v / 100))
+          colors.push((u / 600), 0.5, (v / 300))
         }
       }
       geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3))
