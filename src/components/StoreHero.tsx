@@ -101,15 +101,15 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
       break
     case 'knot': {
       const points: THREE.Vector3[] = []
-      for (let i = 0; i < 1200; i++) {
-        const t = (i / 1200) * 20 * Math.PI
+      for (let i = 0; i < 2000; i++) {
+        const t = (i / 2000) * 20 * Math.PI
         const x = Math.cos(t) * (2 + Math.cos(t * 1.5))
         const y = Math.sin(t) * (2 + Math.cos(t * 1.5))
         const z = Math.sin(t * 1.5)
         points.push(new THREE.Vector3(x * 0.5, y * 0.5, z * 0.5))
       }
       const knotCurve = new THREE.CatmullRomCurve3(points, true)
-      geometry = new THREE.TubeGeometry(knotCurve, 600, 0.2, 256, false)
+      geometry = new THREE.TubeGeometry(knotCurve, 1200, 0.2, 512, false)
       break
     }
     case 'helix': {
@@ -198,7 +198,7 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
           const y = Math.sin(uu) * Math.sinh(vv)
           const z = uu + Math.cosh(vv) * Math.cos(Math.PI / 8)
           vertices.push(x * 0.3, y * 0.3, z * 0.1)
-          colors.push(0.9 + (u / 100) * 0.1, 0.8 + (v / 100) * 0.2, 1.0)
+          colors.push(1.0, 1.0, 1.0)
         }
       }
       for (let u = 0; u < 100; u++) {
@@ -303,7 +303,7 @@ function DynamicAsset({ type, position, baseColor, emissiveColor, speed }: Dynam
         <meshStandardMaterial
           color={baseColor}
           emissive={emissiveColor}
-          emissiveIntensity={0.6}
+          emissiveIntensity={1.5}
           metalness={0.4}
           roughness={0.4}
           vertexColors={true}
@@ -429,7 +429,7 @@ function MysteryCanvas() {
     helix: { base: 0x34d399, emissive: 0x6ee7b7 },       // 밝은 녹색
     hyperboloid: { base: 0xf59e0b, emissive: 0xfbbf24 }, // 주황색
     enneper: { base: 0x06b6d4, emissive: 0x22d3ee },     // 청록색
-    dini: { base: 0xc4b5fd, emissive: 0xe9d5ff },        // 밝은 보라색
+    dini: { base: 0xffffff, emissive: 0xffffff },        // 완전 흰색
     seashell: { base: 0xf43f5e, emissive: 0xfb7185 },    // 빨간색
     boys: { base: 0x14b8a6, emissive: 0x2dd4bf },        // 청색
     rhodonea: { base: 0xeab308, emissive: 0xfde047 },    // 황록색
