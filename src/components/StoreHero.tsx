@@ -8,21 +8,21 @@ import { withLang } from '../i18n/languages'
 
 const STORE_URL = 'https://store.cometest.com/'
 
-type AssetType = 'mobius' | 'infinity' | 'klein' | 'torus' | 'knot' | 'helix' | 'hyperboloid' | 'enneper' | 'dini' | 'seashell' | 'boys' | 'rhodonea'
+type AssetType = 'mobius' | 'infinity' | 'lissajous' | 'torus' | 'knot' | 'helix' | 'hyperboloid' | 'enneper' | 'dini' | 'spherical' | 'boys' | 'villarceau'
 
 const ASSET_NAMES: Record<AssetType, string> = {
   mobius: 'Möbius Strip',
   infinity: 'Infinity Loop',
-  klein: 'Klein Bottle',
+  lissajous: 'Lissajous Curve',
   torus: 'Torus',
   knot: 'Trefoil Knot',
   helix: 'Helix',
   hyperboloid: 'Hyperboloid',
   enneper: 'Enneper Surface',
   dini: 'Dini Surface',
-  seashell: 'Conch Shell',
+  spherical: 'Spherical Harmonics',
   boys: "Boy's Surface",
-  rhodonea: 'Rose Curve',
+  villarceau: 'Villarceau Circles',
 }
 
 interface DynamicAssetProps {
@@ -81,42 +81,17 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
       geometry.computeVertexNormals()
       break
     }
-    case 'klein': {
-      geometry = new THREE.BufferGeometry()
-      const vertices: number[] = []
-      const colors: number[] = []
-      const indices: number[] = []
-      const a = 2
-      for (let u = 0; u <= 200; u++) {
-        for (let v = 0; v <= 200; v++) {
-          const uu = (u / 200) * Math.PI
-          const vv = (v / 200) * 2 * Math.PI
-          let x, y, z
-          if (uu < Math.PI / 2) {
-            x = (a + Math.cos(uu) * Math.sin(vv)) * Math.cos(uu)
-            y = (a + Math.cos(uu) * Math.sin(vv)) * Math.sin(uu)
-            z = Math.sin(uu) * Math.sin(vv)
-          } else {
-            x = (a - Math.sin(uu) * Math.cos(vv)) * Math.cos(uu)
-            y = (a - Math.sin(uu) * Math.cos(vv)) * Math.sin(uu)
-            z = Math.sin(uu) * Math.sin(vv) + Math.cos(uu) * Math.sin(2 * vv)
-          }
-          vertices.push(x * 0.5, y * 0.5, z * 0.5)
-          colors.push((u / 200), (v / 200), 0.7)
-        }
+    case 'lissajous': {
+      const points: THREE.Vector3[] = []
+      for (let i = 0; i < 1000; i++) {
+        const t = (i / 1000) * 4 * Math.PI
+        const x = Math.sin(3 * t)
+        const y = Math.sin(4 * t)
+        const z = Math.sin(5 * t)
+        points.push(new THREE.Vector3(x * 0.8, y * 0.8, z * 0.8))
       }
-      for (let u = 0; u < 200; u++) {
-        for (let v = 0; v < 200; v++) {
-          const a = u * 201 + v
-          const b = a + 51
-          indices.push(a, b, a + 1)
-          indices.push(b, b + 1, a + 1)
-        }
-      }
-      geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3))
-      geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3))
-      geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1))
-      geometry.computeVertexNormals()
+      const curve = new THREE.CatmullRomCurve3(points, false)
+      geometry = new THREE.TubeGeometry(curve, 600, 0.15, 512, false)
       break
     }
     case 'torus':
@@ -238,47 +213,54 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
       geometry.computeVertexNormals()
       break
     }
-    case 'seashell': {
+    case 'spherical': {
       geometry = new THREE.BufferGeometry()
       const vertices: number[] = []
       const colors: number[] = []
-      for (let u = 0; u < 400; u++) {
-        for (let v = 0; v < 300; v++) {
-          const uu = (u / 400) * 6 * Math.PI
-          const vv = (v / 300) * Math.PI
-          const x = 0.5 * (1 - uu / (6 * Math.PI)) * Math.cos(uu) * Math.sin(vv)
-          const y = 0.5 * (1 - uu / (6 * Math.PI)) * Math.sin(uu) * Math.sin(vv)
-          const z = 0.5 * (1 - uu / (6 * Math.PI)) * Math.cos(vv) + uu / (2 * Math.PI)
-          vertices.push(x, y, z * 0.3)
-          colors.push((u / 400), (v / 300), 0.6)
+      for (let u = 0; u <= 100; u++) {
+        for (let v = 0; v <= 100; v++) {
+          const theta = (u / 100) * Math.PI
+          const phi = (v / 100) * 2 * Math.PI
+          const r = 1 + 0.3 * Math.sin(4 * theta) * Math.cos(3 * phi)
+          const x = r * Math.sin(theta) * Math.cos(phi)
+          const y = r * Math.sin(theta) * Math.sin(phi)
+          const z = r * Math.cos(theta)
+          vertices.push(x, y, z)
+          colors.push(0.5 + 0.5 * Math.sin(theta), 0.5 + 0.5 * Math.cos(phi), 0.8)
+        }
+      }
+      const indices: number[] = []
+      for (let u = 0; u < 100; u++) {
+        for (let v = 0; v < 100; v++) {
+          const a = u * 101 + v
+          const b = a + 101
+          indices.push(a, b, a + 1)
+          indices.push(b, b + 1, a + 1)
         }
       }
       geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3))
       geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3))
+      geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1))
+      geometry.computeVertexNormals()
       break
     }
     case 'boys':
-      geometry = new THREE.IcosahedronGeometry(1.2, 8)
+      geometry = new THREE.IcosahedronGeometry(1.2, 10)
       break
-    case 'rhodonea': {
-      geometry = new THREE.BufferGeometry()
-      const vertices: number[] = []
-      const colors: number[] = []
-      for (let u = 0; u < 600; u++) {
-        for (let v = 0; v < 300; v++) {
-          const uu = (u / 600) * 4 * Math.PI
-          const vv = (v / 300) * Math.PI
-          const k = 5
-          const r = Math.cos(k * uu)
-          const x = r * Math.sin(vv) * Math.cos(uu)
-          const y = r * Math.sin(vv) * Math.sin(uu)
-          const z = r * Math.cos(vv)
-          vertices.push(x * 0.8, y * 0.8, z * 0.8)
-          colors.push((u / 600), 0.5, (v / 300))
-        }
+    case 'villarceau': {
+      const points: THREE.Vector3[] = []
+      for (let i = 0; i < 1200; i++) {
+        const t = (i / 1200) * 2 * Math.PI
+        const majorR = 2
+        const minorR = 0.6
+        const angle = Math.PI / 4
+        const x = (majorR + minorR * Math.cos(t)) * Math.cos(t)
+        const y = (majorR + minorR * Math.cos(t)) * Math.sin(t) * Math.cos(angle)
+        const z = (majorR + minorR * Math.cos(t)) * Math.sin(t) * Math.sin(angle) + minorR * Math.sin(t)
+        points.push(new THREE.Vector3(x * 0.4, y * 0.4, z * 0.4))
       }
-      geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3))
-      geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3))
+      const curve = new THREE.CatmullRomCurve3(points, true)
+      geometry = new THREE.TubeGeometry(curve, 800, 0.12, 512, true)
       break
     }
     case 'infinity': {
@@ -442,16 +424,16 @@ function MysteryCanvas({ selectedAssets }: MysteryCanvasProps) {
   const assetColors: Record<AssetType, { base: number; emissive: number }> = {
     mobius: { base: 0xff6b9d, emissive: 0xff1493 },      // 분홍색
     infinity: { base: 0x06b6d4, emissive: 0x0891b2 },    // 파란색
-    klein: { base: 0xa855f7, emissive: 0xd946ef },       // 보라색
+    lissajous: { base: 0xff00ff, emissive: 0xff66ff },   // 마젠타
     torus: { base: 0xfbbf24, emissive: 0xfcd34d },       // 노란색
     knot: { base: 0xec4899, emissive: 0xf472b6 },        // 장미색
     helix: { base: 0x34d399, emissive: 0x6ee7b7 },       // 밝은 녹색
     hyperboloid: { base: 0xf59e0b, emissive: 0xfbbf24 }, // 주황색
     enneper: { base: 0x06b6d4, emissive: 0x22d3ee },     // 청록색
     dini: { base: 0xffffff, emissive: 0xffffff },        // 완전 흰색
-    seashell: { base: 0xffaa00, emissive: 0xffdd00 },    // 밝은 오렌지 황색
+    spherical: { base: 0x00ffff, emissive: 0x66ffff },   // 사이안
     boys: { base: 0x14b8a6, emissive: 0x2dd4bf },        // 하늘색
-    rhodonea: { base: 0xffffff, emissive: 0xffffff },    // 순수 흰색
+    villarceau: { base: 0xffff00, emissive: 0xffff66 },  // 밝은 노란색
   }
 
   return (
