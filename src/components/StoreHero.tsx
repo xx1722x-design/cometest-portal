@@ -320,50 +320,68 @@ function ParticleField() {
   useEffect(() => {
     if (!pointsRef.current) return
 
-    const count = 1000
+    const count = 1500
     const geometry = new THREE.BufferGeometry()
     const positions = new Float32Array(count * 3)
     const colors = new Float32Array(count * 3)
+    const sizes = new Float32Array(count)
 
+    // 실제 우주의 별과 성운 색상
     const spaceColors = [
-      [1.0, 0.3, 1.0],       // 보라색
-      [0.2, 0.8, 1.0],       // 하늘색
-      [1.0, 0.2, 0.8],       // 분홍색
-      [0.5, 1.0, 0.2],       // 라임
-      [1.0, 1.0, 1.0],       // 흰색
-      [0.2, 1.0, 1.0],       // 청록색
-      [0.8, 0.2, 1.0],       // 자주색
-      [1.0, 0.6, 0.2],       // 주황색
-      [0.3, 0.8, 1.0],       // 밝은 파랑
-      [1.0, 0.4, 0.6],       // 장미색
+      // 별 색상 (주계열)
+      [1.0, 1.0, 1.0],       // 흰 별 (A 타입)
+      [1.0, 0.95, 0.8],      // 노란 별 (G 타입, 태양)
+      [1.0, 0.7, 0.3],       // 주황 별 (K 타입)
+      [1.0, 0.2, 0.1],       // 빨간 별 (M 타입)
+      [0.6, 0.8, 1.0],       // 푸른 별 (B 타입)
+      [0.3, 0.5, 1.0],       // 짙은 파란 별 (O 타입)
+      // 성운 색상
+      [1.0, 0.2, 0.8],       // 분홍 성운 (H-알파, 이온화 수소)
+      [0.8, 0.2, 1.0],       // 보라 성운
+      [0.2, 1.0, 0.8],       // 청록 성운 (산소)
+      [1.0, 0.6, 0.2],       // 황금빛 성운
+      [1.0, 0.3, 0.3],       // 적색 성운
+      [0.9, 0.9, 1.0],       // 밝은 별
     ]
 
     for (let i = 0; i < count; i++) {
-      positions[i * 3] = (Math.random() - 0.5) * 15
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 12
-      positions[i * 3 + 2] = (Math.random() - 0.5) * 10
+      positions[i * 3] = (Math.random() - 0.5) * 20
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 15
+      positions[i * 3 + 2] = (Math.random() - 0.5) * 12
 
       const colorIdx = Math.floor(Math.random() * spaceColors.length)
       const color = spaceColors[colorIdx]
       colors[i * 3] = color[0]
       colors[i * 3 + 1] = color[1]
       colors[i * 3 + 2] = color[2]
+
+      // 크기: 작은 별(80%) ~ 큰 별(20%)
+      sizes[i] = Math.random() < 0.8 ? Math.random() * 0.03 + 0.01 : Math.random() * 0.08 + 0.04
     }
 
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
     geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+    geometry.setAttribute('size', new THREE.BufferAttribute(sizes, 1))
     pointsRef.current.geometry = geometry
   }, [])
 
   useFrame(() => {
     if (pointsRef.current) {
-      pointsRef.current.rotation.y += 0.0002
+      pointsRef.current.rotation.y += 0.0001
+      pointsRef.current.rotation.x += 0.00005
     }
   })
 
   return (
     <points ref={pointsRef}>
-      <pointsMaterial size={0.04} sizeAttenuation transparent opacity={0.6} vertexColors />
+      <pointsMaterial
+        size={1}
+        sizeAttenuation
+        transparent
+        opacity={0.7}
+        vertexColors
+        fog={false}
+      />
     </points>
   )
 }
