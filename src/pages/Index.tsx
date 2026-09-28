@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Header } from '../components/Header'
 import { ContentGrid } from '../components/ContentGrid'
 import { Sidebar } from '../components/Sidebar'
+import { HeroSection3D } from '../components/HeroSection3D'
 
 interface ContentItem {
   id: string
@@ -277,54 +278,8 @@ export function Index() {
             transition: 'background-color 0.3s ease',
           }}
         >
-          {/* 히어로 섹션 - 세련된 Neon Black 스타일 */}
-          <div
-            style={{
-              backgroundColor: isDarkMode ? '#0a0a0a' : '#ffffff',
-              borderBottom: isDarkMode ? '1px solid #1a1a1a' : '1px solid #e0e0e0',
-              color: isDarkMode ? '#ffffff' : '#1a1a1a',
-              padding: '4rem 2rem',
-              textAlign: 'center',
-              transition: 'all 0.3s ease',
-            }}
-          >
-            <div
-              style={{
-                display: 'inline-block',
-                padding: '0.75rem 1.5rem',
-                backgroundColor: isDarkMode ? 'rgba(124,58,237,0.15)' : 'rgba(124,58,237,0.1)',
-                border: '1px solid #7c3aed',
-                borderRadius: '24px',
-                marginBottom: '1.5rem',
-              }}
-            >
-              <span style={{ color: '#7c3aed', fontSize: '14px', fontWeight: '600' }}>
-                ✨ {t('educational_content_platform')}
-              </span>
-            </div>
-            <h2
-              style={{
-                margin: '0 0 1rem 0',
-                fontSize: '42px',
-                fontWeight: '700',
-                background: isDarkMode ? 'transparent' : 'transparent',
-                color: isDarkMode ? '#ffffff' : '#1a1a1a',
-              }}
-            >
-              {t('portal_title')}
-            </h2>
-            <p
-              style={{
-                fontSize: '16px',
-                color: isDarkMode ? '#aaaaaa' : '#666666',
-                maxWidth: '600px',
-                margin: '0 auto',
-                lineHeight: '1.6',
-              }}
-            >
-              {t('portal_subtitle')}
-            </p>
-          </div>
+          {/* 히어로 섹션 - 3D 우주 에셋 */}
+          <HeroSection3D isDarkMode={isDarkMode} />
 
           {/* 콘텐츠 그리드 */}
           <ContentGrid items={contentItems} />
