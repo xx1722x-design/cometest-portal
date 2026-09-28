@@ -261,14 +261,14 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
     case 'infinity': {
       geometry = new THREE.BufferGeometry()
       const points: THREE.Vector3[] = []
-      for (let i = 0; i <= 100; i++) {
+      for (let i = 0; i < 100; i++) {
         const t = (i / 100) * Math.PI * 2
         const a = 2
         const x = (a * Math.cos(t)) / (1 + Math.sin(t) ** 2)
         const y = (a * Math.sin(t) * Math.cos(t)) / (1 + Math.sin(t) ** 2)
         points.push(new THREE.Vector3(x * 2, y * 2, 0))
       }
-      const curve = new THREE.CatmullRomCurve3(points)
+      const curve = new THREE.CatmullRomCurve3(points, true)
       const tubeGeometry = new THREE.TubeGeometry(curve, 64, 0.25, 8, false)
       geometry = tubeGeometry
       break
