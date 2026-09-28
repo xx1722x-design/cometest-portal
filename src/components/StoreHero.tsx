@@ -235,7 +235,7 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
       break
     }
     case 'boys':
-      geometry = new THREE.IcosahedronGeometry(1.2, 5)
+      geometry = new THREE.IcosahedronGeometry(1.2, 6)
       break
     case 'rhodonea': {
       geometry = new THREE.BufferGeometry()
