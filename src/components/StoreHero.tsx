@@ -395,7 +395,7 @@ function ParticleField() {
   return (
     <points ref={pointsRef}>
       <pointsMaterial
-        size={1}
+        size={0.5}
         sizeAttenuation
         transparent
         opacity={0.7}
