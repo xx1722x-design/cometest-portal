@@ -8,7 +8,7 @@ import { withLang } from '../i18n/languages'
 
 const STORE_URL = 'https://store.cometest.com/'
 
-// 뫼비우스 띠 (Möbius Strip)
+// 뫼비우스 띠 (Möbius Strip) - 텍스처 포함
 function MoebiusStrip() {
   const groupRef = useRef<THREE.Group>(null)
 
@@ -17,10 +17,11 @@ function MoebiusStrip() {
 
     const geometry = new THREE.BufferGeometry()
     const vertices: number[] = []
+    const colors: number[] = []
     const indices: number[] = []
 
-    const width = 5
-    const depth = 30
+    const width = 12
+    const depth = 60
 
     for (let i = 0; i <= depth; i++) {
       const u = (i / depth) * Math.PI * 2
@@ -31,6 +32,13 @@ function MoebiusStrip() {
         const z = v * Math.sin(u / 2)
 
         vertices.push(x * 2, y * 2, z * 2)
+
+        // 그래디언트 색상
+        const hue = (i / depth) * 360
+        const saturation = 100 - Math.abs(v) * 100
+        const lightness = 40 + Math.abs(v) * 20
+        const rgb = hslToRgb(hue, saturation, lightness)
+        colors.push(rgb.r / 255, rgb.g / 255, rgb.b / 255)
       }
     }
 
@@ -45,15 +53,16 @@ function MoebiusStrip() {
     }
 
     geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3))
+    geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3))
     geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1))
     geometry.computeVertexNormals()
 
     const material = new THREE.MeshStandardMaterial({
-      color: 0xa855f7,
-      emissive: 0xd946ef,
-      emissiveIntensity: 0.5,
-      metalness: 0.5,
-      roughness: 0.3,
+      vertexColors: true,
+      emissive: 0x333333,
+      emissiveIntensity: 0.3,
+      metalness: 0.4,
+      roughness: 0.4,
       wireframe: false,
       side: THREE.DoubleSide,
     })
@@ -70,6 +79,19 @@ function MoebiusStrip() {
   })
 
   return <group ref={groupRef} position={[0, 0, 0]} />
+}
+
+// HSL to RGB 변환
+function hslToRgb(h: number, s: number, l: number) {
+  s = s / 100
+  l = l / 100
+  const a = (s * Math.min(l, 1 - l)) / 100
+  const f = (n: number) => {
+    const k = (n + h / 30) % 12
+    const color = l - a * Math.max(Math.min(k - 3, 9 - k, 1), -1)
+    return Math.round(235.5 * color)
+  }
+  return { r: f(0), g: f(8), b: f(4) }
 }
 
 // 무한 루프 (8자 모양)
