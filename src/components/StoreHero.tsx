@@ -1,117 +1,143 @@
-import { useEffect, useState, useRef, Suspense } from 'react'
+import { useRef, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { useGLTF, OrbitControls } from '@react-three/drei'
-import { Group, Box3, Vector3 } from 'three'
+import * as THREE from 'three'
 import { playPanelBeep } from '../lib/sciFiFx'
 import { withLang } from '../i18n/languages'
-import { selectRandomAssets, SpaceAsset } from '../config/spaceAssets'
 
 const STORE_URL = 'https://store.cometest.com/'
 
-interface Model3DProps {
-  modelPath: string
-  position: [number, number, number]
-  rotationSpeed: number
-}
-
-function Model3D({ modelPath, position, rotationSpeed }: Model3DProps) {
-  const gltf = useGLTF(modelPath)
-  const groupRef = useRef<Group>(null)
-  const [adjustedScale, setAdjustedScale] = useState(1)
+// 미스테리한 3D 객체들
+function MysteryObject1() {
+  const groupRef = useRef<THREE.Group>(null)
+  const meshRef = useRef<THREE.Mesh>(null)
 
   useEffect(() => {
-    if (!gltf.scene) return
-
-    const box = new Box3().setFromObject(gltf.scene)
-    const size = box.getSize(new Vector3())
-    const maxDim = Math.max(size.x, size.y, size.z)
-    const scale = maxDim > 0 ? 3 / maxDim : 1
-
-    setAdjustedScale(scale)
-    const center = box.getCenter(new Vector3())
-    gltf.scene.position.sub(center)
-
-    // 에셋에 랜덤 컬러풀한 material 추가
-    const colors = [
-      0xff6b9d, // Pink
-      0x4d96ff, // Blue
-      0x6bcf7f, // Green
-      0xffd700, // Gold
-      0xff6b35, // Orange
-      0xc74b50, // Red
-      0x9d4edd, // Purple
-      0x00f5ff, // Cyan
-    ]
-    const randomColor = colors[Math.floor(Math.random() * colors.length)]
-
-    gltf.scene.traverse((child: any) => {
-      if (child.isMesh) {
-        child.material.color.setHex(randomColor)
-        child.material.metalness = 0.3
-        child.material.roughness = 0.4
-        child.material.emissive.setHex(randomColor)
-        child.material.emissiveIntensity = 0.3
-      }
+    if (!meshRef.current) return
+    // 회전하는 정이십면체
+    const geometry = new THREE.IcosahedronGeometry(1.5, 4)
+    const material = new THREE.MeshPhongMaterial({
+      color: 0x6b21a8,
+      emissive: 0xd946ef,
+      emissiveIntensity: 0.5,
+      shininess: 100,
     })
-  }, [gltf])
+    meshRef.current.geometry = geometry
+    meshRef.current.material = material
+  }, [])
 
-  useFrame((state) => {
+  useFrame(() => {
     if (groupRef.current) {
-      groupRef.current.rotation.x += rotationSpeed * 0.5
-      groupRef.current.rotation.y += rotationSpeed
+      groupRef.current.rotation.x += 0.005
+      groupRef.current.rotation.y += 0.008
     }
   })
 
-  if (!gltf.scene) return null
-
   return (
-    <group ref={groupRef} position={position} scale={adjustedScale}>
-      <primitive object={gltf.scene} />
+    <group ref={groupRef} position={[-1.5, 0, 0]}>
+      <mesh ref={meshRef} />
     </group>
   )
 }
 
-interface AssetCanvasProps {
-  assets: SpaceAsset[]
+function MysteryObject2() {
+  const groupRef = useRef<THREE.Group>(null)
+  const meshRef = useRef<THREE.Mesh>(null)
+
+  useEffect(() => {
+    if (!meshRef.current) return
+    // 반짝이는 원환체
+    const geometry = new THREE.TorusGeometry(1.2, 0.4, 16, 100)
+    const material = new THREE.MeshStandardMaterial({
+      color: 0x0891b2,
+      emissive: 0x06b6d4,
+      emissiveIntensity: 0.4,
+      metalness: 0.8,
+      roughness: 0.2,
+    })
+    meshRef.current.geometry = geometry
+    meshRef.current.material = material
+  }, [])
+
+  useFrame(() => {
+    if (groupRef.current) {
+      groupRef.current.rotation.x += 0.003
+      groupRef.current.rotation.y += 0.006
+      groupRef.current.rotation.z += 0.004
+    }
+  })
+
+  return (
+    <group ref={groupRef} position={[1.5, 0, 0]}>
+      <mesh ref={meshRef} />
+    </group>
+  )
 }
 
-function AssetCanvas({ assets }: AssetCanvasProps) {
+function ParticleField() {
+  const particlesRef = useRef<THREE.Points>(null)
+
+  useEffect(() => {
+    if (!particlesRef.current) return
+
+    const particleCount = 500
+    const geometry = new THREE.BufferGeometry()
+    const positions = new Float32Array(particleCount * 3)
+
+    for (let i = 0; i < particleCount * 3; i += 3) {
+      positions[i] = (Math.random() - 0.5) * 8
+      positions[i + 1] = (Math.random() - 0.5) * 8
+      positions[i + 2] = (Math.random() - 0.5) * 8
+    }
+
+    geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
+
+    const material = new THREE.PointsMaterial({
+      color: 0x7c3aed,
+      size: 0.05,
+      sizeAttenuation: true,
+      transparent: true,
+      opacity: 0.4,
+    })
+
+    particlesRef.current.geometry = geometry
+    particlesRef.current.material = material
+  }, [])
+
+  useFrame(() => {
+    if (particlesRef.current) {
+      particlesRef.current.rotation.y += 0.0005
+    }
+  })
+
+  return <points ref={particlesRef} />
+}
+
+function MysteryCanvas() {
   return (
-    <Canvas camera={{ position: [0, 0.5, 5], fov: 50 }} dpr={[1, 2]}>
+    <Canvas camera={{ position: [0, 0, 5], fov: 50 }} dpr={[1, 2]}>
       <color attach="background" args={['#0d1117']} />
-      <ambientLight intensity={1.2} color="#ffffff" />
-      <directionalLight position={[10, 15, 10]} intensity={1.5} color="#fff9e6" />
-      <pointLight position={[5, 8, 5]} intensity={1.2} color="#ffccff" distance={30} />
-      <pointLight position={[-8, 6, -8]} intensity={1} color="#ccffff" distance={30} />
 
-      <Suspense fallback={null}>
-        <Model3D modelPath={`/models/${assets[0]}`} position={[-1.5, 0, 0]} rotationSpeed={0.01} />
-      </Suspense>
+      {/* 조명 */}
+      <ambientLight intensity={0.8} color="#ffffff" />
+      <pointLight position={[5, 5, 5]} intensity={1.2} color="#d946ef" />
+      <pointLight position={[-5, -5, 5]} intensity={0.8} color="#06b6d4" />
+      <pointLight position={[0, 0, 3]} intensity={0.6} color="#7c3aed" />
 
-      <Suspense fallback={null}>
-        <Model3D modelPath={`/models/${assets[1]}`} position={[1.5, 0, 0]} rotationSpeed={0.008} />
-      </Suspense>
+      {/* 미스테리한 객체들 */}
+      <MysteryObject1 />
+      <MysteryObject2 />
+      <ParticleField />
     </Canvas>
   )
 }
 
 export function StoreHero() {
   const { t, i18n } = useTranslation()
-  const [selectedAssets, setSelectedAssets] = useState<SpaceAsset[]>([])
-
-  useEffect(() => {
-    const assets = selectRandomAssets(2)
-    setSelectedAssets(assets)
-  }, [])
-
-  if (selectedAssets.length === 0) {
-    return null
-  }
 
   return (
     <section className="hero" aria-labelledby="hero-title">
-      {/* 배경: 우주 그라데이션 + 3D 에셋 캔버스 */}
+      {/* 배경: 우주 그라데이션 + 미스테리한 3D 객체 */}
       <div
         className="hero__backdrop"
         aria-hidden="true"
@@ -140,8 +166,8 @@ export function StoreHero() {
             zIndex: 1,
           }}
         >
-          <div style={{ width: '400px', height: '400px' }}>
-            <AssetCanvas assets={selectedAssets} />
+          <div style={{ width: '100%', height: '100%' }}>
+            <MysteryCanvas />
           </div>
         </div>
         <div className="hero__vignette" />
