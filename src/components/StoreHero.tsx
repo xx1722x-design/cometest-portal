@@ -31,6 +31,29 @@ function Model3D({ modelPath, position, rotationSpeed }: Model3DProps) {
     setAdjustedScale(scale)
     const center = box.getCenter(new Vector3())
     gltf.scene.position.sub(center)
+
+    // 에셋에 랜덤 컬러풀한 material 추가
+    const colors = [
+      0xff6b9d, // Pink
+      0x4d96ff, // Blue
+      0x6bcf7f, // Green
+      0xffd700, // Gold
+      0xff6b35, // Orange
+      0xc74b50, // Red
+      0x9d4edd, // Purple
+      0x00f5ff, // Cyan
+    ]
+    const randomColor = colors[Math.floor(Math.random() * colors.length)]
+
+    gltf.scene.traverse((child: any) => {
+      if (child.isMesh) {
+        child.material.color.setHex(randomColor)
+        child.material.metalness = 0.3
+        child.material.roughness = 0.4
+        child.material.emissive.setHex(randomColor)
+        child.material.emissiveIntensity = 0.3
+      }
+    })
   }, [gltf])
 
   useFrame((state) => {
