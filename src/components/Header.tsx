@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
 interface HeaderProps {
@@ -13,7 +13,8 @@ export function Header({ onLanguageChange, isDarkMode = true, onToggleDarkMode }
   const { t, i18n } = useTranslation()
   const [showLanguageMenu, setShowLanguageMenu] = useState(false)
   const [searchQuery, setSearchQuery] = useState('')
-  const [activeCategory, setActiveCategory] = useState<string | null>(null)
+  // 활성 탭은 현재 URL 기준 (헤더는 페이지마다 다시 마운트되므로 로컬 state로는 유지되지 않음)
+  const { pathname } = useLocation()
 
   const handleLanguageSelect = (lang: string) => {
     i18n.changeLanguage(lang)
@@ -28,7 +29,6 @@ export function Header({ onLanguageChange, isDarkMode = true, onToggleDarkMode }
 
   const handleCategoryClick = (path: string) => {
     navigate(path)
-    setActiveCategory(path)
   }
 
   const languages = [
@@ -101,10 +101,7 @@ export function Header({ onLanguageChange, isDarkMode = true, onToggleDarkMode }
             cursor: 'pointer',
             minWidth: '200px',
           }}
-          onClick={() => {
-            navigate('/')
-            setActiveCategory(null)
-          }}
+          onClick={() => navigate('/')}
         >
           <div
             style={{
@@ -339,31 +336,11 @@ export function Header({ onLanguageChange, isDarkMode = true, onToggleDarkMode }
             <a
               key={cat.key}
               href={cat.path}
+              className={`nav-tab${isDarkMode ? '' : ' nav-tab--light'}${pathname === cat.path ? ' is-active' : ''}`}
+              aria-current={pathname === cat.path ? 'page' : undefined}
               onClick={(e) => {
                 e.preventDefault()
                 handleCategoryClick(cat.path)
-              }}
-              style={{
-                padding: '1rem 0',
-                color: activeCategory === cat.path ? '#7c3aed' : (isDarkMode ? '#aaaaaa' : '#666666'),
-                textDecoration: 'none',
-                fontSize: '14px',
-                fontWeight: activeCategory === cat.path ? '600' : '500',
-                borderBottom: activeCategory === cat.path ? '3px solid #7c3aed' : '2px solid transparent',
-                transition: 'all 0.2s',
-                display: 'inline-block',
-              }}
-              onMouseEnter={(e) => {
-                if (activeCategory !== cat.path) {
-                  e.currentTarget.style.borderColor = isDarkMode ? '#666666' : '#ccc'
-                  e.currentTarget.style.color = isDarkMode ? '#ffffff' : '#1a1a1a'
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (activeCategory !== cat.path) {
-                  e.currentTarget.style.borderColor = 'transparent'
-                  e.currentTarget.style.color = isDarkMode ? '#aaaaaa' : '#666666'
-                }
               }}
             >
               {t(cat.i18nKey)}
