@@ -30,8 +30,9 @@ export function Sidebar({ links }: SidebarProps) {
     {
       id: 'market',
       title: `🛒 ${t('original_asset_store')}`,
-      path: '/store',
+      path: 'https://store.cometest.com',
       icon: '🛒',
+      external: true,
     },
     {
       id: 'about',
