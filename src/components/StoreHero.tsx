@@ -20,7 +20,7 @@ const ASSET_NAMES: Record<AssetType, string> = {
   hyperboloid: 'Hyperboloid',
   enneper: 'Enneper Surface',
   dini: 'Dini Surface',
-  seashell: 'Seashell',
+  seashell: 'Conch Shell',
   boys: "Boy's Surface",
   rhodonea: 'Rose Curve',
 }
