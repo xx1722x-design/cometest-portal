@@ -10,6 +10,21 @@ const STORE_URL = 'https://store.cometest.com/'
 
 type AssetType = 'mobius' | 'infinity' | 'klein' | 'torus' | 'knot' | 'helix' | 'hyperboloid' | 'enneper' | 'dini' | 'seashell' | 'boys' | 'rhodonea'
 
+const ASSET_NAMES: Record<AssetType, string> = {
+  mobius: 'Möbius Strip',
+  infinity: 'Infinity Loop',
+  klein: 'Klein Bottle',
+  torus: 'Torus',
+  knot: 'Trefoil Knot',
+  helix: 'Helix',
+  hyperboloid: 'Hyperboloid',
+  enneper: 'Enneper Surface',
+  dini: 'Dini Surface',
+  seashell: 'Seashell',
+  boys: "Boy's Surface",
+  rhodonea: 'Rose Curve',
+}
+
 interface DynamicAssetProps {
   type: AssetType
   position: [number, number, number]
@@ -409,13 +424,11 @@ function ParticleField() {
   )
 }
 
-function MysteryCanvas() {
-  // 초기에 2개 에셋을 미리 선택해서 시작
-  const [selectedAssets] = useState<AssetType[]>(() => {
-    const allAssets: AssetType[] = ['mobius', 'infinity', 'klein', 'torus', 'knot', 'helix', 'hyperboloid', 'enneper', 'dini', 'seashell', 'boys', 'rhodonea']
-    const shuffled = [...allAssets].sort(() => Math.random() - 0.5)
-    return shuffled.slice(0, 2)
-  })
+interface MysteryCanvasProps {
+  selectedAssets: AssetType[]
+}
+
+function MysteryCanvas({ selectedAssets }: MysteryCanvasProps) {
 
   // 12개 도형별 고유 색상
   const assetColors: Record<AssetType, { base: number; emissive: number }> = {
@@ -483,6 +496,13 @@ function MysteryCanvas() {
 export function StoreHero() {
   const { t, i18n } = useTranslation()
 
+  // 초기에 2개 에셋을 미리 선택해서 시작
+  const [selectedAssets] = useState<AssetType[]>(() => {
+    const allAssets: AssetType[] = ['mobius', 'infinity', 'klein', 'torus', 'knot', 'helix', 'hyperboloid', 'enneper', 'dini', 'seashell', 'boys', 'rhodonea']
+    const shuffled = [...allAssets].sort(() => Math.random() - 0.5)
+    return shuffled.slice(0, 2)
+  })
+
   return (
     <section className="hero" aria-labelledby="hero-title">
       <div className="hero__backdrop" aria-hidden="true" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
@@ -491,7 +511,7 @@ export function StoreHero() {
         <div className="hero__halo" />
 
         <div style={{ position: 'absolute', width: '100%', height: '100%', top: 0, left: 0, zIndex: 1 }}>
-          <MysteryCanvas />
+          <MysteryCanvas selectedAssets={selectedAssets} />
         </div>
 
         <div className="hero__vignette" />
@@ -517,6 +537,11 @@ export function StoreHero() {
             {t('store_cta')}
             <span className="hero__cta-arrow" aria-hidden="true">➔</span>
           </a>
+        </div>
+
+        {/* 현재 표시되는 도형의 이름 */}
+        <div style={{ marginTop: '2rem', textAlign: 'center', fontSize: '14px', color: 'var(--color-text-secondary)', opacity: 0.8 }}>
+          ✨ Featured: {selectedAssets.length === 2 ? `${ASSET_NAMES[selectedAssets[0]]} & ${ASSET_NAMES[selectedAssets[1]]}` : ''}
         </div>
       </div>
     </section>
