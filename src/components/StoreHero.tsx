@@ -418,12 +418,21 @@ function MysteryCanvas() {
     setSelectedAssets(selected)
   }, [])
 
-  const colors = [
-    { base: 0xff6b9d, emissive: 0xff1493 },
-    { base: 0x06b6d4, emissive: 0x0891b2 },
-    { base: 0xa855f7, emissive: 0xd946ef },
-    { base: 0xfbbf24, emissive: 0xfcd34d },
-  ]
+  // 12개 도형별 고유 색상
+  const assetColors: Record<AssetType, { base: number; emissive: number }> = {
+    mobius: { base: 0xff6b9d, emissive: 0xff1493 },      // 분홍색
+    infinity: { base: 0x06b6d4, emissive: 0x0891b2 },    // 파란색
+    klein: { base: 0xa855f7, emissive: 0xd946ef },       // 보라색
+    torus: { base: 0xfbbf24, emissive: 0xfcd34d },       // 노란색
+    knot: { base: 0xec4899, emissive: 0xf472b6 },        // 장미색
+    helix: { base: 0x10b981, emissive: 0x34d399 },       // 녹색
+    hyperboloid: { base: 0xf59e0b, emissive: 0xfbbf24 }, // 주황색
+    enneper: { base: 0x06b6d4, emissive: 0x22d3ee },     // 청록색
+    dini: { base: 0x8b5cf6, emissive: 0xc4b5fd },        // 보라 2
+    seashell: { base: 0xf43f5e, emissive: 0xfb7185 },    // 빨간색
+    boys: { base: 0x14b8a6, emissive: 0x2dd4bf },        // 청색
+    rhodonea: { base: 0xeab308, emissive: 0xfde047 },    // 황록색
+  }
 
   return (
     <Canvas
@@ -452,15 +461,15 @@ function MysteryCanvas() {
           <DynamicAsset
             type={selectedAssets[0]}
             position={[-2.5, 0, 0]}
-            baseColor={colors[0].base}
-            emissiveColor={colors[0].emissive}
+            baseColor={assetColors[selectedAssets[0]].base}
+            emissiveColor={assetColors[selectedAssets[0]].emissive}
             speed={1}
           />
           <DynamicAsset
             type={selectedAssets[1]}
             position={[2.5, 0, 1]}
-            baseColor={colors[1].base}
-            emissiveColor={colors[1].emissive}
+            baseColor={assetColors[selectedAssets[1]].base}
+            emissiveColor={assetColors[selectedAssets[1]].emissive}
             speed={0.9}
           />
         </>
