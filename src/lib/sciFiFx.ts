@@ -13,49 +13,61 @@ function getAudioContext(): AudioContext | null {
   return audioCtx
 }
 
-// 우주선 조작 패널 느낌의 짧은 전자음:
-// square 파 '틱'(피치 급하강) + sine 파 '삐'(짧은 잔향) 두 겹.
+// 스타크래프트 스타일 신비로운 사운드:
+// 다중 고음역대 톤 + 신비로운 청소음 효과
 export function playPanelBeep() {
   const ctx = getAudioContext()
   if (!ctx) return
   const now = ctx.currentTime
 
   const master = ctx.createGain()
-  master.gain.value = 0.18
+  master.gain.value = 0.15
   master.connect(ctx.destination)
 
-  // 1) 클릭 트랜지언트: square 1400Hz → 220Hz, 70ms
-  const click = ctx.createOscillator()
-  const clickGain = ctx.createGain()
-  const lowpass = ctx.createBiquadFilter()
-  click.type = 'square'
-  click.frequency.setValueAtTime(1400, now)
-  click.frequency.exponentialRampToValueAtTime(220, now + 0.07)
-  lowpass.type = 'lowpass'
-  lowpass.frequency.value = 3200
-  clickGain.gain.setValueAtTime(0.0001, now)
-  clickGain.gain.exponentialRampToValueAtTime(0.5, now + 0.004)
-  clickGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.08)
-  click.connect(lowpass).connect(clickGain).connect(master)
-  click.start(now)
-  click.stop(now + 0.09)
+  // 1) 신비로운 고음 톤 1: 2800Hz → 1400Hz, 느린 하강
+  const tone1 = ctx.createOscillator()
+  const tone1Gain = ctx.createGain()
+  tone1.type = 'sine'
+  tone1.frequency.setValueAtTime(2800, now)
+  tone1.frequency.exponentialRampToValueAtTime(1400, now + 0.25)
+  tone1Gain.gain.setValueAtTime(0.0001, now)
+  tone1Gain.gain.exponentialRampToValueAtTime(0.7, now + 0.01)
+  tone1Gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.3)
+  tone1.connect(tone1Gain).connect(master)
+  tone1.start(now)
+  tone1.stop(now + 0.31)
 
-  // 2) 확인음: sine 1046Hz(C6) → 523Hz, 약간 늦게 시작해 180ms decay
-  const tone = ctx.createOscillator()
-  const toneGain = ctx.createGain()
-  const t0 = now + 0.025
-  tone.type = 'sine'
-  tone.frequency.setValueAtTime(1046, t0)
-  tone.frequency.exponentialRampToValueAtTime(523, t0 + 0.16)
-  toneGain.gain.setValueAtTime(0.0001, t0)
-  toneGain.gain.exponentialRampToValueAtTime(0.6, t0 + 0.01)
-  toneGain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.18)
-  tone.connect(toneGain).connect(master)
-  tone.start(t0)
-  tone.stop(t0 + 0.2)
+  // 2) 신비로운 고음 톤 2: 4200Hz → 2100Hz, 약간 지연 후 시작
+  const tone2 = ctx.createOscillator()
+  const tone2Gain = ctx.createGain()
+  const t2 = now + 0.05
+  tone2.type = 'sine'
+  tone2.frequency.setValueAtTime(4200, t2)
+  tone2.frequency.exponentialRampToValueAtTime(2100, t2 + 0.2)
+  tone2Gain.gain.setValueAtTime(0.0001, t2)
+  tone2Gain.gain.exponentialRampToValueAtTime(0.5, t2 + 0.01)
+  tone2Gain.gain.exponentialRampToValueAtTime(0.0001, t2 + 0.22)
+  tone2.connect(tone2Gain).connect(master)
+  tone2.start(t2)
+  tone2.stop(t2 + 0.23)
+
+  // 3) 침침한 저음 배경: 440Hz, 길고 부드럽게
+  const bassTone = ctx.createOscillator()
+  const bassToneGain = ctx.createGain()
+  const bassFilter = ctx.createBiquadFilter()
+  bassTone.type = 'sine'
+  bassTone.frequency.setValueAtTime(440, now)
+  bassFilter.type = 'lowpass'
+  bassFilter.frequency.value = 800
+  bassToneGain.gain.setValueAtTime(0.0001, now)
+  bassToneGain.gain.exponentialRampToValueAtTime(0.3, now + 0.05)
+  bassToneGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.35)
+  bassTone.connect(bassFilter).connect(bassToneGain).connect(master)
+  bassTone.start(now)
+  bassTone.stop(now + 0.36)
 
   // 노드 정리
-  tone.onended = () => master.disconnect()
+  bassTone.onended = () => master.disconnect()
 }
 
 const prefersReducedMotion = () =>

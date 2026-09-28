@@ -101,15 +101,15 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
       break
     case 'knot': {
       const points: THREE.Vector3[] = []
-      for (let i = 0; i < 600; i++) {
-        const t = (i / 600) * 20 * Math.PI
+      for (let i = 0; i < 1200; i++) {
+        const t = (i / 1200) * 20 * Math.PI
         const x = Math.cos(t) * (2 + Math.cos(t * 1.5))
         const y = Math.sin(t) * (2 + Math.cos(t * 1.5))
         const z = Math.sin(t * 1.5)
         points.push(new THREE.Vector3(x * 0.5, y * 0.5, z * 0.5))
       }
       const knotCurve = new THREE.CatmullRomCurve3(points, true)
-      geometry = new THREE.TubeGeometry(knotCurve, 300, 0.2, 128, false)
+      geometry = new THREE.TubeGeometry(knotCurve, 600, 0.2, 256, false)
       break
     }
     case 'helix': {
