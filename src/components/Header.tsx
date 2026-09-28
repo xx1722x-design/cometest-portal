@@ -61,16 +61,18 @@ export function Header({ onLanguageChange, isDarkMode = true, onToggleDarkMode }
     { key: 'web_games', i18nKey: 'web_games', path: '/game' },
   ]
 
-  const darkHeaderBg = '#1a1a1a'
-  const lightHeaderBg = '#ffffff'
+  const darkHeaderBg = 'rgba(12,12,22,0.72)'
+  const lightHeaderBg = 'rgba(255,255,255,0.82)'
   const currentHeaderBg = isDarkMode ? darkHeaderBg : lightHeaderBg
-  const currentHeaderBorder = isDarkMode ? '#333333' : '#e0e0e0'
-  const currentHeaderShadow = isDarkMode ? '0 2px 12px rgba(0,0,0,0.5)' : '0 2px 8px rgba(0,0,0,0.08)'
+  const currentHeaderBorder = isDarkMode ? 'rgba(255,255,255,0.08)' : '#e0e0e0'
+  const currentHeaderShadow = isDarkMode ? '0 8px 30px -12px rgba(0,0,0,0.7)' : '0 2px 8px rgba(0,0,0,0.08)'
 
   return (
     <header
       style={{
         backgroundColor: currentHeaderBg,
+        backdropFilter: 'blur(16px) saturate(140%)',
+        WebkitBackdropFilter: 'blur(16px) saturate(140%)',
         boxShadow: currentHeaderShadow,
         position: 'sticky',
         top: 0,
@@ -315,8 +317,8 @@ export function Header({ onLanguageChange, isDarkMode = true, onToggleDarkMode }
       {/* 하단 네비게이션 메뉴 (스크롤 가능) */}
       <nav
         style={{
-          backgroundColor: isDarkMode ? '#242424' : '#f9f9f9',
-          borderTop: isDarkMode ? '1px solid #333333' : '1px solid #e0e0e0',
+          backgroundColor: isDarkMode ? 'rgba(255,255,255,0.025)' : '#f9f9f9',
+          borderTop: isDarkMode ? '1px solid rgba(255,255,255,0.06)' : '1px solid #e0e0e0',
           padding: '0 2rem',
           overflowX: 'auto',
           overflowY: 'hidden',

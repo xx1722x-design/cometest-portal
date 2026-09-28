@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Header } from '../components/Header'
 import { ContentGrid } from '../components/ContentGrid'
 import { Sidebar } from '../components/Sidebar'
+import { StoreFeaturedCard } from '../components/StoreFeaturedCard'
 
 interface ContentItem {
   id: string
@@ -233,29 +234,15 @@ export function Index() {
       category: 'simulation',
       icon: '🚀',
     },
-    {
-      id: 'market-banner',
-      title: t('original_asset_store'),
-      description: t('asset_store_description'),
-      thumbnail: '',
-      category: 'banner',
-      link: 'https://store.cometest.com/',
-      icon: '🛒',
-    },
   ]
-
-  const darkBg = '#0a0a0a'
-  const lightBg = '#f5f5f5'
-  const currentBg = isDarkMode ? darkBg : lightBg
 
   return (
     <div
+      className={`portal-bg${isDarkMode ? '' : ' theme-light'}`}
       style={{
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
-        backgroundColor: currentBg,
-        transition: 'background-color 0.3s ease',
       }}
     >
       {/* 헤더 */}
@@ -272,16 +259,14 @@ export function Index() {
         <main
           style={{
             flex: 1,
-            backgroundColor: currentBg,
+            minWidth: 0,
             overflow: 'auto',
-            transition: 'background-color 0.3s ease',
           }}
         >
-          {/* 히어로 섹션 - 세련된 Neon Black 스타일 */}
+          {/* 히어로 섹션 - 배경 그라데이션이 비치도록 투명 처리 */}
           <div
             style={{
-              backgroundColor: isDarkMode ? '#0a0a0a' : '#ffffff',
-              borderBottom: isDarkMode ? '1px solid #1a1a1a' : '1px solid #e0e0e0',
+              borderBottom: isDarkMode ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(15,15,40,0.08)',
               color: isDarkMode ? '#ffffff' : '#1a1a1a',
               padding: '4rem 2rem',
               textAlign: 'center',
@@ -326,8 +311,8 @@ export function Index() {
             </p>
           </div>
 
-          {/* 콘텐츠 그리드 */}
-          <ContentGrid items={contentItems} />
+          {/* 콘텐츠 그리드 — 첫 줄에 대형 스토어 피처드 카드 */}
+          <ContentGrid items={contentItems} leading={<StoreFeaturedCard />} />
 
           {/* 페이지네이션 (나중에 추가) */}
           <div
@@ -348,13 +333,13 @@ export function Index() {
 
       {/* 푸터 */}
       <footer
+        className="glass-panel"
         style={{
-          backgroundColor: isDarkMode ? '#151515' : '#f0f0f0',
           color: isDarkMode ? '#888888' : '#666666',
           padding: '2rem',
           textAlign: 'center',
           fontSize: '12px',
-          borderTop: isDarkMode ? '1px solid #333333' : '1px solid #e0e0e0',
+          borderTop: isDarkMode ? '1px solid rgba(255,255,255,0.06)' : '1px solid rgba(15,15,40,0.08)',
           transition: 'all 0.3s ease',
         }}
       >

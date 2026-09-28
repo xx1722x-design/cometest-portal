@@ -28,13 +28,6 @@ export function Sidebar({ links }: SidebarProps) {
 
   const defaultLinks: SidebarLink[] = [
     {
-      id: 'market',
-      title: `🛒 ${t('original_asset_store')}`,
-      path: 'https://store.cometest.com/',
-      icon: '🛒',
-      external: true,
-    },
-    {
       id: 'about',
       title: `${t('about_portal')}`,
       path: '/about',
@@ -68,10 +61,11 @@ export function Sidebar({ links }: SidebarProps) {
 
   return (
     <aside
+      className={`portal-sidebar${isDarkMode ? ' glass-panel' : ''}`}
       style={{
         width: '280px',
-        backgroundColor: isDarkMode ? '#0a0a0a' : '#ffffff',
-        borderLeft: isDarkMode ? '1px solid #333333' : '1px solid #e0e0e0',
+        backgroundColor: isDarkMode ? undefined : '#ffffff',
+        borderLeft: isDarkMode ? '1px solid rgba(255,255,255,0.08)' : '1px solid #e0e0e0',
         padding: '2rem 1.5rem',
         display: 'flex',
         flexDirection: 'column',
@@ -101,36 +95,26 @@ export function Sidebar({ links }: SidebarProps) {
               onClick={() => handleLinkClick(link)}
               style={{
                 padding: '1rem',
-                backgroundColor: link.id === 'market'
-                  ? (isDarkMode ? 'rgba(124,58,237,0.15)' : 'rgba(124,58,237,0.1)')
-                  : (isDarkMode ? '#1a1a1a' : '#f5f5f5'),
-                border: link.id === 'market' ? '2px solid #7c3aed' : (isDarkMode ? '1px solid #333333' : '1px solid #e0e0e0'),
-                borderRadius: '8px',
+                backgroundColor: isDarkMode ? 'rgba(255,255,255,0.04)' : '#f5f5f5',
+                border: isDarkMode ? '1px solid rgba(255,255,255,0.09)' : '1px solid #e0e0e0',
+                borderRadius: '10px',
                 cursor: 'pointer',
                 textAlign: 'left',
                 fontSize: '14px',
-                fontWeight: link.id === 'market' ? '600' : '500',
-                color: link.id === 'market' ? '#a78bfa' : (isDarkMode ? '#ffffff' : '#1a1a1a'),
+                fontWeight: '500',
+                color: isDarkMode ? '#ffffff' : '#1a1a1a',
                 transition: 'all 0.2s',
                 fontFamily: 'inherit',
               }}
               onMouseEnter={(e) => {
-                if (link.id === 'market') {
-                  e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(124,58,237,0.25)' : 'rgba(124,58,237,0.2)'
-                } else {
-                  e.currentTarget.style.backgroundColor = isDarkMode ? '#242424' : '#efefef'
-                }
+                e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(255,255,255,0.08)' : '#efefef'
                 e.currentTarget.style.transform = 'translateX(4px)'
                 e.currentTarget.style.borderColor = '#7c3aed'
               }}
               onMouseLeave={(e) => {
-                if (link.id === 'market') {
-                  e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(124,58,237,0.15)' : 'rgba(124,58,237,0.1)'
-                } else {
-                  e.currentTarget.style.backgroundColor = isDarkMode ? '#1a1a1a' : '#f5f5f5'
-                }
+                e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(255,255,255,0.04)' : '#f5f5f5'
                 e.currentTarget.style.transform = 'translateX(0)'
-                e.currentTarget.style.borderColor = link.id === 'market' ? '#7c3aed' : (isDarkMode ? '#333333' : '#e0e0e0')
+                e.currentTarget.style.borderColor = isDarkMode ? 'rgba(255,255,255,0.09)' : '#e0e0e0'
               }}
             >
               {link.title}

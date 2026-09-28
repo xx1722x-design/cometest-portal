@@ -71,6 +71,7 @@ export function Category() {
 
   return (
     <div
+      className="theme-light"
       style={{
         display: 'flex',
         flexDirection: 'column',
