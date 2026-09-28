@@ -314,6 +314,8 @@ function DynamicAsset({ type, position, baseColor, emissiveColor, speed }: Dynam
           vertexColors={true}
           side={THREE.DoubleSide}
           toneMapped={true}
+          transparent={true}
+          opacity={0.75}
         />
       </mesh>
     </group>
@@ -420,20 +422,20 @@ interface MysteryCanvasProps {
 
 function MysteryCanvas({ selectedAssets }: MysteryCanvasProps) {
 
-  // 12개 도형별 고유 색상
+  // 12개 도형별 고유 색상 (보석처럼 투명한 밝은 색상)
   const assetColors: Record<AssetType, { base: number; emissive: number }> = {
-    mobius: { base: 0xff6b9d, emissive: 0xff1493 },      // 분홍색
-    infinity: { base: 0x06b6d4, emissive: 0x0891b2 },    // 파란색
-    lissajous: { base: 0xff00ff, emissive: 0xff66ff },   // 마젠타
-    torus: { base: 0xfbbf24, emissive: 0xfcd34d },       // 노란색
-    knot: { base: 0xec4899, emissive: 0xf472b6 },        // 장미색
-    helix: { base: 0x34d399, emissive: 0x6ee7b7 },       // 밝은 녹색
-    hyperboloid: { base: 0xf59e0b, emissive: 0xfbbf24 }, // 주황색
-    enneper: { base: 0x06b6d4, emissive: 0x22d3ee },     // 청록색
-    dini: { base: 0xffffff, emissive: 0xffffff },        // 완전 흰색
-    spherical: { base: 0x00ffff, emissive: 0x66ffff },   // 사이안
-    boys: { base: 0x14b8a6, emissive: 0x2dd4bf },        // 하늘색
-    villarceau: { base: 0xffff00, emissive: 0xffff66 },  // 밝은 노란색
+    mobius: { base: 0xffb3d9, emissive: 0xffccff },      // 밝은 핑크
+    infinity: { base: 0x40d9ff, emissive: 0x66e6ff },    // 밝은 하늘 파란색
+    lissajous: { base: 0xff66ff, emissive: 0xff99ff },   // 밝은 마젠타
+    torus: { base: 0xffe680, emissive: 0xfff0cc },       // 밝은 노란색
+    knot: { base: 0xf5a3d6, emissive: 0xf5c9e0 },        // 밝은 장미색
+    helix: { base: 0x66e6b3, emissive: 0x99f0cc },       // 밝은 녹색
+    hyperboloid: { base: 0xffc266, emissive: 0xffd9a3 }, // 밝은 주황색
+    enneper: { base: 0x66e6ff, emissive: 0x99f0ff },     // 밝은 청록색
+    dini: { base: 0xffffff, emissive: 0xffffff },        // 순수 흰색
+    spherical: { base: 0x66ffff, emissive: 0x99ffff },   // 밝은 사이안
+    boys: { base: 0x66d9cc, emissive: 0x99e6d9 },        // 밝은 하늘색
+    villarceau: { base: 0xffff99, emissive: 0xffffcc },  // 밝은 노란색
   }
 
   return (
