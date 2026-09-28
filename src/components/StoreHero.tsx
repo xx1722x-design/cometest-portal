@@ -8,9 +8,10 @@ import { withLang } from '../i18n/languages'
 
 const STORE_URL = 'https://store.cometest.com/'
 
-// 뫼비우스 띠 (Möbius Strip) - 텍스처 포함
+// 뫼비우스 띠 (Möbius Strip) - 텍스처 + 동적 움직임
 function MoebiusStrip() {
   const groupRef = useRef<THREE.Group>(null)
+  const timeRef = useRef(0)
 
   useEffect(() => {
     if (!groupRef.current) return
@@ -71,10 +72,18 @@ function MoebiusStrip() {
     groupRef.current.add(mesh)
   }, [])
 
-  useFrame(() => {
+  useFrame((state) => {
     if (groupRef.current) {
+      timeRef.current += 0.01
+
+      // 회전
       groupRef.current.rotation.x += 0.001
       groupRef.current.rotation.y += 0.003
+
+      // 동적 움직임 - 떠다니는 효과
+      groupRef.current.position.y = Math.sin(timeRef.current * 0.8) * 0.5
+      groupRef.current.position.x = Math.cos(timeRef.current * 0.6) * 0.3
+      groupRef.current.position.z = Math.sin(timeRef.current * 0.5) * 0.2
     }
   })
 
@@ -94,9 +103,10 @@ function hslToRgb(h: number, s: number, l: number) {
   return { r: f(0), g: f(8), b: f(4) }
 }
 
-// 무한 루프 (8자 모양)
+// 무한 루프 (8자 모양) - 동적 움직임
 function InfinityLoop() {
   const groupRef = useRef<THREE.Group>(null)
+  const timeRef = useRef(0)
 
   useEffect(() => {
     if (!groupRef.current) return
@@ -127,7 +137,16 @@ function InfinityLoop() {
 
   useFrame(() => {
     if (groupRef.current) {
+      timeRef.current += 0.01
+
+      // 회전
       groupRef.current.rotation.z += 0.004
+      groupRef.current.rotation.x += 0.002
+
+      // 동적 움직임 - 다른 패턴으로 떠다니기
+      groupRef.current.position.y = Math.cos(timeRef.current * 0.7) * 0.4
+      groupRef.current.position.x = Math.sin(timeRef.current * 0.5) * 0.4
+      groupRef.current.position.z = Math.cos(timeRef.current * 0.6) * 0.3
     }
   })
 
