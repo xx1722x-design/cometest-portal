@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Header } from '../components/Header'
 import { StoreHero } from '../components/StoreHero'
@@ -24,21 +23,6 @@ const SECTIONS: { id: string; titleKey: string; itemIds: string[]; featured?: bo
 
 export function Index() {
   const { t } = useTranslation()
-  const [isDarkMode, setIsDarkMode] = useState(true)
-
-  useEffect(() => {
-    const savedMode = localStorage.getItem('darkMode')
-    if (savedMode !== null) {
-      setIsDarkMode(JSON.parse(savedMode))
-    }
-  }, [])
-
-  const handleToggleDarkMode = () => {
-    const newMode = !isDarkMode
-    setIsDarkMode(newMode)
-    localStorage.setItem('darkMode', JSON.stringify(newMode))
-  }
-
   const contentItems: ContentItem[] = [
     {
       id: 'cat-1',
@@ -251,14 +235,14 @@ export function Index() {
 
   return (
     <div
-      className={`portal-bg${isDarkMode ? '' : ' theme-light'}`}
+      className="portal-bg"
       style={{
         display: 'flex',
         flexDirection: 'column',
         minHeight: '100vh',
       }}
     >
-      <Header isDarkMode={isDarkMode} onToggleDarkMode={handleToggleDarkMode} />
+      <Header />
 
       {/* 전체 폭 스토어 히어로 */}
       <StoreHero />

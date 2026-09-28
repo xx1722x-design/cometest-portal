@@ -99,5 +99,8 @@
   "select_language": "选择语言",
   "languages_available": "支持 {{count}} 种语言",
   "current_language": "当前",
-  "featured_title": "精选"
+  "featured_title": "精选",
+  "menu_toggle": "菜单",
+  "theme_to_light": "切换到浅色模式",
+  "theme_to_dark": "切换到深色模式"
 }

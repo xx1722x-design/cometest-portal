@@ -99,5 +99,8 @@
   "select_language": "언어 선택",
   "languages_available": "{{count}}개 언어 지원",
   "current_language": "현재",
-  "featured_title": "추천"
+  "featured_title": "추천",
+  "menu_toggle": "메뉴",
+  "theme_to_light": "라이트 모드로 전환",
+  "theme_to_dark": "다크 모드로 전환"
 }

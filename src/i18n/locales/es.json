@@ -99,5 +99,8 @@
   "select_language": "Seleccionar Idioma",
   "languages_available": "{{count}} idiomas disponibles",
   "current_language": "Actual",
-  "featured_title": "Destacados"
+  "featured_title": "Destacados",
+  "menu_toggle": "Menú",
+  "theme_to_light": "Cambiar a modo claro",
+  "theme_to_dark": "Cambiar a modo oscuro"
 }

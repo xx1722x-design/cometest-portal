@@ -99,5 +99,8 @@
   "select_language": "اختر اللغة",
   "languages_available": "{{count}} لغات متاحة",
   "current_language": "الحالية",
-  "featured_title": "مميز"
+  "featured_title": "مميز",
+  "menu_toggle": "القائمة",
+  "theme_to_light": "التبديل إلى الوضع الفاتح",
+  "theme_to_dark": "التبديل إلى الوضع الداكن"
 }

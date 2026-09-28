@@ -99,5 +99,8 @@
   "select_language": "Select Language",
   "languages_available": "{{count}} languages available",
   "current_language": "Current",
-  "featured_title": "Featured"
+  "featured_title": "Featured",
+  "menu_toggle": "Menu",
+  "theme_to_light": "Switch to light mode",
+  "theme_to_dark": "Switch to dark mode"
 }

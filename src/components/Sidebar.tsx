@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 
@@ -14,109 +13,36 @@ interface SidebarProps {
   links?: SidebarLink[]
 }
 
+// 색은 테마 CSS 변수로만 결정된다 — src/styles/portal.css 의 .portal-sidebar 참고.
 export function Sidebar({ links }: SidebarProps) {
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const [isDarkMode, setIsDarkMode] = useState(true)
 
-  useEffect(() => {
-    const savedMode = localStorage.getItem('darkMode')
-    if (savedMode !== null) {
-      setIsDarkMode(JSON.parse(savedMode))
-    }
-  }, [])
-
+  // 번역 문구에 이모지가 이미 들어 있으므로 아이콘을 따로 붙이지 않는다
   const defaultLinks: SidebarLink[] = [
-    {
-      id: 'about',
-      title: `${t('about_portal')}`,
-      path: '/about',
-      icon: '📖',
-    },
-    {
-      id: 'docs',
-      title: `${t('documentation')}`,
-      path: '/docs',
-      icon: '📚',
-    },
-    {
-      id: 'community',
-      title: `${t('community')}`,
-      path: '/community',
-      icon: '👥',
-    },
+    { id: 'about', title: t('about_portal'), path: '/about' },
+    { id: 'docs', title: t('documentation'), path: '/docs' },
+    { id: 'community', title: t('community'), path: '/community' },
   ]
 
   const sidebarLinks = links || defaultLinks
 
   const handleLinkClick = (link: SidebarLink) => {
-    if (link.path) {
-      if (link.external) {
-        window.open(link.path, '_blank')
-      } else {
-        navigate(link.path)
-      }
+    if (!link.path) return
+    if (link.external) {
+      window.open(link.path, '_blank', 'noopener,noreferrer')
+    } else {
+      navigate(link.path)
     }
   }
 
   return (
-    <aside
-      className={`portal-sidebar${isDarkMode ? ' glass-panel' : ''}`}
-      style={{
-        width: '280px',
-        backgroundColor: isDarkMode ? undefined : '#ffffff',
-        borderLeft: isDarkMode ? '1px solid rgba(255,255,255,0.08)' : '1px solid #e0e0e0',
-        padding: '2rem 1.5rem',
-        display: 'flex',
-        flexDirection: 'column',
-        gap: '1rem',
-        transition: 'all 0.3s ease',
-      }}
-    >
-      <div style={{ marginBottom: '1rem' }}>
-        <h3
-          style={{
-            margin: '0 0 1rem 0',
-            fontSize: '14px',
-            fontWeight: '600',
-            color: isDarkMode ? '#999999' : '#666666',
-            textTransform: 'uppercase',
-            letterSpacing: '0.5px',
-            transition: 'color 0.3s ease',
-          }}
-        >
-          {t('shortcuts')}
-        </h3>
-
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+    <aside className="portal-sidebar glass-panel">
+      <div>
+        <h3 className="portal-sidebar__heading">{t('shortcuts')}</h3>
+        <div className="portal-sidebar__links">
           {sidebarLinks.map((link) => (
-            <button
-              key={link.id}
-              onClick={() => handleLinkClick(link)}
-              style={{
-                padding: '1rem',
-                backgroundColor: isDarkMode ? 'rgba(255,255,255,0.04)' : '#f5f5f5',
-                border: isDarkMode ? '1px solid rgba(255,255,255,0.09)' : '1px solid #e0e0e0',
-                borderRadius: '10px',
-                cursor: 'pointer',
-                textAlign: 'left',
-                fontSize: '14px',
-                fontWeight: '500',
-                color: isDarkMode ? '#ffffff' : '#1a1a1a',
-                transition: 'all 0.2s',
-                fontFamily: 'inherit',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(255,255,255,0.08)' : '#efefef'
-                e.currentTarget.style.transform = 'translateX(4px)'
-                e.currentTarget.style.borderColor = '#7c3aed'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.backgroundColor = isDarkMode ? 'rgba(255,255,255,0.04)' : '#f5f5f5'
-                e.currentTarget.style.transform = 'translateX(0)'
-                e.currentTarget.style.borderColor = isDarkMode ? 'rgba(255,255,255,0.09)' : '#e0e0e0'
-              }}
-            >
+            <button key={link.id} type="button" className="portal-sidebar__link" onClick={() => handleLinkClick(link)}>
               {link.title}
             </button>
           ))}
@@ -124,38 +50,9 @@ export function Sidebar({ links }: SidebarProps) {
       </div>
 
       {/* 공지사항 영역 */}
-      <div
-        style={{
-          marginTop: '2rem',
-          padding: '1rem',
-          backgroundColor: isDarkMode ? 'rgba(124,58,237,0.1)' : 'rgba(124,58,237,0.05)',
-          borderLeft: '4px solid #7c3aed',
-          borderRadius: '6px',
-          transition: 'all 0.3s ease',
-        }}
-      >
-        <h4
-          style={{
-            margin: '0 0 0.5rem 0',
-            fontSize: '12px',
-            fontWeight: '600',
-            color: '#a78bfa',
-            textTransform: 'uppercase',
-          }}
-        >
-          {t('notice')}
-        </h4>
-        <p
-          style={{
-            margin: 0,
-            fontSize: '12px',
-            color: isDarkMode ? '#999999' : '#666666',
-            lineHeight: '1.5',
-            transition: 'color 0.3s ease',
-          }}
-        >
-          {t('notice_content')}
-        </p>
+      <div className="portal-sidebar__notice">
+        <h4>{t('notice')}</h4>
+        <p>{t('notice_content')}</p>
       </div>
     </aside>
   )

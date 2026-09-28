@@ -99,5 +99,8 @@
   "select_language": "言語を選択",
   "languages_available": "{{count}}言語に対応",
   "current_language": "現在",
-  "featured_title": "注目"
+  "featured_title": "注目",
+  "menu_toggle": "メニュー",
+  "theme_to_light": "ライトモードに切り替え",
+  "theme_to_dark": "ダークモードに切り替え"
 }
