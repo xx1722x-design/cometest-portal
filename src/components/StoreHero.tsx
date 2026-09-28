@@ -7,126 +7,198 @@ import { withLang } from '../i18n/languages'
 
 const STORE_URL = 'https://store.cometest.com/'
 
-// 미스테리한 3D 객체들
-function MysteryObject1() {
+// 3D 별 모양
+function StarObject() {
   const groupRef = useRef<THREE.Group>(null)
-  const meshRef = useRef<THREE.Mesh>(null)
 
   useEffect(() => {
-    if (!meshRef.current) return
-    // 회전하는 정이십면체
-    const geometry = new THREE.IcosahedronGeometry(1.5, 4)
-    const material = new THREE.MeshPhongMaterial({
-      color: 0x6b21a8,
-      emissive: 0xd946ef,
-      emissiveIntensity: 0.5,
-      shininess: 100,
-    })
-    meshRef.current.geometry = geometry
-    meshRef.current.material = material
-  }, [])
+    if (!groupRef.current) return
 
-  useFrame(() => {
-    if (groupRef.current) {
-      groupRef.current.rotation.x += 0.005
-      groupRef.current.rotation.y += 0.008
-    }
-  })
+    const geometry = new THREE.IcosahedronGeometry(1, 2)
+    geometry.scale(1.5, 1, 1.5)
 
-  return (
-    <group ref={groupRef} position={[-1.5, 0, 0]}>
-      <mesh ref={meshRef} />
-    </group>
-  )
-}
-
-function MysteryObject2() {
-  const groupRef = useRef<THREE.Group>(null)
-  const meshRef = useRef<THREE.Mesh>(null)
-
-  useEffect(() => {
-    if (!meshRef.current) return
-    // 반짝이는 원환체
-    const geometry = new THREE.TorusGeometry(1.2, 0.4, 16, 100)
     const material = new THREE.MeshStandardMaterial({
-      color: 0x0891b2,
-      emissive: 0x06b6d4,
-      emissiveIntensity: 0.4,
-      metalness: 0.8,
+      color: 0xff6b9d,
+      emissive: 0xff1493,
+      emissiveIntensity: 0.6,
+      metalness: 0.6,
       roughness: 0.2,
     })
-    meshRef.current.geometry = geometry
-    meshRef.current.material = material
+
+    const mesh = new THREE.Mesh(geometry, material)
+    groupRef.current.add(mesh)
   }, [])
 
   useFrame(() => {
     if (groupRef.current) {
-      groupRef.current.rotation.x += 0.003
-      groupRef.current.rotation.y += 0.006
-      groupRef.current.rotation.z += 0.004
+      groupRef.current.rotation.x += 0.004
+      groupRef.current.rotation.y += 0.007
     }
   })
 
-  return (
-    <group ref={groupRef} position={[1.5, 0, 0]}>
-      <mesh ref={meshRef} />
-    </group>
-  )
+  return <group ref={groupRef} position={[-3, 1, -2]} />
 }
 
-function ParticleField() {
-  const particlesRef = useRef<THREE.Points>(null)
+// 결정체 (크리스탈)
+function CrystalObject() {
+  const groupRef = useRef<THREE.Group>(null)
 
   useEffect(() => {
-    if (!particlesRef.current) return
+    if (!groupRef.current) return
 
-    const particleCount = 500
+    const geometry = new THREE.OctahedronGeometry(1.2, 2)
+    const material = new THREE.MeshStandardMaterial({
+      color: 0x00d4ff,
+      emissive: 0x0099cc,
+      emissiveIntensity: 0.5,
+      metalness: 0.7,
+      roughness: 0.1,
+    })
+
+    const mesh = new THREE.Mesh(geometry, material)
+    groupRef.current.add(mesh)
+  }, [])
+
+  useFrame(() => {
+    if (groupRef.current) {
+      groupRef.current.rotation.x += 0.006
+      groupRef.current.rotation.z += 0.008
+    }
+  })
+
+  return <group ref={groupRef} position={[3, -1, -2]} />
+}
+
+// 회전하는 Wireframe 구
+function WireframeOrb() {
+  const groupRef = useRef<THREE.Group>(null)
+
+  useEffect(() => {
+    if (!groupRef.current) return
+
+    const geometry = new THREE.IcosahedronGeometry(1.5, 5)
+    const material = new THREE.MeshPhongMaterial({
+      color: 0x7c3aed,
+      emissive: 0xa855f7,
+      emissiveIntensity: 0.7,
+      wireframe: false,
+      shininess: 100,
+    })
+
+    const mesh = new THREE.Mesh(geometry, material)
+
+    // Wireframe 선 추가
+    const wireframeGeometry = new THREE.WireframeGeometry(geometry)
+    const line = new THREE.LineSegments(
+      wireframeGeometry,
+      new THREE.LineBasicMaterial({ color: 0xfbbf24, linewidth: 2 })
+    )
+    mesh.add(line)
+
+    groupRef.current.add(mesh)
+  }, [])
+
+  useFrame(() => {
+    if (groupRef.current) {
+      groupRef.current.rotation.y += 0.005
+    }
+  })
+
+  return <group ref={groupRef} position={[0, 0, 0]} />
+}
+
+// 다층 원환체 (복잡한 토러스)
+function ComplexTorus() {
+  const groupRef = useRef<THREE.Group>(null)
+
+  useEffect(() => {
+    if (!groupRef.current) return
+
+    for (let i = 0; i < 3; i++) {
+      const geometry = new THREE.TorusGeometry(1.5 - i * 0.4, 0.3, 20, 200)
+      const colors = [0xd946ef, 0x06b6d4, 0x8b5cf6]
+      const material = new THREE.MeshStandardMaterial({
+        color: colors[i],
+        emissive: colors[i],
+        emissiveIntensity: 0.4,
+        metalness: 0.4,
+        roughness: 0.3,
+      })
+
+      const mesh = new THREE.Mesh(geometry, material)
+      groupRef.current.add(mesh)
+    }
+  }, [])
+
+  useFrame(() => {
+    if (groupRef.current) {
+      groupRef.current.children.forEach((child, i) => {
+        child.rotation.x += 0.002 * (i + 1)
+        child.rotation.z += 0.003 * (i + 1)
+      })
+    }
+  })
+
+  return <group ref={groupRef} position={[0, 2, 1]} />
+}
+
+// 입자 필드
+function ParticleField() {
+  const pointsRef = useRef<THREE.Points>(null)
+
+  useEffect(() => {
+    if (!pointsRef.current) return
+
+    const count = 1000
     const geometry = new THREE.BufferGeometry()
-    const positions = new Float32Array(particleCount * 3)
+    const positions = new Float32Array(count * 3)
 
-    for (let i = 0; i < particleCount * 3; i += 3) {
-      positions[i] = (Math.random() - 0.5) * 8
-      positions[i + 1] = (Math.random() - 0.5) * 8
-      positions[i + 2] = (Math.random() - 0.5) * 8
+    for (let i = 0; i < count * 3; i += 3) {
+      positions[i] = (Math.random() - 0.5) * 15
+      positions[i + 1] = (Math.random() - 0.5) * 12
+      positions[i + 2] = (Math.random() - 0.5) * 10
     }
 
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
 
     const material = new THREE.PointsMaterial({
-      color: 0x7c3aed,
-      size: 0.05,
+      color: 0xfbbf24,
+      size: 0.04,
       sizeAttenuation: true,
       transparent: true,
-      opacity: 0.4,
+      opacity: 0.5,
     })
 
-    particlesRef.current.geometry = geometry
-    particlesRef.current.material = material
+    pointsRef.current.geometry = geometry
+    pointsRef.current.material = material
   }, [])
 
   useFrame(() => {
-    if (particlesRef.current) {
-      particlesRef.current.rotation.y += 0.0005
+    if (pointsRef.current) {
+      pointsRef.current.rotation.y += 0.0002
     }
   })
 
-  return <points ref={particlesRef} />
+  return <points ref={pointsRef} />
 }
 
 function MysteryCanvas() {
   return (
-    <Canvas camera={{ position: [0, 0, 5], fov: 50 }} dpr={[1, 2]}>
+    <Canvas camera={{ position: [0, 0, 8], fov: 45 }} dpr={[1, 2]}>
       <color attach="background" args={['#0d1117']} />
 
-      {/* 조명 */}
-      <ambientLight intensity={0.8} color="#ffffff" />
-      <pointLight position={[5, 5, 5]} intensity={1.2} color="#d946ef" />
-      <pointLight position={[-5, -5, 5]} intensity={0.8} color="#06b6d4" />
-      <pointLight position={[0, 0, 3]} intensity={0.6} color="#7c3aed" />
+      {/* 다중 조명으로 복잡한 그림자 효과 */}
+      <ambientLight intensity={0.7} color="#ffffff" />
+      <pointLight position={[10, 10, 5]} intensity={1.4} color="#d946ef" />
+      <pointLight position={[-10, -10, 5]} intensity={1.2} color="#06b6d4" />
+      <pointLight position={[0, 0, 8]} intensity={0.8} color="#fbbf24" />
+      <pointLight position={[5, -5, -5]} intensity={0.9} color="#a855f7" />
 
-      {/* 미스테리한 객체들 */}
-      <MysteryObject1 />
-      <MysteryObject2 />
+      {/* 복잡한 미스테리한 객체들 */}
+      <StarObject />
+      <CrystalObject />
+      <WireframeOrb />
+      <ComplexTorus />
       <ParticleField />
     </Canvas>
   )
@@ -137,7 +209,7 @@ export function StoreHero() {
 
   return (
     <section className="hero" aria-labelledby="hero-title">
-      {/* 배경: 우주 그라데이션 + 미스테리한 3D 객체 */}
+      {/* 배경: 우주 그라데이션 + 3D 캔버스 (전체 채움) */}
       <div
         className="hero__backdrop"
         aria-hidden="true"
@@ -147,29 +219,26 @@ export function StoreHero() {
           left: 0,
           right: 0,
           bottom: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
         }}
       >
         <div className="hero__stars" />
         <div className="hero__grid-floor" />
         <div className="hero__halo" />
+
+        {/* 3D Canvas - 전체 배경 채움 */}
         <div
           style={{
             position: 'absolute',
             width: '100%',
             height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            top: 0,
+            left: 0,
             zIndex: 1,
           }}
         >
-          <div style={{ width: '100%', height: '100%' }}>
-            <MysteryCanvas />
-          </div>
+          <MysteryCanvas />
         </div>
+
         <div className="hero__vignette" />
       </div>
 
