@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls } from '@react-three/drei'
+import { OrbitControls, Environment } from '@react-three/drei'
 import * as THREE from 'three'
 import { playPanelBeep } from '../lib/sciFiFx'
 import { withLang } from '../i18n/languages'
@@ -451,6 +451,9 @@ function MysteryCanvas({ selectedAssets }: MysteryCanvasProps) {
       }}
     >
       <color attach="background" args={['#0d1117']} />
+
+      {/* 환경 맵: 금속 재질의 반사 효과 */}
+      <Environment preset="night" intensity={1.2} blur={0.6} />
 
       <ambientLight intensity={0.7} color="#ffffff" />
       <pointLight position={[10, 10, 5]} intensity={1.4} color="#d946ef" />
