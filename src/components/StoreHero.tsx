@@ -429,7 +429,7 @@ function MysteryCanvas() {
     helix: { base: 0x34d399, emissive: 0x6ee7b7 },       // 밝은 녹색
     hyperboloid: { base: 0xf59e0b, emissive: 0xfbbf24 }, // 주황색
     enneper: { base: 0x06b6d4, emissive: 0x22d3ee },     // 청록색
-    dini: { base: 0x8b5cf6, emissive: 0xc4b5fd },        // 보라 2
+    dini: { base: 0xc4b5fd, emissive: 0xe9d5ff },        // 밝은 보라색
     seashell: { base: 0xf43f5e, emissive: 0xfb7185 },    // 빨간색
     boys: { base: 0x14b8a6, emissive: 0x2dd4bf },        // 청색
     rhodonea: { base: 0xeab308, emissive: 0xfde047 },    // 황록색
