@@ -8,92 +8,18 @@ import { withLang } from '../i18n/languages'
 
 const STORE_URL = 'https://store.cometest.com/'
 
-// 뫼비우스 띠 (Möbius Strip) - 텍스처 + 동적 움직임
-function MoebiusStrip() {
-  const groupRef = useRef<THREE.Group>(null)
-  const timeRef = useRef(0)
+type AssetType = 'mobius' | 'infinity' | 'klein' | 'torus' | 'knot' | 'helix' | 'hyperboloid' | 'enneper' | 'dini' | 'seashell' | 'boys' | 'rhodonea'
 
-  useEffect(() => {
-    if (!groupRef.current) return
-
-    const geometry = new THREE.BufferGeometry()
-    const vertices: number[] = []
-    const colors: number[] = []
-    const indices: number[] = []
-
-    const width = 12
-    const depth = 60
-
-    for (let i = 0; i <= depth; i++) {
-      const u = (i / depth) * Math.PI * 2
-      for (let j = 0; j <= width; j++) {
-        const v = (j / width - 0.5) * 0.5
-        const x = (1 + v * Math.cos(u / 2)) * Math.cos(u)
-        const y = (1 + v * Math.cos(u / 2)) * Math.sin(u)
-        const z = v * Math.sin(u / 2)
-
-        vertices.push(x * 2, y * 2, z * 2)
-
-        // 그래디언트 색상
-        const hue = (i / depth) * 360
-        const saturation = 100 - Math.abs(v) * 100
-        const lightness = 40 + Math.abs(v) * 20
-        const rgb = hslToRgb(hue, saturation, lightness)
-        colors.push(rgb.r / 255, rgb.g / 255, rgb.b / 255)
-      }
-    }
-
-    for (let i = 0; i < depth; i++) {
-      for (let j = 0; j < width; j++) {
-        const a = i * (width + 1) + j
-        const b = a + width + 1
-
-        indices.push(a, b, a + 1)
-        indices.push(b, b + 1, a + 1)
-      }
-    }
-
-    geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3))
-    geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3))
-    geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1))
-    geometry.computeVertexNormals()
-
-    const material = new THREE.MeshStandardMaterial({
-      vertexColors: true,
-      emissive: 0x333333,
-      emissiveIntensity: 0.3,
-      metalness: 0.4,
-      roughness: 0.4,
-      wireframe: false,
-      side: THREE.DoubleSide,
-    })
-
-    const mesh = new THREE.Mesh(geometry, material)
-    groupRef.current.add(mesh)
-  }, [])
-
-  useFrame((state) => {
-    if (groupRef.current) {
-      timeRef.current += 0.01
-
-      // 회전
-      groupRef.current.rotation.x += 0.001
-      groupRef.current.rotation.y += 0.003
-
-      // 동적 움직임 - 떠다니는 효과
-      groupRef.current.position.y = Math.sin(timeRef.current * 0.8) * 0.5
-      groupRef.current.position.x = Math.cos(timeRef.current * 0.6) * 0.3
-      groupRef.current.position.z = Math.sin(timeRef.current * 0.5) * 0.2
-    }
-  })
-
-  return <group ref={groupRef} position={[0, 0, 0]} scale={0.8} />
+interface DynamicAssetProps {
+  type: AssetType
+  position: [number, number, number]
+  baseColor: number
+  emissiveColor: number
+  speed: number
 }
 
-// HSL to RGB 변환
 function hslToRgb(h: number, s: number, l: number) {
-  s = s / 100
-  l = l / 100
+  s = s / 100; l = l / 100
   const a = (s * Math.min(l, 1 - l)) / 100
   const f = (n: number) => {
     const k = (n + h / 30) % 12
@@ -103,130 +29,291 @@ function hslToRgb(h: number, s: number, l: number) {
   return { r: f(0), g: f(8), b: f(4) }
 }
 
-// 무한 루프 (8자 모양) - 동적 움직임
-function InfinityLoop() {
+function createGeometry(type: AssetType): THREE.BufferGeometry {
+  let geometry: THREE.BufferGeometry | null = null
+
+  switch (type) {
+    case 'mobius': {
+      geometry = new THREE.BufferGeometry()
+      const vertices: number[] = []
+      const colors: number[] = []
+      const indices: number[] = []
+      const width = 12, depth = 60
+      for (let i = 0; i <= depth; i++) {
+        const u = (i / depth) * Math.PI * 2
+        for (let j = 0; j <= width; j++) {
+          const v = (j / width - 0.5) * 0.5
+          const x = (1 + v * Math.cos(u / 2)) * Math.cos(u)
+          const y = (1 + v * Math.cos(u / 2)) * Math.sin(u)
+          const z = v * Math.sin(u / 2)
+          vertices.push(x * 2, y * 2, z * 2)
+          const hue = (i / depth) * 360
+          const rgb = hslToRgb(hue, 100 - Math.abs(v) * 100, 40 + Math.abs(v) * 20)
+          colors.push(rgb.r / 255, rgb.g / 255, rgb.b / 255)
+        }
+      }
+      for (let i = 0; i < depth; i++) {
+        for (let j = 0; j < width; j++) {
+          const a = i * (width + 1) + j
+          const b = a + width + 1
+          indices.push(a, b, a + 1)
+          indices.push(b, b + 1, a + 1)
+        }
+      }
+      geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3))
+      geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3))
+      geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1))
+      geometry.computeVertexNormals()
+      break
+    }
+    case 'klein': {
+      geometry = new THREE.BufferGeometry()
+      const vertices: number[] = []
+      const colors: number[] = []
+      const indices: number[] = []
+      for (let u = 0; u <= 50; u++) {
+        for (let v = 0; v <= 50; v++) {
+          const uu = (u / 50) * 2 * Math.PI
+          const vv = (v / 50) * 2 * Math.PI
+          const x = (2 + Math.cos(uu / 2) * Math.sin(vv)) * Math.cos(uu)
+          const y = (2 + Math.cos(uu / 2) * Math.sin(vv)) * Math.sin(uu)
+          const z = Math.sin(uu / 2) * Math.sin(vv)
+          vertices.push(x * 0.8, y * 0.8, z * 0.8)
+          colors.push((u / 50), (v / 50), 0.7)
+        }
+      }
+      for (let u = 0; u < 50; u++) {
+        for (let v = 0; v < 50; v++) {
+          const a = u * 51 + v
+          const b = a + 51
+          indices.push(a, b, a + 1)
+          indices.push(b, b + 1, a + 1)
+        }
+      }
+      geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3))
+      geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3))
+      geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1))
+      geometry.computeVertexNormals()
+      break
+    }
+    case 'torus':
+      geometry = new THREE.TorusGeometry(1.2, 0.5, 32, 100)
+      break
+    case 'knot': {
+      geometry = new THREE.BufferGeometry()
+      const vertices: number[] = []
+      for (let i = 0; i < 1000; i++) {
+        const t = (i / 1000) * 20 * Math.PI
+        const x = Math.cos(t) * (2 + Math.cos(t * 1.5))
+        const y = Math.sin(t) * (2 + Math.cos(t * 1.5))
+        const z = Math.sin(t * 1.5)
+        vertices.push(x * 0.5, y * 0.5, z * 0.5)
+      }
+      geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3))
+      break
+    }
+    case 'helix': {
+      geometry = new THREE.BufferGeometry()
+      const vertices: number[] = []
+      for (let i = 0; i < 500; i++) {
+        const t = (i / 500) * 8 * Math.PI
+        const x = Math.cos(t) * 1.5
+        const y = t * 0.3
+        const z = Math.sin(t) * 1.5
+        vertices.push(x, y, z)
+      }
+      geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3))
+      break
+    }
+    case 'hyperboloid': {
+      geometry = new THREE.BufferGeometry()
+      const vertices: number[] = []
+      const colors: number[] = []
+      const indices: number[] = []
+      for (let u = 0; u <= 40; u++) {
+        for (let v = 0; v <= 40; v++) {
+          const uu = (u / 40) * 2 * Math.PI
+          const vv = (v / 40 - 0.5) * 3
+          const x = Math.cosh(vv) * Math.cos(uu)
+          const y = Math.cosh(vv) * Math.sin(uu)
+          const z = Math.sinh(vv)
+          vertices.push(x * 0.4, y * 0.4, z * 0.4)
+          colors.push((u / 40), 0.5, (v / 40))
+        }
+      }
+      for (let u = 0; u < 40; u++) {
+        for (let v = 0; v < 40; v++) {
+          const a = u * 41 + v
+          const b = a + 41
+          indices.push(a, b, a + 1)
+          indices.push(b, b + 1, a + 1)
+        }
+      }
+      geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3))
+      geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3))
+      geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1))
+      geometry.computeVertexNormals()
+      break
+    }
+    case 'enneper': {
+      geometry = new THREE.BufferGeometry()
+      const vertices: number[] = []
+      const colors: number[] = []
+      const indices: number[] = []
+      for (let u = 0; u <= 30; u++) {
+        for (let v = 0; v <= 30; v++) {
+          const uu = (u / 30) * 4 - 2
+          const vv = (v / 30) * 4 - 2
+          const x = uu - (uu ** 3) / 3 + uu * (vv ** 2)
+          const y = vv - (vv ** 3) / 3 + vv * (uu ** 2)
+          const z = (uu ** 2) - (vv ** 2)
+          vertices.push(x * 0.15, y * 0.15, z * 0.15)
+          colors.push((u / 30), (v / 30), 0.8)
+        }
+      }
+      for (let u = 0; u < 30; u++) {
+        for (let v = 0; v < 30; v++) {
+          const a = u * 31 + v
+          const b = a + 31
+          indices.push(a, b, a + 1)
+          indices.push(b, b + 1, a + 1)
+        }
+      }
+      geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3))
+      geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3))
+      geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1))
+      geometry.computeVertexNormals()
+      break
+    }
+    case 'dini': {
+      geometry = new THREE.BufferGeometry()
+      const vertices: number[] = []
+      const colors: number[] = []
+      const indices: number[] = []
+      for (let u = 0; u <= 35; u++) {
+        for (let v = 0; v <= 35; v++) {
+          const uu = (u / 35) * 4 * Math.PI
+          const vv = (v / 35) * 2 + 0.1
+          const x = Math.cos(uu) * Math.sinh(vv)
+          const y = Math.sin(uu) * Math.sinh(vv)
+          const z = uu + Math.cosh(vv) * Math.cos(Math.PI / 8)
+          vertices.push(x * 0.3, y * 0.3, z * 0.1)
+          colors.push((u / 35), 0.5, (v / 35))
+        }
+      }
+      for (let u = 0; u < 35; u++) {
+        for (let v = 0; v < 35; v++) {
+          const a = u * 36 + v
+          const b = a + 36
+          indices.push(a, b, a + 1)
+          indices.push(b, b + 1, a + 1)
+        }
+      }
+      geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3))
+      geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3))
+      geometry.setIndex(new THREE.BufferAttribute(new Uint32Array(indices), 1))
+      geometry.computeVertexNormals()
+      break
+    }
+    case 'seashell': {
+      geometry = new THREE.BufferGeometry()
+      const vertices: number[] = []
+      const colors: number[] = []
+      for (let u = 0; u < 200; u++) {
+        for (let v = 0; v < 100; v++) {
+          const uu = (u / 200) * 6 * Math.PI
+          const vv = (v / 100) * Math.PI
+          const x = 0.5 * (1 - uu / (6 * Math.PI)) * Math.cos(uu) * Math.sin(vv)
+          const y = 0.5 * (1 - uu / (6 * Math.PI)) * Math.sin(uu) * Math.sin(vv)
+          const z = 0.5 * (1 - uu / (6 * Math.PI)) * Math.cos(vv) + uu / (2 * Math.PI)
+          vertices.push(x, y, z * 0.3)
+          colors.push((u / 200), (v / 100), 0.6)
+        }
+      }
+      geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3))
+      geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3))
+      break
+    }
+    case 'boys':
+      geometry = new THREE.IcosahedronGeometry(1.2, 5)
+      break
+    case 'rhodonea': {
+      geometry = new THREE.BufferGeometry()
+      const vertices: number[] = []
+      const colors: number[] = []
+      for (let u = 0; u < 300; u++) {
+        for (let v = 0; v < 100; v++) {
+          const uu = (u / 300) * 4 * Math.PI
+          const vv = (v / 100) * Math.PI
+          const k = 5
+          const r = Math.cos(k * uu)
+          const x = r * Math.sin(vv) * Math.cos(uu)
+          const y = r * Math.sin(vv) * Math.sin(uu)
+          const z = r * Math.cos(vv)
+          vertices.push(x * 0.8, y * 0.8, z * 0.8)
+          colors.push((u / 300), 0.5, (v / 100))
+        }
+      }
+      geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(vertices), 3))
+      geometry.setAttribute('color', new THREE.BufferAttribute(new Float32Array(colors), 3))
+      break
+    }
+    case 'infinity': {
+      geometry = new THREE.BufferGeometry()
+      const points: THREE.Vector3[] = []
+      for (let i = 0; i <= 100; i++) {
+        const t = (i / 100) * Math.PI * 2
+        const a = 2
+        const x = (a * Math.cos(t)) / (1 + Math.sin(t) ** 2)
+        const y = (a * Math.sin(t) * Math.cos(t)) / (1 + Math.sin(t) ** 2)
+        points.push(new THREE.Vector3(x * 2, y * 2, 0))
+      }
+      const curve = new THREE.CatmullRomCurve3(points)
+      const tubeGeometry = new THREE.TubeGeometry(curve, 64, 0.25, 8, false)
+      geometry = tubeGeometry
+      break
+    }
+    default:
+      geometry = new THREE.BoxGeometry(1, 1, 1)
+  }
+
+  return geometry
+}
+
+function DynamicAsset({ type, position, baseColor, emissiveColor, speed }: DynamicAssetProps) {
   const groupRef = useRef<THREE.Group>(null)
   const timeRef = useRef(0)
-
-  useEffect(() => {
-    if (!groupRef.current) return
-
-    const points: THREE.Vector3[] = []
-    for (let i = 0; i <= 100; i++) {
-      const t = (i / 100) * Math.PI * 2
-      const a = 2
-      const x = (a * Math.cos(t)) / (1 + Math.sin(t) ** 2)
-      const y = (a * Math.sin(t) * Math.cos(t)) / (1 + Math.sin(t) ** 2)
-      points.push(new THREE.Vector3(x * 2, y * 2, 0))
-    }
-
-    const curve = new THREE.CatmullRomCurve3(points)
-    const tubeGeometry = new THREE.TubeGeometry(curve, 64, 0.25, 8, false)
-
-    const material = new THREE.MeshStandardMaterial({
-      color: 0x06b6d4,
-      emissive: 0x0891b2,
-      emissiveIntensity: 0.6,
-      metalness: 0.6,
-      roughness: 0.2,
-    })
-
-    const mesh = new THREE.Mesh(tubeGeometry, material)
-    groupRef.current.add(mesh)
-  }, [])
+  const [geometry] = useState(() => createGeometry(type))
 
   useFrame(() => {
     if (groupRef.current) {
-      timeRef.current += 0.01
-
-      // 회전
-      groupRef.current.rotation.z += 0.004
-      groupRef.current.rotation.x += 0.002
-
-      // 동적 움직임 - 다른 패턴으로 떠다니기
-      groupRef.current.position.y = Math.cos(timeRef.current * 0.7) * 0.4
-      groupRef.current.position.x = Math.sin(timeRef.current * 0.5) * 0.4
-      groupRef.current.position.z = Math.cos(timeRef.current * 0.6) * 0.3
+      timeRef.current += 0.01 * speed
+      groupRef.current.rotation.x += 0.002 * speed
+      groupRef.current.rotation.y += 0.003 * speed
+      groupRef.current.rotation.z += 0.001 * speed
+      groupRef.current.position.y += Math.sin(timeRef.current * 0.8) * 0.008
+      groupRef.current.position.x += Math.cos(timeRef.current * 0.6) * 0.005
+      groupRef.current.position.z += Math.sin(timeRef.current * 0.5) * 0.003
     }
   })
 
-  return <group ref={groupRef} position={[0, 0, 0]} scale={0.9} />
+  return (
+    <group ref={groupRef} position={position}>
+      <mesh geometry={geometry}>
+        <meshStandardMaterial
+          color={baseColor}
+          emissive={emissiveColor}
+          emissiveIntensity={0.4}
+          metalness={0.5}
+          roughness={0.3}
+          vertexColors={true}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
+    </group>
+  )
 }
 
-// 회전하는 Wireframe 구
-function WireframeOrb() {
-  const groupRef = useRef<THREE.Group>(null)
-
-  useEffect(() => {
-    if (!groupRef.current) return
-
-    const geometry = new THREE.IcosahedronGeometry(1.5, 5)
-    const material = new THREE.MeshPhongMaterial({
-      color: 0x7c3aed,
-      emissive: 0xa855f7,
-      emissiveIntensity: 0.7,
-      wireframe: false,
-      shininess: 100,
-    })
-
-    const mesh = new THREE.Mesh(geometry, material)
-
-    // Wireframe 선 추가
-    const wireframeGeometry = new THREE.WireframeGeometry(geometry)
-    const line = new THREE.LineSegments(
-      wireframeGeometry,
-      new THREE.LineBasicMaterial({ color: 0xfbbf24, linewidth: 2 })
-    )
-    mesh.add(line)
-
-    groupRef.current.add(mesh)
-  }, [])
-
-  useFrame(() => {
-    if (groupRef.current) {
-      groupRef.current.rotation.y += 0.005
-    }
-  })
-
-  return <group ref={groupRef} position={[0, 0, 0]} />
-}
-
-// 다층 원환체 (복잡한 토러스)
-function ComplexTorus() {
-  const groupRef = useRef<THREE.Group>(null)
-
-  useEffect(() => {
-    if (!groupRef.current) return
-
-    for (let i = 0; i < 3; i++) {
-      const geometry = new THREE.TorusGeometry(1.5 - i * 0.4, 0.3, 20, 200)
-      const colors = [0xd946ef, 0x06b6d4, 0x8b5cf6]
-      const material = new THREE.MeshStandardMaterial({
-        color: colors[i],
-        emissive: colors[i],
-        emissiveIntensity: 0.4,
-        metalness: 0.4,
-        roughness: 0.3,
-      })
-
-      const mesh = new THREE.Mesh(geometry, material)
-      groupRef.current.add(mesh)
-    }
-  }, [])
-
-  useFrame(() => {
-    if (groupRef.current) {
-      groupRef.current.children.forEach((child, i) => {
-        child.rotation.x += 0.002 * (i + 1)
-        child.rotation.z += 0.003 * (i + 1)
-      })
-    }
-  })
-
-  return <group ref={groupRef} position={[0, 2, 1]} />
-}
-
-// 입자 필드
 function ParticleField() {
   const pointsRef = useRef<THREE.Points>(null)
 
@@ -244,17 +331,7 @@ function ParticleField() {
     }
 
     geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3))
-
-    const material = new THREE.PointsMaterial({
-      color: 0xfbbf24,
-      size: 0.04,
-      sizeAttenuation: true,
-      transparent: true,
-      opacity: 0.5,
-    })
-
     pointsRef.current.geometry = geometry
-    pointsRef.current.material = material
   }, [])
 
   useFrame(() => {
@@ -263,10 +340,30 @@ function ParticleField() {
     }
   })
 
-  return <points ref={pointsRef} />
+  return (
+    <points ref={pointsRef}>
+      <pointsMaterial color={0xfbbf24} size={0.04} sizeAttenuation transparent opacity={0.5} />
+    </points>
+  )
 }
 
 function MysteryCanvas() {
+  const [selectedAssets, setSelectedAssets] = useState<AssetType[]>([])
+
+  useEffect(() => {
+    const allAssets: AssetType[] = ['mobius', 'infinity', 'klein', 'torus', 'knot', 'helix', 'hyperboloid', 'enneper', 'dini', 'seashell', 'boys', 'rhodonea']
+    const shuffled = [...allAssets].sort(() => Math.random() - 0.5)
+    const selected = shuffled.slice(0, 2)
+    setSelectedAssets(selected)
+  }, [])
+
+  const colors = [
+    { base: 0xff6b9d, emissive: 0xff1493 },
+    { base: 0x06b6d4, emissive: 0x0891b2 },
+    { base: 0xa855f7, emissive: 0xd946ef },
+    { base: 0xfbbf24, emissive: 0xfcd34d },
+  ]
+
   return (
     <Canvas
       camera={{ position: [0, 0, 8], fov: 45 }}
@@ -283,23 +380,32 @@ function MysteryCanvas() {
     >
       <color attach="background" args={['#0d1117']} />
 
-      {/* 다중 조명으로 복잡한 그림자 효과 */}
       <ambientLight intensity={0.7} color="#ffffff" />
       <pointLight position={[10, 10, 5]} intensity={1.4} color="#d946ef" />
       <pointLight position={[-10, -10, 5]} intensity={1.2} color="#06b6d4" />
       <pointLight position={[0, 0, 8]} intensity={0.8} color="#fbbf24" />
       <pointLight position={[5, -5, -5]} intensity={0.9} color="#a855f7" />
 
-      {/* 2개 에셋 - 서로 겹치지 않게 배치 */}
-      <group position={[-2.5, 0, 0]}>
-        <MoebiusStrip />
-      </group>
-      <group position={[2.5, 0, 1]}>
-        <InfinityLoop />
-      </group>
+      {selectedAssets.length > 0 && (
+        <DynamicAsset
+          type={selectedAssets[0]}
+          position={[-2.5, 0, 0]}
+          baseColor={colors[0].base}
+          emissiveColor={colors[0].emissive}
+          speed={1}
+        />
+      )}
+      {selectedAssets.length > 1 && (
+        <DynamicAsset
+          type={selectedAssets[1]}
+          position={[2.5, 0, 1]}
+          baseColor={colors[1].base}
+          emissiveColor={colors[1].emissive}
+          speed={0.9}
+        />
+      )}
       <ParticleField />
 
-      {/* 드래그 가능하게 */}
       <OrbitControls enableZoom={true} enablePan={true} autoRotate autoRotateSpeed={1} />
     </Canvas>
   )
@@ -310,33 +416,12 @@ export function StoreHero() {
 
   return (
     <section className="hero" aria-labelledby="hero-title">
-      {/* 배경: 우주 그라데이션 + 3D 캔버스 (전체 채움) */}
-      <div
-        className="hero__backdrop"
-        aria-hidden="true"
-        style={{
-          position: 'absolute',
-          top: 0,
-          left: 0,
-          right: 0,
-          bottom: 0,
-        }}
-      >
+      <div className="hero__backdrop" aria-hidden="true" style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
         <div className="hero__stars" />
         <div className="hero__grid-floor" />
         <div className="hero__halo" />
 
-        {/* 3D Canvas - 전체 배경 채움 */}
-        <div
-          style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            top: 0,
-            left: 0,
-            zIndex: 1,
-          }}
-        >
+        <div style={{ position: 'absolute', width: '100%', height: '100%', top: 0, left: 0, zIndex: 1 }}>
           <MysteryCanvas />
         </div>
 
@@ -361,9 +446,7 @@ export function StoreHero() {
             onClick={() => playPanelBeep()}
           >
             {t('store_cta')}
-            <span className="hero__cta-arrow" aria-hidden="true">
-              ➔
-            </span>
+            <span className="hero__cta-arrow" aria-hidden="true">➔</span>
           </a>
         </div>
       </div>
