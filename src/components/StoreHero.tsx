@@ -109,7 +109,7 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
         points.push(new THREE.Vector3(x * 0.5, y * 0.5, z * 0.5))
       }
       const knotCurve = new THREE.CatmullRomCurve3(points, true)
-      geometry = new THREE.TubeGeometry(knotCurve, 64, 0.15, 16, false)
+      geometry = new THREE.TubeGeometry(knotCurve, 100, 0.2, 32, false)
       break
     }
     case 'helix': {
@@ -122,7 +122,7 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
         points.push(new THREE.Vector3(x, y, z))
       }
       const helixCurve = new THREE.CatmullRomCurve3(points)
-      geometry = new THREE.TubeGeometry(helixCurve, 32, 0.12, 16, false)
+      geometry = new THREE.TubeGeometry(helixCurve, 100, 0.18, 32, false)
       break
     }
     case 'hyperboloid': {
@@ -269,7 +269,7 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
         points.push(new THREE.Vector3(x * 2, y * 2, 0))
       }
       const curve = new THREE.CatmullRomCurve3(points, true)
-      const tubeGeometry = new THREE.TubeGeometry(curve, 64, 0.25, 8, false)
+      const tubeGeometry = new THREE.TubeGeometry(curve, 100, 0.3, 32, false)
       geometry = tubeGeometry
       break
     }
