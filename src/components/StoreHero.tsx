@@ -88,13 +88,14 @@ function createGeometry(type: AssetType): THREE.BufferGeometry {
       const indices: number[] = []
       for (let u = 0; u <= 200; u++) {
         for (let v = 0; v <= 200; v++) {
-          const uu = (u / 150) * 2 * Math.PI
-          const vv = (v / 150) * 2 * Math.PI
-          const x = (2 + Math.cos(uu / 2) * Math.sin(vv)) * Math.cos(uu)
-          const y = (2 + Math.cos(uu / 2) * Math.sin(vv)) * Math.sin(uu)
-          const z = Math.sin(uu / 2) * Math.sin(vv)
-          vertices.push(x * 0.8, y * 0.8, z * 0.8)
-          colors.push((u / 150), (v / 150), 0.7)
+          const uu = (u / 200) * 2 * Math.PI
+          const vv = (v / 200) * 2 * Math.PI
+          const r = 4 * (1 - Math.cos(uu) / 2)
+          const x = 6 * Math.cos(uu) * (1 + Math.sin(uu)) + r * Math.cos(uu) * Math.cos(vv)
+          const y = 16 * Math.sin(uu) + r * Math.sin(uu) * Math.cos(vv)
+          const z = r * Math.sin(vv)
+          vertices.push(x * 0.1, y * 0.1, z * 0.1)
+          colors.push((u / 200), (v / 200), 0.7)
         }
       }
       for (let u = 0; u < 200; u++) {
@@ -441,7 +442,7 @@ function MysteryCanvas({ selectedAssets }: MysteryCanvasProps) {
     hyperboloid: { base: 0xf59e0b, emissive: 0xfbbf24 }, // 주황색
     enneper: { base: 0x06b6d4, emissive: 0x22d3ee },     // 청록색
     dini: { base: 0xffffff, emissive: 0xffffff },        // 완전 흰색
-    seashell: { base: 0xff3366, emissive: 0xff66aa },    // 핑크 빨간색
+    seashell: { base: 0xffaa00, emissive: 0xffdd00 },    // 밝은 오렌지 황색
     boys: { base: 0x14b8a6, emissive: 0x2dd4bf },        // 하늘색
     rhodonea: { base: 0xffffff, emissive: 0xffffff },    // 순수 흰색
   }
