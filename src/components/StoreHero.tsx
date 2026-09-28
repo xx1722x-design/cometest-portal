@@ -410,14 +410,12 @@ function ParticleField() {
 }
 
 function MysteryCanvas() {
-  const [selectedAssets, setSelectedAssets] = useState<AssetType[]>([])
-
-  useEffect(() => {
+  // 초기에 2개 에셋을 미리 선택해서 시작
+  const [selectedAssets] = useState<AssetType[]>(() => {
     const allAssets: AssetType[] = ['mobius', 'infinity', 'klein', 'torus', 'knot', 'helix', 'hyperboloid', 'enneper', 'dini', 'seashell', 'boys', 'rhodonea']
     const shuffled = [...allAssets].sort(() => Math.random() - 0.5)
-    const selected = shuffled.slice(0, 2)
-    setSelectedAssets(selected)
-  }, [])
+    return shuffled.slice(0, 2)
+  })
 
   // 12개 도형별 고유 색상
   const assetColors: Record<AssetType, { base: number; emissive: number }> = {
