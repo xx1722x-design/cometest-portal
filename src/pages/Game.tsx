@@ -1,10 +1,26 @@
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { SpaceRacer } from '../components/games/SpaceRacer'
+import { getGameById } from '../config/gamesData'
 
 export function Game() {
   const navigate = useNavigate()
+  const { gameId } = useParams<{ gameId: string }>()
   const { t } = useTranslation()
+
+  const game = gameId ? getGameById(gameId) : null
+
+  const renderGame = () => {
+    switch (gameId) {
+      case 'space-racer':
+        return <SpaceRacer />
+      case 'prism-rush':
+        // TODO: PrismRush 게임 추가
+        return <div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Prism Rush Coming Soon</div>
+      default:
+        return <div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>게임을 찾을 수 없습니다</div>
+    }
+  }
 
   return (
     <div
@@ -19,12 +35,12 @@ export function Game() {
         position: 'relative',
       }}
     >
-      {/* Space Racer 게임 */}
-      <SpaceRacer />
+      {/* 게임 렌더링 */}
+      {renderGame()}
 
-      {/* 홈 버튼 - 게임 위에 오버레이 */}
+      {/* 뒤로가기 버튼 - 게임 위에 오버레이 */}
       <button
-        onClick={() => navigate('/')}
+        onClick={() => navigate('/game')}
         style={{
           position: 'absolute',
           top: '1rem',

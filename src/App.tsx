@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { Index } from './pages/Index'
 import { Game } from './pages/Game'
+import { GameList } from './pages/GameList'
 import { Store } from './pages/Store'
 import { Category } from './pages/Category'
 
@@ -9,7 +10,8 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/game" element={<Game />} />
+        <Route path="/game" element={<GameList />} />
+        <Route path="/game/:gameId" element={<Game />} />
         <Route path="/store" element={<Store />} />
         <Route path="/category/:categoryId" element={<Category />} />
         <Route path="*" element={<Navigate to="/" replace />} />
