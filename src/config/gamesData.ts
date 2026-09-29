@@ -19,6 +19,15 @@ export const GAMES_DATA: GameItem[] = [
     path: '/game/space-racer',
   },
   {
+    id: 'all-you-can-tycoon',
+    title: 'All You Can Tycoon',
+    description: '3D 경영 시뮬레이션 게임 - 음식점을 운영하고 부를 축적하세요!',
+    thumbnail: '🏪',
+    category: 'web_games',
+    icon: '🏪',
+    path: '/game/all-you-can-tycoon',
+  },
+  {
     id: 'prism-rush',
     title: 'Prism Rush',
     description: '3D 프리즘을 피해 나아가는 스릴 넘치는 게임',

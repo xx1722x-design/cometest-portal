@@ -47,13 +47,16 @@ function Player() {
   )
 }
 
-// 트랙 (곡선 경로)
+// 트랙 (곡선 경로 - 흰색)
 function Track() {
   const groupRef = useRef<Group>(null)
+  const { difficulty } = usePrismRushStore()
+
+  const trackSpeed = difficulty === 'easy' ? 0.08 : difficulty === 'normal' ? 0.1 : 0.12
 
   useFrame(() => {
     if (groupRef.current) {
-      groupRef.current.position.z -= 0.15 // 트랙이 지나가는 느낌
+      groupRef.current.position.z -= trackSpeed
       if (groupRef.current.position.z < -50) {
         groupRef.current.position.z = 0
       }
@@ -68,35 +71,37 @@ function Track() {
 
         return (
           <group key={i}>
-            {/* 트랙 좌측 */}
+            {/* 트랙 좌측 경계 (흰색) */}
             <mesh position={[xOffset - 3, -0.5, zPos]}>
-              <boxGeometry args={[0.3, 0.3, 2.5]} />
+              <boxGeometry args={[0.4, 0.3, 2.5]} />
               <meshStandardMaterial
-                color={0x0a0a0a}
-                emissive={0x1a1a1a}
-                metalness={0.7}
-                roughness={0.3}
+                color={0xffffff}
+                emissive={0xffffff}
+                emissiveIntensity={0.5}
+                metalness={0.6}
+                roughness={0.2}
               />
             </mesh>
 
-            {/* 트랙 우측 */}
+            {/* 트랙 우측 경계 (흰색) */}
             <mesh position={[xOffset + 3, -0.5, zPos]}>
-              <boxGeometry args={[0.3, 0.3, 2.5]} />
+              <boxGeometry args={[0.4, 0.3, 2.5]} />
               <meshStandardMaterial
-                color={0x0a0a0a}
-                emissive={0x1a1a1a}
-                metalness={0.7}
-                roughness={0.3}
+                color={0xffffff}
+                emissive={0xffffff}
+                emissiveIntensity={0.5}
+                metalness={0.6}
+                roughness={0.2}
               />
             </mesh>
 
-            {/* 중앙 선 (네온) */}
-            <mesh position={[xOffset, -0.3, zPos]}>
-              <boxGeometry args={[0.1, 0.1, 2.5]} />
+            {/* 트랙 중앙 경로 (흰색) */}
+            <mesh position={[xOffset, -0.35, zPos]}>
+              <boxGeometry args={[5.8, 0.15, 2.5]} />
               <meshStandardMaterial
-                color={0x00ffff}
-                emissive={0x00ffff}
-                emissiveIntensity={0.8}
+                color={0xffffff}
+                emissive={0xffffff}
+                emissiveIntensity={0.3}
               />
             </mesh>
           </group>
@@ -115,19 +120,17 @@ function ParticleExplosion() {
   useEffect(() => {
     if (!pointsRef.current) return
 
-    const count = Math.min(500 + Math.floor(score / 10), 2000) // 점수에 따라 파티클 증가
+    const count = Math.min(500 + Math.floor(score / 10), 2000)
     const geometry = new BufferGeometry()
     const positions = new Float32Array(count * 3)
     const colors = new Float32Array(count * 3)
     const sizes = new Float32Array(count)
 
     for (let i = 0; i < count; i++) {
-      // 랜덤 위치 (화면 전체)
       positions[i * 3] = (Math.random() - 0.5) * 20
       positions[i * 3 + 1] = (Math.random() - 0.5) * 15
       positions[i * 3 + 2] = (Math.random() - 0.5) * 20
 
-      // 무지개 색상
       const hue = Math.random()
       const saturation = 1
       const lightness = 0.5
@@ -136,7 +139,6 @@ function ParticleExplosion() {
       colors[i * 3 + 1] = rgb.g / 255
       colors[i * 3 + 2] = rgb.b / 255
 
-      // 크기 변화 (별처럼 작게)
       sizes[i] = Math.random() * 0.08 + 0.02
     }
 
@@ -153,11 +155,10 @@ function ParticleExplosion() {
       const positions = pointsRef.current.geometry.attributes.position.array as Float32Array
 
       for (let i = 0; i < positions.length; i += 3) {
-        positions[i] += (Math.random() - 0.5) * 0.5 // X 이동
-        positions[i + 1] += Math.random() * 0.3 // Y 상향 (위로)
-        positions[i + 2] += (Math.random() - 0.5) * 0.5 // Z 이동
+        positions[i] += (Math.random() - 0.5) * 0.5
+        positions[i + 1] += Math.random() * 0.3
+        positions[i + 2] += (Math.random() - 0.5) * 0.5
 
-        // 범위 벗어나면 재생성
         if (positions[i + 1] > 10) {
           positions[i + 1] = -8
           positions[i] = (Math.random() - 0.5) * 20
@@ -231,7 +232,6 @@ function Background() {
         <meshStandardMaterial
           color={0x0a0a1a}
           emissive={0x0a0a1a}
-          side={THREE.DoubleSide}
         />
       </mesh>
 
@@ -245,16 +245,14 @@ function Background() {
 }
 
 export function PrismRushGameContent() {
-  const { isGameRunning, tick, jump, setJump } = usePrismRushStore()
+  const { isGameRunning, tick } = usePrismRushStore()
 
-  // 게임 루프
   useFrame(() => {
     if (isGameRunning) {
       tick()
     }
   })
 
-  // 입력 처리
   useEffect(() => {
     if (!isGameRunning) return
 
@@ -299,5 +297,4 @@ export function PrismRushGameContent() {
   )
 }
 
-// THREE import (global)
 import * as THREE from 'three'

@@ -102,7 +102,7 @@ export const useSpaceRacerStore = create<SpaceRacerStore>((set, get) => ({
     let newPy = py + vy * deltaTime
 
     // Check if player fell off the track (below ground or too far left/right)
-    let isOutOfBounds = Math.abs(px) >= 3 || newPy < 0.2
+    let isOutOfBounds = Math.abs(px) > 4.5 || newPy < 0.2
 
     // Sway effect (±10 degrees)
     const swayAngle = Math.sin(state.elapsedTime * 2) * (Math.PI / 18)
@@ -157,7 +157,7 @@ export const useSpaceRacerStore = create<SpaceRacerStore>((set, get) => ({
   movePlayer: (direction: number) => {
     const state = get()
     const [px, py, pz] = state.playerPos
-    const newX = Math.max(-3, Math.min(3, px + direction * 0.5))
+    const newX = Math.max(-4, Math.min(4, px + direction * 0.5))
     set({ playerPos: [newX, py, pz] })
   },
 

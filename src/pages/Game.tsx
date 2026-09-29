@@ -1,7 +1,10 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { lazy, Suspense } from 'react'
 import { SpaceRacer } from '../components/games/SpaceRacer'
 import { getGameById } from '../config/gamesData'
+
+const AllYouCanTycoon = lazy(() => import('../components/games/AllYouCanTycoon'))
 
 export function Game() {
   const navigate = useNavigate()
@@ -14,6 +17,12 @@ export function Game() {
     switch (gameId) {
       case 'space-racer':
         return <SpaceRacer />
+      case 'all-you-can-tycoon':
+        return (
+          <Suspense fallback={<div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Loading...</div>}>
+            <AllYouCanTycoon />
+          </Suspense>
+        )
       case 'prism-rush':
         // TODO: PrismRush 게임 추가
         return <div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Prism Rush Coming Soon</div>
