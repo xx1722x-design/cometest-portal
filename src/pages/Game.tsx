@@ -1,6 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { PrismRush } from '../components/games/PrismRush'
+import { SpaceRacer } from '../components/games/SpaceRacer'
 
 export function Game() {
   const navigate = useNavigate()
@@ -19,8 +19,8 @@ export function Game() {
         position: 'relative',
       }}
     >
-      {/* Prism Rush 게임 */}
-      <PrismRush />
+      {/* Space Racer 게임 */}
+      <SpaceRacer />
 
       {/* 홈 버튼 - 게임 위에 오버레이 */}
       <button
