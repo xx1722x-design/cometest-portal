@@ -136,8 +136,8 @@ function ParticleExplosion() {
       colors[i * 3 + 1] = rgb.g / 255
       colors[i * 3 + 2] = rgb.b / 255
 
-      // 크기 변화
-      sizes[i] = Math.random() * 0.5 + 0.1
+      // 크기 변화 (별처럼 작게)
+      sizes[i] = Math.random() * 0.08 + 0.02
     }
 
     geometry.setAttribute('position', new BufferAttribute(positions, 3))
@@ -175,11 +175,11 @@ function ParticleExplosion() {
     <points ref={pointsRef}>
       <bufferGeometry />
       <pointsMaterial
-        size={0.15}
+        size={0.08}
         sizeAttenuation
         vertexColors
         transparent
-        opacity={0.8}
+        opacity={0.7}
         fog={false}
       />
     </points>
