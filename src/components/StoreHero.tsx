@@ -5,6 +5,7 @@ import { OrbitControls, Environment } from '@react-three/drei'
 import * as THREE from 'three'
 import { playPanelBeep } from '../lib/sciFiFx'
 import { withLang } from '../i18n/languages'
+import WebGLErrorBoundary from './WebGLErrorBoundary'
 
 const STORE_URL = 'https://store.cometest.com/'
 
@@ -506,7 +507,9 @@ export function StoreHero() {
         <div className="hero__halo" />
 
         <div style={{ position: 'absolute', width: '100%', height: '100%', top: 0, left: 0, zIndex: 1 }}>
-          <MysteryCanvas selectedAssets={selectedAssets} />
+          <WebGLErrorBoundary>
+            <MysteryCanvas selectedAssets={selectedAssets} />
+          </WebGLErrorBoundary>
         </div>
 
         <div className="hero__vignette" />

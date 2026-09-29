@@ -7,6 +7,7 @@ import { MenuHUD } from '../components/MenuHUD'
 import { useGameStore } from '../hooks/useGameStore'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import WebGLErrorBoundary from '../components/WebGLErrorBoundary'
 
 function CameraRotationController() {
   const cameraRotation = useGameStore((s) => s?.cameraRotation) ?? 0
@@ -55,7 +56,44 @@ export function Game() {
         position: 'relative',
       }}
     >
-      {/* 홈 버튼 */}
+      {/* 풀스크린 Canvas */}
+      <WebGLErrorBoundary>
+        <Canvas
+          style={{ width: '100%', height: '100%' }}
+          shadows
+          dpr={window.devicePixelRatio}
+        >
+          <PerspectiveCamera
+            makeDefault
+            position={[20, 20, 25]}
+            fov={55}
+            near={0.1}
+            far={500}
+          />
+          <OrbitControls
+            target={[0, 1.0, 5]}
+            minPolarAngle={Math.PI / 6}
+            maxPolarAngle={Math.PI / 2.5}
+            minDistance={15}
+            maxDistance={80}
+            enablePan={true}
+            panSpeed={1.0}
+            rotateSpeed={1.2}
+            zoomSpeed={1.5}
+            enableDamping={true}
+            dampingFactor={0.05}
+            autoRotate={false}
+            enableZoom={true}
+            autoRotateSpeed={0}
+          />
+          <CameraRotationController />
+          <Suspense fallback={null}>
+            <GameScene />
+          </Suspense>
+        </Canvas>
+      </WebGLErrorBoundary>
+
+      {/* 홈 버튼 - 에러 발생시에도 보이도록 상단에 배치 */}
       <button
         onClick={() => navigate('/')}
         style={{
@@ -75,41 +113,6 @@ export function Game() {
       >
         {t('home_button')}
       </button>
-
-      {/* 풀스크린 Canvas */}
-      <Canvas
-        style={{ width: '100%', height: '100%' }}
-        shadows
-        dpr={window.devicePixelRatio}
-      >
-        <PerspectiveCamera
-          makeDefault
-          position={[20, 20, 25]}
-          fov={55}
-          near={0.1}
-          far={500}
-        />
-        <OrbitControls
-          target={[0, 1.0, 5]}
-          minPolarAngle={Math.PI / 6}
-          maxPolarAngle={Math.PI / 2.5}
-          minDistance={15}
-          maxDistance={80}
-          enablePan={true}
-          panSpeed={1.0}
-          rotateSpeed={1.2}
-          zoomSpeed={1.5}
-          enableDamping={true}
-          dampingFactor={0.05}
-          autoRotate={false}
-          enableZoom={true}
-          autoRotateSpeed={0}
-        />
-        <CameraRotationController />
-        <Suspense fallback={null}>
-          <GameScene />
-        </Suspense>
-      </Canvas>
 
       {/* 메뉴 HUD */}
       <MenuHUD />

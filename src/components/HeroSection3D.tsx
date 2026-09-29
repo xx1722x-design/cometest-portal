@@ -4,6 +4,7 @@ import { useGLTF, OrbitControls } from '@react-three/drei'
 import { Group, Box3, Vector3 } from 'three'
 import { selectRandomAssets, SpaceAsset } from '../config/spaceAssets'
 import { playPanelBeep } from '../lib/sciFiFx'
+import WebGLErrorBoundary from './WebGLErrorBoundary'
 
 interface Model3DProps {
   modelPath: string
@@ -178,10 +179,12 @@ export function HeroSection3D({ isDarkMode }: HeroSection3DProps) {
           marginBottom: '2rem',
         }}
       >
-        <Canvas camera={{ position: [0, 1.5, 7], fov: 55 }} dpr={[1, 2]}>
-          <color attach="background" args={[canvasBgColor]} />
-          <HeroSection3DContent assets={selectedAssets} />
-        </Canvas>
+        <WebGLErrorBoundary>
+          <Canvas camera={{ position: [0, 1.5, 7], fov: 55 }} dpr={[1, 2]}>
+            <color attach="background" args={[canvasBgColor]} />
+            <HeroSection3DContent assets={selectedAssets} />
+          </Canvas>
+        </WebGLErrorBoundary>
       </div>
 
       {/* CTA 및 Store 링크 */}
