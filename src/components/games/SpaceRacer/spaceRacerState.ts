@@ -89,33 +89,48 @@ export const useSpaceRacerStore = create<SpaceRacerStore>((set, get) => ({
 
     const diffSettings = initialDifficulties[state.difficulty]
 
-    // Increase speed gradually
-    const newSpeed = Math.min(state.speed + 0.5 * deltaTime, state.maxSpeed)
+    // Smooth speed increase with slower ramp in early game
+    const speedRampFactor = Math.min(1, state.score / 200) // Gradually increase acceleration after 200m
+    const speedIncrement = 0.3 * speedRampFactor * deltaTime
+    const newSpeed = Math.min(state.speed + speedIncrement, state.maxSpeed)
 
     // Update position
     const [px, py, pz] = state.playerPos
     const newZ = pz + newSpeed * deltaTime * 10
     const [vx, vy, vz] = state.playerVelocity
 
-    // Gravity and jumping
+    // Gravity and jumping with increased friction
     const newVy = vy - 25 * deltaTime
     let newPy = py + vy * deltaTime
 
-    // Check if player fell off the track (below ground or too far left/right)
-    let isOutOfBounds = Math.abs(px) > 4.5 || newPy < 0.2
+    // Smooth lateral friction - makes controls tighter
+    const lateralFriction = 0.92
+    const newVx = vx * lateralFriction
 
-    // Sway effect (±10 degrees)
-    const swayAngle = Math.sin(state.elapsedTime * 2) * (Math.PI / 18)
+    // Generous track boundaries (wide track)
+    const trackWidth = 6.5
+    let isOutOfBounds = Math.abs(px) > trackWidth || newPy < 0.2
 
-    // Generate obstacles
+    // Curved track after 200m - smooth sine wave
+    let trackCurve = 0
+    if (state.score > 200) {
+      const curveAmount = Math.sin((state.score - 200) * 0.002) * 0.8
+      trackCurve = curveAmount
+    }
+
+    // Adjust track boundaries based on curve
+    const adjustedTrackWidth = trackWidth + Math.abs(trackCurve) * 0.5
+
+    // Generate obstacles with varied spacing
     let newObstacles = [...state.obstacles]
     const shouldAddObstacle = Math.random() < diffSettings.obstacleFrequency * deltaTime
 
     if (shouldAddObstacle) {
       const isGap = Math.random() < diffSettings.gapChance
+      const xOffset = trackCurve + (Math.random() - 0.5) * 4
       newObstacles.push({
         id: state.nextObstacleId,
-        x: (Math.random() - 0.5) * 6,
+        x: Math.max(-adjustedTrackWidth, Math.min(adjustedTrackWidth, xOffset)),
         z: newZ + 50,
         type: isGap ? 'gap' : 'block',
       })
@@ -124,13 +139,13 @@ export const useSpaceRacerStore = create<SpaceRacerStore>((set, get) => ({
     // Remove obstacles that are behind the player
     newObstacles = newObstacles.filter(obs => obs.z > newZ - 10)
 
-    // Check collision with obstacles
+    // Check collision with obstacles (generous hitbox)
     let collision = false
     for (const obs of newObstacles) {
       const distZ = Math.abs(obs.z - newZ)
       const distX = Math.abs(obs.x - px)
 
-      if (distZ < 2 && distX < 1.5) {
+      if (distZ < 2.5 && distX < 1.8) {
         if (obs.type === 'block' && py < 1.5) {
           collision = true
           break
@@ -144,8 +159,8 @@ export const useSpaceRacerStore = create<SpaceRacerStore>((set, get) => ({
     set({
       speed: newSpeed,
       playerPos: [px, Math.max(0.5, newPy), newZ],
-      playerVelocity: [vx, newVy, vz],
-      playerRotation: swayAngle,
+      playerVelocity: [newVx, newVy, vz],
+      playerRotation: 0, // Remove auto-rotation, player controls rotation
       elapsedTime: state.elapsedTime + deltaTime,
       score: Math.floor(newZ),
       obstacles: newObstacles,
@@ -157,7 +172,8 @@ export const useSpaceRacerStore = create<SpaceRacerStore>((set, get) => ({
   movePlayer: (direction: number) => {
     const state = get()
     const [px, py, pz] = state.playerPos
-    const newX = Math.max(-4, Math.min(4, px + direction * 0.5))
+    // Faster, tighter controls - 1.0 per input instead of 0.5
+    const newX = Math.max(-7, Math.min(7, px + direction * 1.0))
     set({ playerPos: [newX, py, pz] })
   },
 

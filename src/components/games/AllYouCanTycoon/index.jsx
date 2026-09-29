@@ -13,7 +13,7 @@ function Player({ playerRef, onPositionChange }) {
   const FRICTION = 0.85;
 
   const randomModelNumber = useMemo(() => Math.floor(Math.random() * 10) + 1, []);
-  const { scene } = useGLTF(`/1.glb`);
+  const { scene } = useGLTF(`/models/tycoon/${randomModelNumber}.glb`);
   const clonedScene = useMemo(() => scene.clone(), [scene]);
 
   useEffect(() => {

@@ -4,7 +4,8 @@ import { lazy, Suspense } from 'react'
 import { SpaceRacer } from '../components/games/SpaceRacer'
 import { getGameById } from '../config/gamesData'
 
-const AllYouCanTycoon = lazy(() => import('../components/games/AllYouCanTycoon'))
+// Dynamic import for AllYouCanTycoon (JSX file)
+const AllYouCanTycoon = lazy(() => import('../components/games/AllYouCanTycoon/index.jsx').then(m => ({ default: m.default })))
 
 export function Game() {
   const navigate = useNavigate()
@@ -19,12 +20,11 @@ export function Game() {
         return <SpaceRacer />
       case 'all-you-can-tycoon':
         return (
-          <Suspense fallback={<div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Loading...</div>}>
+          <Suspense fallback={<div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Loading Game...</div>}>
             <AllYouCanTycoon />
           </Suspense>
         )
       case 'prism-rush':
-        // TODO: PrismRush 게임 추가
         return <div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Prism Rush Coming Soon</div>
       default:
         return <div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>게임을 찾을 수 없습니다</div>
