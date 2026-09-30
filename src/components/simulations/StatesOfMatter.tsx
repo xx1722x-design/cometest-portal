@@ -131,14 +131,20 @@ function StatesOfMatterScene({ physicsState }: { physicsState: PhysicsState }) {
         particle.position.add(particle.velocity.clone().multiplyScalar(0.016))
 
         const bounceDistance = CONTAINER_SIZE / 2 - PARTICLE_RADIUS
-        ['x', 'y', 'z'].forEach((axis) => {
-          if (Math.abs(particle.position[axis as keyof THREE.Vector3]) > bounceDistance) {
-            particle.position[axis as keyof THREE.Vector3] = Math.sign(
-              particle.position[axis as keyof THREE.Vector3]
-            ) * bounceDistance
-            particle.velocity[axis as keyof THREE.Vector3] *= -0.9
-          }
-        })
+
+        // Bounce off walls
+        if (Math.abs(particle.position.x) > bounceDistance) {
+          particle.position.x = Math.sign(particle.position.x) * bounceDistance
+          particle.velocity.x *= -0.9
+        }
+        if (Math.abs(particle.position.y) > bounceDistance) {
+          particle.position.y = Math.sign(particle.position.y) * bounceDistance
+          particle.velocity.y *= -0.9
+        }
+        if (Math.abs(particle.position.z) > bounceDistance) {
+          particle.position.z = Math.sign(particle.position.z) * bounceDistance
+          particle.velocity.z *= -0.9
+        }
       }
     })
 
