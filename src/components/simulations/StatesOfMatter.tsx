@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, useHelper } from '@react-three/drei'
+import { OrbitControls } from '@react-three/drei'
 import { useNavigate } from 'react-router-dom'
 import * as THREE from 'three'
 
@@ -13,12 +13,13 @@ interface ParticleState {
   baseX: number
   baseZ: number
   baseY: number
+  layer: number
 }
 
-const NUM_PARTICLES = 64
-const CONTAINER_SIZE = 6
-const PARTICLE_RADIUS = 0.15
-const FORCE_DISTANCE_THRESHOLD = 1.2
+const NUM_PARTICLES = 180
+const CONTAINER_SIZE = 16
+const PARTICLE_RADIUS = 0.12
+const FORCE_DISTANCE_THRESHOLD = 0.8
 
 interface PhysicsState {
   state: 'solid' | 'liquid' | 'gas'
@@ -31,29 +32,55 @@ function StatesOfMatterScene({ physicsState }: { physicsState: PhysicsState }) {
   const particleStatesRef = useRef<ParticleState[]>([])
   const linesRef = useRef<THREE.LineSegments>(null)
   const containerRef = useRef<THREE.Mesh>(null)
-  const frameCountRef = useRef(0)
+  const timeRef = useRef(0)
   const prevStateRef = useRef<'solid' | 'liquid' | 'gas'>('solid')
 
   useEffect(() => {
     if (!particleStatesRef.current.length) {
-      const gridSize = Math.ceil(Math.cbrt(NUM_PARTICLES))
-      const spacing = CONTAINER_SIZE / (gridSize + 1)
+      const particlesPerLayer = Math.floor(NUM_PARTICLES / 3)
+      const gridSize = Math.ceil(Math.sqrt(particlesPerLayer))
+      const spacing = CONTAINER_SIZE * 0.7 / gridSize
 
-      for (let i = 0; i < NUM_PARTICLES; i++) {
-        const x = ((i % gridSize) - gridSize / 2) * spacing
-        const y = (Math.floor((i / gridSize) % gridSize) - gridSize / 2) * spacing
-        const z = (Math.floor(i / (gridSize * gridSize)) - gridSize / 2) * spacing
+      let particleIndex = 0
 
+      for (let layer = 0; layer < 3; layer++) {
+        const layerY = -CONTAINER_SIZE / 2 + 1 + layer * 0.4
+        for (let i = 0; i < particlesPerLayer && particleIndex < NUM_PARTICLES; i++) {
+          const gridX = i % gridSize
+          const gridZ = Math.floor(i / gridSize)
+          const x = (gridX - gridSize / 2) * spacing
+          const z = (gridZ - gridSize / 2) * spacing
+
+          particleStatesRef.current.push({
+            position: new THREE.Vector3(x, layerY, z),
+            velocity: new THREE.Vector3(0, 0, 0),
+            targetPosition: new THREE.Vector3(x, layerY, z),
+            targetVelocity: new THREE.Vector3(0, 0, 0),
+            vibrationPhase: Math.random() * Math.PI * 2,
+            baseX: x,
+            baseZ: z,
+            baseY: layerY,
+            layer,
+          })
+          particleIndex++
+        }
+      }
+
+      while (particleIndex < NUM_PARTICLES) {
+        const x = (Math.random() - 0.5) * CONTAINER_SIZE * 0.7
+        const z = (Math.random() - 0.5) * CONTAINER_SIZE * 0.7
         particleStatesRef.current.push({
-          position: new THREE.Vector3(x, -CONTAINER_SIZE / 2 + 0.5, z),
+          position: new THREE.Vector3(x, -CONTAINER_SIZE / 2 + 1.5, z),
           velocity: new THREE.Vector3(0, 0, 0),
-          targetPosition: new THREE.Vector3(x, -CONTAINER_SIZE / 2 + 0.5, z),
+          targetPosition: new THREE.Vector3(x, -CONTAINER_SIZE / 2 + 1.5, z),
           targetVelocity: new THREE.Vector3(0, 0, 0),
           vibrationPhase: Math.random() * Math.PI * 2,
           baseX: x,
           baseZ: z,
-          baseY: -CONTAINER_SIZE / 2 + 1,
+          baseY: -CONTAINER_SIZE / 2 + 1.5,
+          layer: 0,
         })
+        particleIndex++
       }
     }
 
@@ -64,33 +91,42 @@ function StatesOfMatterScene({ physicsState }: { physicsState: PhysicsState }) {
   }, [physicsState.state])
 
   const initializeStateTransition = () => {
-    const gridSize = Math.ceil(Math.cbrt(NUM_PARTICLES))
-    const spacing = CONTAINER_SIZE / (gridSize + 1)
+    const particlesPerLayer = Math.floor(NUM_PARTICLES / 3)
+    const gridSize = Math.ceil(Math.sqrt(particlesPerLayer))
+    const spacing = CONTAINER_SIZE * 0.7 / gridSize
 
     particleStatesRef.current.forEach((particle, i) => {
       if (physicsState.state === 'solid') {
-        const x = ((i % gridSize) - gridSize / 2) * spacing
-        const z = (Math.floor((i / gridSize) % gridSize) - gridSize / 2) * spacing
-        particle.targetPosition.set(x, -CONTAINER_SIZE / 2 + 0.5, z)
+        const layer = Math.floor(i / particlesPerLayer)
+        const layerIndex = i % particlesPerLayer
+        const gridX = layerIndex % gridSize
+        const gridZ = Math.floor(layerIndex / gridSize)
+        const x = (gridX - gridSize / 2) * spacing
+        const z = (gridZ - gridSize / 2) * spacing
+        const y = -CONTAINER_SIZE / 2 + 1 + layer * 0.4
+
+        particle.targetPosition.set(x, y, z)
         particle.baseX = x
         particle.baseZ = z
+        particle.baseY = y
+        particle.layer = layer
         particle.targetVelocity.set(0, 0, 0)
       } else if (physicsState.state === 'liquid') {
-        const randomX = (Math.random() - 0.5) * CONTAINER_SIZE * 0.8
-        const randomZ = (Math.random() - 0.5) * CONTAINER_SIZE * 0.8
-        particle.targetPosition.set(randomX, -CONTAINER_SIZE / 2 + 1.5, randomZ)
+        const randomX = (Math.random() - 0.5) * CONTAINER_SIZE * 0.9
+        const randomZ = (Math.random() - 0.5) * CONTAINER_SIZE * 0.9
+        particle.targetPosition.set(randomX, -CONTAINER_SIZE / 2 + 2, randomZ)
         particle.baseX = randomX
         particle.baseZ = randomZ
-        particle.targetVelocity.set((Math.random() - 0.5) * 2, 0, (Math.random() - 0.5) * 2)
+        particle.targetVelocity.set((Math.random() - 0.5) * 1, 0, (Math.random() - 0.5) * 1)
       } else {
-        const randomX = (Math.random() - 0.5) * CONTAINER_SIZE
-        const randomY = (Math.random() - 0.5) * CONTAINER_SIZE
-        const randomZ = (Math.random() - 0.5) * CONTAINER_SIZE
+        const randomX = (Math.random() - 0.5) * CONTAINER_SIZE * 0.95
+        const randomY = (Math.random() - 0.5) * CONTAINER_SIZE * 0.95
+        const randomZ = (Math.random() - 0.5) * CONTAINER_SIZE * 0.95
         particle.targetPosition.set(randomX, randomY, randomZ)
         particle.targetVelocity.set(
-          (Math.random() - 0.5) * 4,
-          (Math.random() - 0.5) * 4,
-          (Math.random() - 0.5) * 4
+          (Math.random() - 0.5) * 8,
+          (Math.random() - 0.5) * 8,
+          (Math.random() - 0.5) * 8
         )
       }
     })
@@ -99,81 +135,88 @@ function StatesOfMatterScene({ physicsState }: { physicsState: PhysicsState }) {
   useFrame(() => {
     if (!physicsState.isRunning || !particleRefs.current.length) return
 
-    frameCountRef.current++
+    timeRef.current += 0.016
     const particles = particleStatesRef.current
+    const bounceDistance = CONTAINER_SIZE / 2 - PARTICLE_RADIUS
 
-    // Update particle physics
-    particles.forEach((particle) => {
-      const lerpFactor = 0.1
-      const velocityLerpFactor = 0.15
+    particles.forEach((particle, idx) => {
+      const lerpFactor = 0.08
+      const velocityLerpFactor = 0.12
 
       particle.position.lerp(particle.targetPosition, lerpFactor)
       particle.velocity.lerp(particle.targetVelocity, velocityLerpFactor)
 
       if (physicsState.state === 'solid') {
-        particle.vibrationPhase += 0.08
-        const vibration = Math.sin(particle.vibrationPhase) * 0.02
-        particle.position.x = particle.targetPosition.x + vibration * 0.5
-        particle.position.z = particle.targetPosition.z + vibration * 0.5
+        const thermalAmplitude = 0.025
+        particle.vibrationPhase += 0.12
+        const vibX = Math.sin(particle.vibrationPhase) * thermalAmplitude * 0.5
+        const vibY = Math.cos(particle.vibrationPhase * 0.7) * thermalAmplitude * 0.3
+        const vibZ = Math.sin(particle.vibrationPhase * 0.9) * thermalAmplitude * 0.5
+
+        particle.position.x = particle.targetPosition.x + vibX
+        particle.position.y = particle.targetPosition.y + vibY
+        particle.position.z = particle.targetPosition.z + vibZ
       } else if (physicsState.state === 'liquid') {
-        const brownianX = (Math.random() - 0.5) * 0.15
-        const brownianZ = (Math.random() - 0.5) * 0.15
+        const rippleAmplitude = 0.15
+        const rippleFrequency = 2
+        const waveHeight = Math.sin(timeRef.current * rippleFrequency + particle.baseX * 0.3) * rippleAmplitude
+        particle.position.y = particle.targetPosition.y + waveHeight
+
+        const brownianX = (Math.random() - 0.5) * 0.12
+        const brownianZ = (Math.random() - 0.5) * 0.12
         particle.position.x += brownianX
         particle.position.z += brownianZ
 
-        const gravity = 0.98
-        particle.velocity.y -= gravity * 0.016
+        const gravity = 0.95
+        particle.velocity.y -= (1 - gravity) * 0.016
         if (particle.position.y < -CONTAINER_SIZE / 2 + PARTICLE_RADIUS) {
           particle.position.y = -CONTAINER_SIZE / 2 + PARTICLE_RADIUS
-          particle.velocity.y *= -0.3
+          particle.velocity.y *= -0.2
         }
       } else if (physicsState.state === 'gas') {
         particle.position.add(particle.velocity.clone().multiplyScalar(0.016))
 
-        const bounceDistance = CONTAINER_SIZE / 2 - PARTICLE_RADIUS
-
-        // Bounce off walls
         if (Math.abs(particle.position.x) > bounceDistance) {
           particle.position.x = Math.sign(particle.position.x) * bounceDistance
-          particle.velocity.x *= -0.9
+          particle.velocity.x *= -0.85
         }
         if (Math.abs(particle.position.y) > bounceDistance) {
           particle.position.y = Math.sign(particle.position.y) * bounceDistance
-          particle.velocity.y *= -0.9
+          particle.velocity.y *= -0.85
         }
         if (Math.abs(particle.position.z) > bounceDistance) {
           particle.position.z = Math.sign(particle.position.z) * bounceDistance
-          particle.velocity.z *= -0.9
+          particle.velocity.z *= -0.85
         }
       }
     })
 
-    // Update particle meshes
     particleRefs.current.forEach((mesh, i) => {
       if (particles[i]) {
         mesh.position.copy(particles[i].position)
       }
     })
 
-    // Update force lines
     if (physicsState.showForces && linesRef.current) {
       const positions: number[] = []
 
       if (physicsState.state === 'solid') {
-        const gridSize = Math.ceil(Math.cbrt(NUM_PARTICLES))
+        const particlesPerLayer = Math.floor(NUM_PARTICLES / 3)
+        const gridSize = Math.ceil(Math.sqrt(particlesPerLayer))
         particles.forEach((p1, i) => {
-          const x = i % gridSize
-          const y = Math.floor((i / gridSize) % gridSize)
-          const z = Math.floor(i / (gridSize * gridSize))
+          const layer = Math.floor(i / particlesPerLayer)
+          const layerIndex = i % particlesPerLayer
+          const x = layerIndex % gridSize
+          const y = Math.floor(layerIndex / gridSize)
 
           const neighbors = [
-            (x + 1) + y * gridSize + z * gridSize * gridSize,
-            x + (y + 1) * gridSize + z * gridSize * gridSize,
-            x + y * gridSize + (z + 1) * gridSize * gridSize,
+            layer * particlesPerLayer + (x + 1) + y * gridSize,
+            layer * particlesPerLayer + x + (y + 1) * gridSize,
+            ((layer + 1) % 3) * particlesPerLayer + x + y * gridSize,
           ]
 
           neighbors.forEach((j) => {
-            if (j < NUM_PARTICLES) {
+            if (j < NUM_PARTICLES && j !== i) {
               const p2 = particles[j]
               positions.push(p1.position.x, p1.position.y, p1.position.z)
               positions.push(p2.position.x, p2.position.y, p2.position.z)
@@ -183,7 +226,7 @@ function StatesOfMatterScene({ physicsState }: { physicsState: PhysicsState }) {
       } else if (physicsState.state === 'liquid') {
         particles.forEach((p1, i) => {
           particles.forEach((p2, j) => {
-            if (i < j) {
+            if (i < j && Math.random() < 0.15) {
               const dist = p1.position.distanceTo(p2.position)
               if (dist < FORCE_DISTANCE_THRESHOLD) {
                 positions.push(p1.position.x, p1.position.y, p1.position.z)
@@ -204,25 +247,16 @@ function StatesOfMatterScene({ physicsState }: { physicsState: PhysicsState }) {
 
   return (
     <>
-      {/* Container - Transparent cube */}
       <mesh ref={containerRef}>
         <boxGeometry args={[CONTAINER_SIZE, CONTAINER_SIZE, CONTAINER_SIZE]} />
-        <meshPhysicalMaterial
-          transparent
-          opacity={0.1}
-          color={0x3366ff}
-          metalness={0.3}
-          roughness={0.4}
-        />
+        <meshPhysicalMaterial transparent opacity={0.08} color={0x3366ff} metalness={0.2} roughness={0.6} />
       </mesh>
 
-      {/* Container edges */}
       <lineSegments>
         <edgesGeometry attach="geometry" args={[new THREE.BoxGeometry(CONTAINER_SIZE, CONTAINER_SIZE, CONTAINER_SIZE)]} />
-        <lineBasicMaterial attach="material" color={0x6699ff} linewidth={2} />
+        <lineBasicMaterial attach="material" color={0x6699ff} linewidth={1} />
       </lineSegments>
 
-      {/* Particles */}
       {Array.from({ length: NUM_PARTICLES }).map((_, i) => (
         <mesh
           key={i}
@@ -231,12 +265,11 @@ function StatesOfMatterScene({ physicsState }: { physicsState: PhysicsState }) {
           }}
           position={[0, 0, 0]}
         >
-          <sphereGeometry args={[PARTICLE_RADIUS, 16, 16]} />
-          <meshPhongMaterial color={0x00ccff} emissive={0x0066ff} shininess={100} />
+          <sphereGeometry args={[PARTICLE_RADIUS, 12, 12]} />
+          <meshPhongMaterial color={0x00ddff} emissive={0x0055ff} shininess={80} />
         </mesh>
       ))}
 
-      {/* Force lines */}
       {physicsState.showForces && (
         <lineSegments ref={linesRef}>
           <bufferGeometry>
@@ -247,25 +280,15 @@ function StatesOfMatterScene({ physicsState }: { physicsState: PhysicsState }) {
               itemSize={3}
             />
           </bufferGeometry>
-          <lineBasicMaterial color={0xff3333} linewidth={1} />
+          <lineBasicMaterial color={0xff4444} linewidth={1} transparent opacity={0.7} />
         </lineSegments>
       )}
 
-      {/* Lighting */}
-      <ambientLight intensity={0.6} />
-      <pointLight position={[10, 10, 10]} intensity={1} />
-      <pointLight position={[-10, -10, -10]} intensity={0.5} color={0x0066ff} />
+      <ambientLight intensity={0.7} />
+      <pointLight position={[12, 12, 12]} intensity={1.2} />
+      <pointLight position={[-12, -8, -12]} intensity={0.6} color={0x0088ff} />
 
-      {/* Camera controls */}
-      <OrbitControls
-        enableZoom
-        enablePan
-        enableRotate
-        autoRotate
-        autoRotateSpeed={2}
-        minDistance={8}
-        maxDistance={25}
-      />
+      <OrbitControls enableZoom enablePan enableRotate autoRotate autoRotateSpeed={1.5} minDistance={20} maxDistance={50} />
     </>
   )
 }
@@ -292,16 +315,14 @@ export function StatesOfMatter() {
 
   return (
     <div style={{ width: '100%', height: '100%', position: 'relative', background: '#0a0a1a' }}>
-      {/* Canvas */}
       <Canvas
-        camera={{ position: [12, 10, 12], fov: 50 }}
+        camera={{ position: [22, 18, 22], fov: 45 }}
         style={{ width: '100%', height: '100%' }}
         gl={{ antialias: true, alpha: true }}
       >
         <StatesOfMatterScene physicsState={physicsState} />
       </Canvas>
 
-      {/* Info Panel - Left side */}
       <div
         style={{
           position: 'absolute',
@@ -333,17 +354,13 @@ export function StatesOfMatter() {
           물질의 상태 변화
         </h2>
         <p style={{ margin: 0, textAlign: 'justify', color: '#ccc' }}>
-          자연계의 모든 물질은 온도와 압력 조건에 따라 고체, 액체, 기체라는 세 가지 서로 다른
-          상(Phase)을 띱니다. 고체 상태일 때는 입자들이 강하게 결합하여 고정된 형태와 일정한 부피를
-          유지합니다. 반면 액체 상태에서는 입자 간의 결합이 다소 느슨해져 부피는 유지하되 용기의 형태에
-          맞춰 자유롭게 흐르며 모양을 바꿀 수 있습니다. 기체 상태에 도달하면 입자들이 공간 제약 없이
-          활발하게 운동하며, 형태는 물론 부피마저 외부 조건에 따라 유동적으로 팽창하거나 수축합니다.
-          열에너지를 흡수하거나 방출함에 따라 물질의 구조가 재배열되는 이러한 현상을 '물질의 상태 변화'라고
-          일컫습니다.
+          자연계의 모든 물질은 온도와 압력 조건에 따라 고체, 액체, 기체라는 세 가지 서로 다른 상(Phase)을 띱니다. 고체 상태일 때는 입자들이 강하게 결합하여 고정된 형태와 일정한 부피를
+          유지합니다. 반면 액체 상태에서는 입자 간의 결합이 다소 느슨해져 부피는 유지하되 용기의 형태에 맞춰 자유롭게 흐르며 모양을 바꿀 수 있습니다. 기체 상태에 도달하면 입자들이 공간
+          제약 없이 활발하게 운동하며, 형태는 물론 부피마저 외부 조건에 따라 유동적으로 팽창하거나 수축합니다. 열에너지를 흡수하거나 방출함에 따라 물질의 구조가 재배열되는 이러한 현상을
+          '물질의 상태 변화'라고 일컫습니다.
         </p>
       </div>
 
-      {/* Control Panel - Bottom */}
       <div
         style={{
           position: 'absolute',
@@ -364,7 +381,6 @@ export function StatesOfMatter() {
           backdropFilter: 'blur(10px)',
         }}
       >
-        {/* State Buttons */}
         <div style={{ display: 'flex', gap: '10px' }}>
           {(['solid', 'liquid', 'gas'] as const).map((state) => (
             <button
@@ -380,8 +396,7 @@ export function StatesOfMatter() {
                 fontSize: '13px',
                 fontWeight: '600',
                 transition: 'all 0.3s ease',
-                boxShadow:
-                  physicsState.state === state ? '0 0 15px rgba(0, 204, 255, 0.6)' : 'none',
+                boxShadow: physicsState.state === state ? '0 0 15px rgba(0, 204, 255, 0.6)' : 'none',
               }}
               onMouseEnter={(e) => {
                 if (physicsState.state !== state) {
@@ -403,7 +418,6 @@ export function StatesOfMatter() {
           ))}
         </div>
 
-        {/* Checkbox */}
         <label
           style={{
             display: 'flex',
@@ -428,7 +442,6 @@ export function StatesOfMatter() {
           입자 사이의 인력 표시
         </label>
 
-        {/* Run/Pause Button */}
         <button
           onClick={handleToggleRun}
           style={{
@@ -453,6 +466,37 @@ export function StatesOfMatter() {
           {physicsState.isRunning ? '⏸ Pause' : '▶ Run'}
         </button>
       </div>
+
+      <button
+        onClick={() => navigate('/chemistry')}
+        style={{
+          position: 'absolute',
+          top: '1rem',
+          right: '1rem',
+          zIndex: 100,
+          padding: '0.75rem 1.5rem',
+          backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          border: 'none',
+          borderRadius: '8px',
+          cursor: 'pointer',
+          fontSize: '14px',
+          fontWeight: '600',
+          boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
+          transition: 'all 0.3s ease',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#ffffff'
+          e.currentTarget.style.transform = 'translateY(-2px)'
+          e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.4)'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.9)'
+          e.currentTarget.style.transform = 'translateY(0)'
+          e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)'
+        }}
+      >
+        ← Back to Chemistry
+      </button>
     </div>
   )
 }
