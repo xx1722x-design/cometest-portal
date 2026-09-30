@@ -46,6 +46,7 @@ export function Index() {
       description: t('light_wave_desc'),
       thumbnail: '',
       category: 'simulation',
+      link: '/optics',
       icon: '🌊',
     },
     {

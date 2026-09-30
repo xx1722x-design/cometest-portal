@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 interface SimulationCardProps {
   id: string
@@ -6,10 +7,15 @@ interface SimulationCardProps {
   description: string
   icon: string
   path: string
+  isTranslationKey?: boolean
 }
 
-export function SimulationCard({ id, title, description, icon, path }: SimulationCardProps) {
+export function SimulationCard({ id, title, description, icon, path, isTranslationKey }: SimulationCardProps) {
   const navigate = useNavigate()
+  const { t } = useTranslation()
+
+  const displayTitle = isTranslationKey ? t(title) : title
+  const displayDesc = isTranslationKey ? t(description) : description
 
   return (
     <div
@@ -77,7 +83,7 @@ export function SimulationCard({ id, title, description, icon, path }: Simulatio
             lineHeight: 1.3,
           }}
         >
-          {title}
+          {displayTitle}
         </h3>
         <p
           style={{
@@ -88,7 +94,7 @@ export function SimulationCard({ id, title, description, icon, path }: Simulatio
             flex: 1,
           }}
         >
-          {description}
+          {displayDesc}
         </p>
         <div
           style={{

@@ -9,7 +9,7 @@ const CATEGORIES = [
   { key: 'home', i18nKey: 'home', path: '/' },
   { key: 'measurement', i18nKey: 'measurement', path: '/category/measurement' },
   { key: 'force_motion', i18nKey: 'force_motion', path: '/category/force_motion' },
-  { key: 'light_wave', i18nKey: 'light_wave', path: '/category/light_wave' },
+  { key: 'light_wave', i18nKey: 'light_wave', path: '/optics' },
   { key: 'electricity', i18nKey: 'electricity', path: '/category/electricity' },
   { key: 'energy', i18nKey: 'energy', path: '/category/energy' },
   { key: 'chemistry', i18nKey: 'chemistry', path: '/chemistry' },

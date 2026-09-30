@@ -22,6 +22,11 @@ const StatesOfWaterSimulator = lazy(() =>
 const StatesOfMatter = lazy(() =>
   import('../components/simulations/StatesOfMatter').then((m) => ({ default: m.StatesOfMatter }))
 )
+const LightRefractionLab = lazy(() =>
+  import('../components/simulations/LightRefractionLab').then((m) => ({
+    default: m.LightRefractionLab,
+  }))
+)
 
 export function Simulation() {
   const navigate = useNavigate()
@@ -33,6 +38,8 @@ export function Simulation() {
   const handleBackClick = () => {
     if (simulation?.category === 'physics_chemistry') {
       navigate('/chemistry')
+    } else if (simulation?.category === 'optics_waves') {
+      navigate('/optics')
     } else {
       navigate('/game')
     }
@@ -68,6 +75,12 @@ export function Simulation() {
         return (
           <Suspense fallback={<div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Loading Simulation...</div>}>
             <StatesOfMatter />
+          </Suspense>
+        )
+      case 'light-refraction':
+        return (
+          <Suspense fallback={<div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Loading Simulation...</div>}>
+            <LightRefractionLab />
           </Suspense>
         )
       default:

@@ -5,11 +5,11 @@ import { SiteFooter } from '../components/SiteFooter'
 import { SimulationCard } from '../components/SimulationCard'
 import { getSimulationsByCategory } from '../config/simulationsData'
 
-export function ChemistryPage() {
+export function OpticsPage() {
   const navigate = useNavigate()
   const { t } = useTranslation()
 
-  const chemistrySimulations = getSimulationsByCategory('physics_chemistry')
+  const opticsSimulations = getSimulationsByCategory('optics_waves')
 
   return (
     <div className="portal-bg" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
@@ -19,10 +19,10 @@ export function ChemistryPage() {
         {/* Hero section */}
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <h1 style={{ fontSize: '36px', fontWeight: '700', color: '#fff', margin: '0 0 16px 0' }}>
-            <span style={{ marginRight: '12px' }}>⚛️</span> Physics & Chemistry Labs
+            <span style={{ marginRight: '12px' }}>💡</span>{t('optics_and_waves_title')}
           </h1>
           <p style={{ fontSize: '16px', color: '#aaa', margin: 0, maxWidth: '600px', marginLeft: 'auto', marginRight: 'auto' }}>
-            Interactive 3D simulations to explore the fundamental principles of matter and energy
+            {t('optics_and_waves_subtitle')}
           </p>
         </div>
 
@@ -36,7 +36,7 @@ export function ChemistryPage() {
             margin: '0 auto 40px',
           }}
         >
-          {chemistrySimulations.map((sim) => (
+          {opticsSimulations.map((sim) => (
             <SimulationCard
               key={sim.id}
               id={sim.id}

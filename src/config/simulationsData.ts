@@ -6,6 +6,7 @@ export interface SimulationItem {
   icon: string
   path: string
   component: string
+  isTranslationKey?: boolean
 }
 
 export const SIMULATIONS_DATA: SimulationItem[] = [
@@ -38,21 +39,33 @@ export const SIMULATIONS_DATA: SimulationItem[] = [
   },
   {
     id: 'states-of-water',
-    title: 'States of Water (물의 상태)',
-    description: '3D H2O molecules - Visualize transitions between solid, liquid, and gas states',
+    title: 'states_of_water_title',
+    description: 'states_of_water_desc',
     category: 'physics_chemistry',
     icon: '💧',
     path: '/simulation/states-of-water',
     component: 'StatesOfWaterSimulator',
+    isTranslationKey: true,
   },
   {
     id: 'states-of-matter',
-    title: 'States of Matter (물질의 상태)',
-    description: 'Interactive 3D particle simulation - Explore solid, liquid, and gas phases',
+    title: 'states_of_matter_title',
+    description: 'states_of_matter_desc',
     category: 'physics_chemistry',
     icon: '⚛️',
     path: '/simulation/states-of-matter',
     component: 'StatesOfMatter',
+    isTranslationKey: true,
+  },
+  {
+    id: 'light-refraction',
+    title: 'light_refraction_title',
+    description: 'light_refraction_desc',
+    category: 'optics_waves',
+    icon: '💡',
+    path: '/simulation/light-refraction',
+    component: 'LightRefractionLab',
+    isTranslationKey: true,
   },
 ]
 
