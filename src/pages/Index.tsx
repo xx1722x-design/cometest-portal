@@ -78,6 +78,7 @@ export function Index() {
       description: t('chemistry_desc'),
       thumbnail: '',
       category: 'simulation',
+      link: '/chemistry',
       icon: '🧪',
     },
     {

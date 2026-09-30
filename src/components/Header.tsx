@@ -12,7 +12,7 @@ const CATEGORIES = [
   { key: 'light_wave', i18nKey: 'light_wave', path: '/category/light_wave' },
   { key: 'electricity', i18nKey: 'electricity', path: '/category/electricity' },
   { key: 'energy', i18nKey: 'energy', path: '/category/energy' },
-  { key: 'chemistry', i18nKey: 'chemistry', path: '/category/chemistry' },
+  { key: 'chemistry', i18nKey: 'chemistry', path: '/chemistry' },
   { key: 'earth', i18nKey: 'earth', path: '/category/earth' },
   { key: 'astronomy', i18nKey: 'astronomy', path: '/category/astronomy' },
   { key: 'biology', i18nKey: 'biology', path: '/category/biology' },
