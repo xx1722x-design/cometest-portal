@@ -5,29 +5,30 @@ import { useTranslation } from 'react-i18next'
 import * as THREE from 'three'
 
 type ElementType = 'laser' | 'flatGlass' | 'prism' | 'convexLens' | 'concaveLens' | 'concaveMirror' | 'convexMirror'
-type LaserMode = 'single' | 'triple'
 
-interface WorkspaceElement {
+interface SpawnedElement {
   id: string
-  type: ElementType
-  position: [number, number]
-  rotation: number
-  scale: number
+  type: Exclude<ElementType, 'laser'>
+  position: [number, number, number]
+  rotation: [number, number, number]
 }
 
-interface LaserEmitter extends WorkspaceElement {
-  type: 'laser'
-  mode: LaserMode
+interface DragState {
+  elementId: string | null
+  startPos: [number, number] | null
 }
 
-function Workbench({ laser }: { laser: LaserEmitter }) {
-  const { camera } = useThree()
-  const raysRef = useRef<THREE.LineSegments>(null)
-  const dragStartRef = useRef<{ x: number; y: number } | null>(null)
+function LaserScene({ laser, spawned, onElementDrag }: { laser: { position: [number, number]; rotation: number }; spawned: SpawnedElement[]; onElementDrag: (id: string, delta: [number, number]) => void }) {
+  const { camera, scene } = useThree()
+  const raycasterRef = useRef(new THREE.Raycaster())
+  const dragStateRef = useRef<DragState>({ elementId: null, startPos: null })
+  const dragPlaneRef = useRef(new THREE.Plane(new THREE.Vector3(0, 0, 1), 0))
+  const dragPointRef = useRef(new THREE.Vector3())
+  const elementsRef = useRef<{ [key: string]: THREE.Mesh }>({})
 
   useEffect(() => {
     if (camera instanceof THREE.OrthographicCamera) {
-      camera.position.z = 40
+      camera.position.z = 30
       const width = 40
       const height = 30
       camera.left = -width / 2
@@ -38,122 +39,210 @@ function Workbench({ laser }: { laser: LaserEmitter }) {
     }
   }, [camera])
 
-  const calculateRays = useCallback(() => {
-    const rays: { start: THREE.Vector3; direction: THREE.Vector3; color: number }[] = []
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (e.button !== 0) return
+
+    const rect = (e.target as HTMLElement).getBoundingClientRect()
+    const x = (e.clientX - rect.left) / rect.width
+    const y = (e.clientY - rect.top) / rect.height
+
+    const mouse = new THREE.Vector2(x * 2 - 1, -(y * 2 - 1))
+    raycasterRef.current.setFromCamera(mouse, camera)
+
+    const objectsToTest = Object.values(elementsRef.current)
+    const intersects = raycasterRef.current.intersectObjects(objectsToTest)
+
+    if (intersects.length > 0) {
+      const hitElement = intersects[0].object
+      const elementId = (hitElement.userData as any).elementId
+      dragStateRef.current = {
+        elementId,
+        startPos: [e.clientX, e.clientY],
+      }
+    }
+  }
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!dragStateRef.current.elementId || !dragStateRef.current.startPos) return
+
+    const deltaX = (e.clientX - dragStateRef.current.startPos[0]) * 0.01
+    const deltaY = (e.clientY - dragStateRef.current.startPos[1]) * 0.01
+
+    onElementDrag(dragStateRef.current.elementId, [deltaX, -deltaY])
+    dragStateRef.current.startPos = [e.clientX, e.clientY]
+  }
+
+  const handleMouseUp = () => {
+    dragStateRef.current = { elementId: null, startPos: null }
+  }
+
+  const calculateRays = () => {
+    const rays: Array<{ start: THREE.Vector3; end: THREE.Vector3; color: number }> = []
     const laserDir = new THREE.Vector3(Math.cos(laser.rotation), Math.sin(laser.rotation), 0)
     const laserPos = new THREE.Vector3(laser.position[0], laser.position[1], 0)
 
-    const beamCount = laser.mode === 'single' ? 1 : 3
-    const beamOffsets = laser.mode === 'single' ? [0] : [-0.5, 0, 0.5]
-
-    beamOffsets.forEach((offset) => {
-      const perpOffset = new THREE.Vector3(-Math.sin(laser.rotation), Math.cos(laser.rotation), 0).multiplyScalar(offset * 0.3)
-      const start = laserPos.clone().add(perpOffset)
-      const dir = laserDir.clone()
-      rays.push({ start, direction: dir, color: 0xff0000 })
-    })
+    const start = laserPos.clone()
+    const end = start.clone().add(laserDir.clone().multiplyScalar(25))
+    rays.push({ start, end, color: 0xff0000 })
 
     return rays
-  }, [laser])
+  }
 
-  useFrame(() => {
-    const rays = calculateRays()
-    if (raysRef.current) {
-      const positions: number[] = []
-      rays.forEach((ray) => {
-        positions.push(ray.start.x, ray.start.y, ray.start.z)
-        const endPoint = ray.start.clone().add(ray.direction.clone().multiplyScalar(20))
-        positions.push(endPoint.x, endPoint.y, endPoint.z)
-      })
-
-      const geometry = raysRef.current.geometry as THREE.BufferGeometry
-      geometry.setAttribute('position', new THREE.BufferAttribute(new Float32Array(positions), 3))
-      if (geometry.attributes.position) {
-        geometry.attributes.position.needsUpdate = true
-      }
-    }
-  })
+  const rays = calculateRays()
 
   return (
     <>
-      <ambientLight intensity={0.8} />
-      <pointLight position={[20, 20, 15]} intensity={1.5} />
+      {/* Lighting */}
+      <ambientLight intensity={0.6} color={0xffffff} />
+      <directionalLight position={[15, 15, 20]} intensity={1.2} castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} />
+      <pointLight position={[-15, -15, 15]} intensity={0.4} color={0x4a9eff} />
 
-      <mesh position={[0, 0, -1]}>
-        <planeGeometry args={[40, 30]} />
-        <meshStandardMaterial color={0x0d1b2a} roughness={0.8} metalness={0.1} />
+      {/* Background plane */}
+      <mesh position={[0, 0, -1]} receiveShadow>
+        <planeGeometry args={[50, 40]} />
+        <meshStandardMaterial color={0x0d1b2a} roughness={0.9} metalness={0} />
       </mesh>
 
+      {/* Grid */}
       <gridHelper args={[40, 40, 0x2a4a6a, 0x1a3a5a]} position={[0, 0, 0.01]} />
 
-      <group position={[laser.position[0], laser.position[1], 0.1]} rotation={[0, 0, laser.rotation]}>
-        <mesh>
-          <boxGeometry args={[1, 0.4, 0.2]} />
-          <meshStandardMaterial color={0xff6b6b} emissive={0xff3333} emissiveIntensity={0.8} metalness={0.6} />
+      {/* Laser emitter */}
+      <group position={[laser.position[0], laser.position[1], 0.5]} rotation={[0, 0, laser.rotation]} castShadow>
+        <mesh castShadow>
+          <boxGeometry args={[1.2, 0.5, 0.4]} />
+          <meshStandardMaterial color={0xff4444} emissive={0xff2222} emissiveIntensity={1.5} metalness={0.7} roughness={0.3} />
         </mesh>
-        <mesh position={[0.7, 0, 0]}>
-          <sphereGeometry args={[0.25, 12, 12]} />
-          <meshStandardMaterial color={0xffcc00} emissive={0xff8800} emissiveIntensity={1} />
+        <mesh position={[0.8, 0, 0]} castShadow>
+          <sphereGeometry args={[0.35, 16, 16]} />
+          <meshStandardMaterial color={0xffdd00} emissive={0xffaa00} emissiveIntensity={3} metalness={0.8} roughness={0.2} toneMapped={false} />
         </mesh>
       </group>
 
-      <lineSegments ref={raysRef} position={[0, 0, 0.05]}>
-        <bufferGeometry>
-          <bufferAttribute attach="attributes-position" count={0} array={new Float32Array(0)} itemSize={3} />
-        </bufferGeometry>
-        <lineBasicMaterial color={0xff4444} linewidth={2} />
-      </lineSegments>
+      {/* Spawned optical elements */}
+      {spawned.map((elem) => (
+        <OpticalElementMesh
+          key={elem.id}
+          element={elem}
+          ref={(mesh: THREE.Mesh) => {
+            if (mesh) elementsRef.current[elem.id] = mesh
+          }}
+        />
+      ))}
+
+      {/* Laser rays - with neon glow */}
+      {rays.map((ray, idx) => (
+        <lineSegments key={idx} position={ray.start}>
+          <bufferGeometry>
+            <bufferAttribute attach="attributes-position" count={2} array={new Float32Array([0, 0, 0, ray.end.x - ray.start.x, ray.end.y - ray.start.y, ray.end.z - ray.start.z])} itemSize={3} />
+          </bufferGeometry>
+          <lineBasicMaterial color={ray.color} linewidth={3} toneMapped={false} fog={false} />
+        </lineSegments>
+      ))}
+
+      {/* Invisible drag plane for interaction */}
+      <mesh position={[0, 0, 0]} onPointerDown={(e: any) => handleMouseDown(e.nativeEvent)} onPointerMove={(e: any) => handleMouseMove(e.nativeEvent)} onPointerUp={(e: any) => handleMouseUp()} onPointerLeave={(e: any) => handleMouseUp()}>
+        <planeGeometry args={[50, 40]} />
+        <meshBasicMaterial transparent opacity={0} />
+      </mesh>
     </>
   )
 }
 
+const OpticalElementMesh = React.forwardRef<
+  THREE.Mesh,
+  { element: SpawnedElement }
+>(({ element }, ref) => {
+  const meshRef = useRef<THREE.Mesh>(null)
+
+  useEffect(() => {
+    if (meshRef.current) {
+      meshRef.current.userData.elementId = element.id
+    }
+  }, [element.id])
+
+  const getGeometry = () => {
+    const scale = 1.5
+    switch (element.type) {
+      case 'flatGlass':
+        return <boxGeometry args={[2 * scale, 3 * scale, 0.5 * scale]} />
+      case 'prism':
+        return <coneGeometry args={[1 * scale, 2.5 * scale, 3]} />
+      case 'convexLens':
+        return <sphereGeometry args={[1 * scale, 24, 24]} />
+      case 'concaveLens':
+        return <icosahedronGeometry args={[1 * scale, 3]} />
+      case 'convexMirror':
+        return <sphereGeometry args={[1.2 * scale, 20, 20]} />
+      case 'concaveMirror':
+        return <sphereGeometry args={[1.2 * scale, 20, 20]} />
+      default:
+        return <boxGeometry args={[1, 1, 0.5]} />
+    }
+  }
+
+  const getColor = () => {
+    switch (element.type) {
+      case 'flatGlass':
+      case 'convexLens':
+      case 'concaveLens':
+        return 0x4a9eff
+      case 'prism':
+        return 0x7b68ee
+      case 'convexMirror':
+      case 'concaveMirror':
+        return 0xcccccc
+      default:
+        return 0x888888
+    }
+  }
+
+  const isMirror = element.type.includes('Mirror')
+
+  return (
+    <mesh ref={ref} position={element.position} rotation={element.rotation} castShadow receiveShadow>
+      {getGeometry()}
+      <meshStandardMaterial
+        color={getColor()}
+        transparent
+        opacity={isMirror ? 0.95 : 0.8}
+        metalness={isMirror ? 0.95 : 0.4}
+        roughness={isMirror ? 0.05 : 0.5}
+        emissive={isMirror ? 0x444444 : 0x1a2a3a}
+        emissiveIntensity={0.3}
+      />
+    </mesh>
+  )
+})
+
+OpticalElementMesh.displayName = 'OpticalElementMesh'
+
 export function LightRefractionLab() {
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const [laser, setLaser] = useState<LaserEmitter>({
-    id: 'laser-1',
-    type: 'laser',
-    position: [-15, 0],
-    rotation: 0,
-    scale: 1,
-    mode: 'single',
-  })
-  const canvasRef = useRef<HTMLDivElement>(null)
-  const dragStartRef = useRef<{ x: number; y: number } | null>(null)
+  const [laser, setLaser] = useState({ position: [-15, 0] as [number, number], rotation: 0 })
+  const [spawned, setSpawned] = useState<SpawnedElement[]>([])
 
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if (!canvasRef.current) return
-    const rect = canvasRef.current.getBoundingClientRect()
-    dragStartRef.current = { x: e.clientX - rect.left, y: e.clientY - rect.top }
-  }
-
-  const handleMouseMove = (e: React.MouseEvent) => {
-    if (!dragStartRef.current || !canvasRef.current) return
-    const rect = canvasRef.current.getBoundingClientRect()
-    const currentX = e.clientX - rect.left
-    const currentY = e.clientY - rect.top
-    const deltaX = currentX - dragStartRef.current.x
-    const deltaY = currentY - dragStartRef.current.y
-
-    if ((e.buttons & 1) === 1) {
-      // Left button down - move laser
-      setLaser((prev) => ({
-        ...prev,
-        position: [prev.position[0] + deltaX * 0.01, prev.position[1] - deltaY * 0.01],
-      }))
-    } else if ((e.buttons & 2) === 2) {
-      // Right button down - rotate laser
-      setLaser((prev) => ({
-        ...prev,
-        rotation: prev.rotation + deltaX * 0.01,
-      }))
+  const handleSpawnElement = (type: Exclude<ElementType, 'laser'>) => {
+    const newElement: SpawnedElement = {
+      id: `${type}-${Date.now()}`,
+      type,
+      position: [0, 0, 0.5],
+      rotation: [0, 0, 0],
     }
-
-    dragStartRef.current = { x: currentX, y: currentY }
+    setSpawned((prev) => [...prev, newElement])
   }
 
-  const handleMouseUp = () => {
-    dragStartRef.current = null
+  const handleElementDrag = (id: string, delta: [number, number]) => {
+    setSpawned((prev) =>
+      prev.map((elem) =>
+        elem.id === id
+          ? {
+              ...elem,
+              position: [elem.position[0] + delta[0], elem.position[1] + delta[1], elem.position[2]],
+            }
+          : elem
+      )
+    )
   }
 
   const opticalTools = [
@@ -167,17 +256,9 @@ export function LightRefractionLab() {
 
   return (
     <div style={{ width: '100%', height: '100vh', position: 'relative', background: '#0a0a1a', display: 'flex', overflow: 'hidden' }}>
-      <div
-        ref={canvasRef}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
-        onMouseLeave={handleMouseUp}
-        onContextMenu={(e) => e.preventDefault()}
-        style={{ flex: 1, position: 'relative', cursor: 'grab' }}
-      >
-        <Canvas orthographic camera={{ position: [0, 0, 40], zoom: 1 }} style={{ width: '100%', height: '100%' }}>
-          <Workbench laser={laser} />
+      <div style={{ flex: 1, position: 'relative' }}>
+        <Canvas orthographic camera={{ position: [0, 0, 30], zoom: 1 }} style={{ width: '100%', height: '100%' }}>
+          <LaserScene laser={laser} spawned={spawned} onElementDrag={handleElementDrag} />
         </Canvas>
       </div>
 
@@ -186,25 +267,25 @@ export function LightRefractionLab() {
           position: 'absolute',
           top: '1rem',
           left: '1rem',
-          background: 'rgba(10, 10, 26, 0.95)',
+          background: 'rgba(10, 10, 26, 0.97)',
           border: '2px solid #4a9eff',
           borderRadius: '12px',
           padding: '1.5rem',
           color: '#fff',
           fontFamily: "'Segoe UI', sans-serif",
-          maxWidth: '320px',
+          maxWidth: '340px',
           fontSize: '13px',
-          backdropFilter: 'blur(10px)',
-          boxShadow: '0 8px 32px rgba(74, 158, 255, 0.2)',
+          backdropFilter: 'blur(12px)',
+          boxShadow: '0 8px 32px rgba(74, 158, 255, 0.25)',
           zIndex: 100,
         }}
       >
         <h2 style={{ margin: '0 0 1rem 0', fontSize: '16px', color: '#66ccff', fontWeight: '700' }}>💡 {t('light_refraction_title')}</h2>
-        <p style={{ margin: '0 0 0.75rem 0', fontSize: '12px', color: '#aaa' }}>{t('light_refraction_content')}</p>
-        <div style={{ marginTop: '1rem', fontSize: '11px', color: '#888', lineHeight: '1.8' }}>
+        <p style={{ margin: '0 0 1rem 0', fontSize: '12px', color: '#aaa' }}>{t('light_refraction_content')}</p>
+        <div style={{ marginTop: '1rem', fontSize: '11px', color: '#888', lineHeight: '1.8', borderTop: '1px solid #2a4a6a', paddingTop: '1rem' }}>
           <div>🖱️ {t('left_drag')}</div>
-          <div>🔄 {t('right_drag')}</div>
-          <div>📦 {t('optical_elements')}</div>
+          <div>📦 Click element buttons to spawn</div>
+          <div>🎯 Drag spawned objects freely</div>
         </div>
       </div>
 
@@ -218,7 +299,7 @@ export function LightRefractionLab() {
           border: '2px solid #4a9eff',
           borderRadius: '16px',
           padding: '1.25rem',
-          backdropFilter: 'blur(10px)',
+          backdropFilter: 'blur(12px)',
           boxShadow: '0 8px 32px rgba(74, 158, 255, 0.3)',
           zIndex: 100,
           maxWidth: '90vw',
@@ -228,8 +309,9 @@ export function LightRefractionLab() {
           {opticalTools.map((tool) => (
             <button
               key={tool.id}
+              onClick={() => handleSpawnElement(tool.id as Exclude<ElementType, 'laser'>)}
               style={{
-                padding: '0.6rem 1rem',
+                padding: '0.7rem 1.1rem',
                 background: '#1a2a3a',
                 border: `2px solid ${tool.color}`,
                 borderRadius: '8px',
@@ -245,12 +327,14 @@ export function LightRefractionLab() {
               onMouseEnter={(e) => {
                 e.currentTarget.style.backgroundColor = tool.color
                 e.currentTarget.style.color = '#000'
-                e.currentTarget.style.boxShadow = `0 0 12px ${tool.color}80`
+                e.currentTarget.style.boxShadow = `0 0 16px ${tool.color}80`
+                e.currentTarget.style.transform = 'scale(1.05)'
               }}
               onMouseLeave={(e) => {
                 e.currentTarget.style.backgroundColor = '#1a2a3a'
                 e.currentTarget.style.color = '#fff'
                 e.currentTarget.style.boxShadow = 'none'
+                e.currentTarget.style.transform = 'scale(1)'
               }}
             >
               <span style={{ fontSize: '14px' }}>{tool.icon}</span>
@@ -280,10 +364,12 @@ export function LightRefractionLab() {
         onMouseEnter={(e) => {
           e.currentTarget.style.background = 'rgba(255, 255, 255, 1)'
           e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.4)'
+          e.currentTarget.style.transform = 'translateY(-2px)'
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)'
           e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)'
+          e.currentTarget.style.transform = 'translateY(0)'
         }}
       >
         {t('back_button')}
