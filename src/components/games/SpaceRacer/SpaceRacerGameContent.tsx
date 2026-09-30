@@ -2,6 +2,7 @@ import { useEffect, useRef } from 'react'
 import { useFrame, useThree } from '@react-three/fiber'
 import * as THREE from 'three'
 import { useSpaceRacerStore } from './spaceRacerState'
+import { SpaceRacerShip } from './SpaceRacerShip'
 
 const SHIP_MODELS = [
   { color: 0xff6b6b, name: 'Red Speed' },
@@ -107,7 +108,7 @@ export function SpaceRacerGameContent() {
 
       {/* Player Ship */}
       <group ref={playerRef}>
-        <Ship color={SHIP_MODELS[selectedShip].color} />
+        <SpaceRacerShip />
       </group>
 
       {/* Obstacles */}
@@ -229,24 +230,39 @@ function Ship({ color }: { color: number }) {
 function Track({ playerZ }: { playerZ: number }) {
   const trackRef = useRef<THREE.Group>(null)
 
-  useFrame(() => {
-    // Dynamic color shift along the track
-  })
+  // Create extensive track segments - render 3000m ahead for infinite feel
+  const segments = 150  // 150 segments * 20 units = 3000 units ahead
+  const segmentLength = 20
+  const baseTrackWidth = 8.0  // Match physics trackWidth
 
-  // Create track segments
-  const segments = 30
-  const trackWidth = 6
+  const getTrackCurve = (z: number, score: number) => {
+    // X-axis curve: gets more pronounced with difficulty
+    const curveAmplitude = 1.2 + Math.min(2, score / 200)
+    const curveFrequency = 0.004 + score / 50000
+    return Math.sin(z * curveFrequency) * curveAmplitude
+  }
+
+  const getTrackHeight = (z: number, score: number) => {
+    // Y-axis slopes: roller coaster-like hills and valleys
+    const heightAmplitude = 0.5 + Math.min(1, score / 300)
+    const heightFrequency = 0.003
+    return Math.sin(z * heightFrequency) * heightAmplitude
+  }
 
   return (
     <group ref={trackRef}>
       {Array.from({ length: segments }).map((_, i) => {
-        const z = playerZ - 200 + i * 20
+        const z = playerZ - 100 + i * segmentLength
+        const trackX = getTrackCurve(z, playerZ)
+        const trackY = getTrackHeight(z, playerZ)
+        const trackWidth = baseTrackWidth - Math.min(2, playerZ / 500)
+
         const hue = (playerZ * 0.001 + i * 0.05) % 1
         const color = new THREE.Color().setHSL(hue, 0.8, 0.5)
 
         return (
-          <mesh key={i} position={[0, 0, z]}>
-            <boxGeometry args={[trackWidth, 0.5, 20]} />
+          <mesh key={i} position={[trackX, trackY, z]}>
+            <boxGeometry args={[trackWidth, 0.5, segmentLength]} />
             <meshStandardMaterial
               color={color}
               metalness={0.6}
@@ -260,16 +276,19 @@ function Track({ playerZ }: { playerZ: number }) {
 
       {/* Track edges */}
       {Array.from({ length: segments }).map((_, i) => {
-        const z = playerZ - 200 + i * 20
+        const z = playerZ - 100 + i * segmentLength
+        const trackX = getTrackCurve(z, playerZ)
+        const trackY = getTrackHeight(z, playerZ)
+        const trackWidth = baseTrackWidth - Math.min(2, playerZ / 500)
 
         return (
           <group key={`edges-${i}`}>
-            <mesh position={[-trackWidth / 2 - 0.3, 0.3, z]}>
-              <boxGeometry args={[0.3, 0.8, 20]} />
+            <mesh position={[trackX - trackWidth / 2 - 0.3, trackY + 0.3, z]}>
+              <boxGeometry args={[0.3, 0.8, segmentLength]} />
               <meshStandardMaterial color={0xffffff} emissive={0x4ecdc4} emissiveIntensity={0.5} />
             </mesh>
-            <mesh position={[trackWidth / 2 + 0.3, 0.3, z]}>
-              <boxGeometry args={[0.3, 0.8, 20]} />
+            <mesh position={[trackX + trackWidth / 2 + 0.3, trackY + 0.3, z]}>
+              <boxGeometry args={[0.3, 0.8, segmentLength]} />
               <meshStandardMaterial color={0xffffff} emissive={0xff6b6b} emissiveIntensity={0.5} />
             </mesh>
           </group>

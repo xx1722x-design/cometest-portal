@@ -76,7 +76,7 @@ export const useSpaceRacerStore = create<SpaceRacerStore>((set, get) => ({
       playerPos: [0, 0.5, 0],
       playerVelocity: [0, 0, 0],
       playerRotation: 0,
-      speed: 5,
+      speed: 20, // Start with higher initial speed
       maxSpeed: initialDifficulties[difficulty].maxSpeed,
       obstacles: [],
       nextObstacleId: 0,
@@ -88,11 +88,14 @@ export const useSpaceRacerStore = create<SpaceRacerStore>((set, get) => ({
     if (!state.isAlive || state.gameState !== 'playing') return
 
     const diffSettings = initialDifficulties[state.difficulty]
+    const score = state.score
 
-    // Smooth speed increase with slower ramp in early game
-    const speedRampFactor = Math.min(1, state.score / 200) // Gradually increase acceleration after 200m
-    const speedIncrement = 0.3 * speedRampFactor * deltaTime
-    const newSpeed = Math.min(state.speed + speedIncrement, state.maxSpeed)
+    // PROGRESSIVE DIFFICULTY: Speed increases faster over time
+    const speedFactor = Math.min(1.5, 1 + score / 300) // Doubles at 300m
+    const baseMaxSpeed = diffSettings.maxSpeed
+    const adjustedMaxSpeed = baseMaxSpeed * speedFactor
+    const speedIncrement = 0.12 * speedFactor * deltaTime
+    const newSpeed = Math.min(state.speed + speedIncrement, adjustedMaxSpeed)
 
     // Update position
     const [px, py, pz] = state.playerPos
@@ -103,53 +106,73 @@ export const useSpaceRacerStore = create<SpaceRacerStore>((set, get) => ({
     const newVy = vy - 25 * deltaTime
     let newPy = py + vy * deltaTime
 
-    // Smooth lateral friction - makes controls tighter
-    const lateralFriction = 0.92
+    // Smooth lateral friction
+    const lateralFriction = 0.90
     const newVx = vx * lateralFriction
 
-    // Generous track boundaries (wide track)
-    const trackWidth = 6.5
-    let isOutOfBounds = Math.abs(px) > trackWidth || newPy < 0.2
+    // DYNAMIC TRACK CURVES & HEIGHTS: MUST MATCH Track.tsx calculation exactly
+    const curveAmplitude = 1.2 + Math.min(2, score / 200) // Max 3.2 units at 200m
+    const curveFrequency = 0.004 + score / 50000 // Curves get tighter
+    const trackCurve = Math.sin(newZ * curveFrequency) * curveAmplitude
 
-    // Curved track after 200m - smooth sine wave
-    let trackCurve = 0
-    if (state.score > 200) {
-      const curveAmount = Math.sin((state.score - 200) * 0.002) * 0.8
-      trackCurve = curveAmount
+    // TRACK HEIGHT (Y-axis): Calculate exact ground level at player Z position
+    const heightAmplitude = 0.5 + Math.min(1, score / 300)
+    const heightFrequency = 0.003
+    const trackGroundY = Math.sin(newZ * heightFrequency) * heightAmplitude
+
+    // Ship height offset - keep ship ON TOP of track surface
+    const shipHeightOffset = 0.3
+
+    // Base track width - narrows slightly with difficulty
+    const baseTrackWidth = 8.0
+    const trackWidth = baseTrackWidth - Math.min(2, score / 500)
+
+    // CHECK FALL OFF: Only trigger if off-track sides AND falling below the track surface
+    let isOutOfBounds = false
+    const distanceFromCenterLine = Math.abs(px - trackCurve)
+
+    if (distanceFromCenterLine > trackWidth / 2) {
+      // Player is off the track sides - check if they're falling below the track
+      if (newPy < trackGroundY - 1.0) {
+        isOutOfBounds = true
+      }
     }
 
-    // Adjust track boundaries based on curve
-    const adjustedTrackWidth = trackWidth + Math.abs(trackCurve) * 0.5
+    // Force player to stay ON the track surface (rigid ground)
+    // This prevents sinking and creates firm ground for jumping
+    const targetPy = trackGroundY + shipHeightOffset
+    const clampedPy = newPy > targetPy ? newPy : targetPy
 
-    // Generate obstacles with varied spacing
+    // Generate obstacles with PROGRESSIVE DIFFICULTY
     let newObstacles = [...state.obstacles]
-    const shouldAddObstacle = Math.random() < diffSettings.obstacleFrequency * deltaTime
+    const obstacleFrequency = Math.min(1.5, diffSettings.obstacleFrequency * (1 + score / 400))
+    const shouldAddObstacle = Math.random() < obstacleFrequency * deltaTime
 
     if (shouldAddObstacle) {
       const isGap = Math.random() < diffSettings.gapChance
-      const xOffset = trackCurve + (Math.random() - 0.5) * 4
+      const randomOffset = (Math.random() - 0.5) * 3
+      const xOffset = trackCurve + randomOffset
       newObstacles.push({
         id: state.nextObstacleId,
-        x: Math.max(-adjustedTrackWidth, Math.min(adjustedTrackWidth, xOffset)),
+        x: Math.max(-trackWidth, Math.min(trackWidth, xOffset)),
         z: newZ + 50,
         type: isGap ? 'gap' : 'block',
       })
     }
 
-    // Remove obstacles that are behind the player
+    // Remove obstacles behind the player
     newObstacles = newObstacles.filter(obs => obs.z > newZ - 10)
 
-    // Check collision with obstacles (generous hitbox)
+    // FAIR COLLISION DETECTION: Small hitbox relative to visual model
     let collision = false
+    const hitboxRadius = 0.3 // 60% of visual ship size
     for (const obs of newObstacles) {
       const distZ = Math.abs(obs.z - newZ)
       const distX = Math.abs(obs.x - px)
 
-      if (distZ < 2.5 && distX < 1.8) {
-        if (obs.type === 'block' && py < 1.5) {
-          collision = true
-          break
-        } else if (obs.type === 'gap' && py < 0.5) {
+      // Tighter collision detection - only hits if very close
+      if (distZ < 2 && distX < hitboxRadius) {
+        if (obs.type === 'block' && py <= 0.8) {
           collision = true
           break
         }
@@ -158,9 +181,9 @@ export const useSpaceRacerStore = create<SpaceRacerStore>((set, get) => ({
 
     set({
       speed: newSpeed,
-      playerPos: [px, Math.max(0.5, newPy), newZ],
+      playerPos: [px, clampedPy, newZ],
       playerVelocity: [newVx, newVy, vz],
-      playerRotation: 0, // Remove auto-rotation, player controls rotation
+      playerRotation: 0,
       elapsedTime: state.elapsedTime + deltaTime,
       score: Math.floor(newZ),
       obstacles: newObstacles,
@@ -172,8 +195,9 @@ export const useSpaceRacerStore = create<SpaceRacerStore>((set, get) => ({
   movePlayer: (direction: number) => {
     const state = get()
     const [px, py, pz] = state.playerPos
-    // Faster, tighter controls - 1.0 per input instead of 0.5
-    const newX = Math.max(-7, Math.min(7, px + direction * 1.0))
+    const trackWidth = 8.0
+    // Faster, tighter controls - allow full track width
+    const newX = Math.max(-trackWidth, Math.min(trackWidth, px + direction * 1.0))
     set({ playerPos: [newX, py, pz] })
   },
 

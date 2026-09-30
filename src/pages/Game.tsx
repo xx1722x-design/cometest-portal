@@ -5,6 +5,7 @@ import { SpaceRacer } from '../components/games/SpaceRacer'
 import { getGameById } from '../config/gamesData'
 
 // Dynamic import for AllYouCanTycoon (JSX file)
+// @ts-ignore - importing JSX file is intentional for game compatibility
 const AllYouCanTycoon = lazy(() => import('../components/games/AllYouCanTycoon/index.jsx').then(m => ({ default: m.default })))
 
 export function Game() {
