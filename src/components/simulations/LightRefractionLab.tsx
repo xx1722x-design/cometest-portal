@@ -46,8 +46,8 @@ function OpticsScene({ elements, onElementsChange }: { elements: SpawnedElement[
     return new THREE.Vector2(x, y)
   }
 
-  const handleCanvasMouseDown = (e: React.MouseEvent) => {
-    const ndc = worldToNDC(e.clientX, e.clientY)
+  const handleCanvasMouseDown = (e: any) => {
+    const ndc = worldToNDC(e.clientX || e.nativeEvent.clientX, e.clientY || e.nativeEvent.clientY)
     raycasterRef.current.setFromCamera(ndc, camera)
 
     const meshes = Object.values(meshesRef.current)
@@ -55,24 +55,27 @@ function OpticsScene({ elements, onElementsChange }: { elements: SpawnedElement[
 
     if (hits.length > 0) {
       const hitMesh = hits[0].object as any
+      const button = e.button || (e.nativeEvent?.button ?? 0)
       dragStateRef.current = {
         elementId: hitMesh.userData.elementId,
-        isDragging: e.button === 0,
-        isRotating: e.button === 2,
-        startMouse: [e.clientX, e.clientY],
+        isDragging: button === 0,
+        isRotating: button === 2,
+        startMouse: [e.clientX || e.nativeEvent.clientX, e.clientY || e.nativeEvent.clientY],
       }
     }
   }
 
-  const handleCanvasMouseMove = (e: React.MouseEvent) => {
+  const handleCanvasMouseMove = (e: any) => {
     if (!dragStateRef.current.elementId) return
 
-    const ndc = worldToNDC(e.clientX, e.clientY)
+    const clientX = e.clientX || e.nativeEvent?.clientX || 0
+    const clientY = e.clientY || e.nativeEvent?.clientY || 0
+    const ndc = worldToNDC(clientX, clientY)
     raycasterRef.current.setFromCamera(ndc, camera)
     raycasterRef.current.ray.intersectPlane(dragPlaneRef.current, dragPointRef.current)
 
-    const deltaX = e.clientX - dragStateRef.current.startMouse[0]
-    const deltaY = e.clientY - dragStateRef.current.startMouse[1]
+    const deltaX = clientX - dragStateRef.current.startMouse[0]
+    const deltaY = clientY - dragStateRef.current.startMouse[1]
 
     onElementsChange(
       elements.map((el) => {
@@ -97,7 +100,7 @@ function OpticsScene({ elements, onElementsChange }: { elements: SpawnedElement[
       })
     )
 
-    dragStateRef.current.startMouse = [e.clientX, e.clientY]
+    dragStateRef.current.startMouse = [clientX, clientY]
   }
 
   const handleCanvasMouseUp = () => {
