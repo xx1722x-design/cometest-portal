@@ -389,7 +389,9 @@ function OpticsScene({ objects, elements, onUpdate, onDelete }: any) {
         const points = path.map((p) => new THREE.Vector3(p[0], p[1], 0))
         return (
           <line key={`ray-${i}`}>
-            <bufferGeometry setFromPoints={points} />
+            <bufferGeometry>
+              <bufferAttribute attach="attributes-position" count={points.length} array={new Float32Array(points.flatMap(p => [p.x, p.y, p.z]))} itemSize={3} />
+            </bufferGeometry>
             <lineBasicMaterial color={0xff1a4d} linewidth={5} toneMapped={false} />
           </line>
         )
