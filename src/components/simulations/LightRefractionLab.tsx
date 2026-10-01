@@ -101,27 +101,28 @@ const traceRay = (start: THREE.Vector2, dir: THREE.Vector2, elements: OpticalEle
       }
     }
 
-    if (!closest || closestT > 200) {
+    if (!closest || closestT > 200 || !closest.hit) {
       // Extend ray to infinity
       const extend = ray.dir.multiplyScalar(200)
       path.push(new THREE.Vector3(ray.start.x + extend.x, ray.start.y + extend.y, 0))
       break
     }
 
-    path.push(new THREE.Vector3(closest.hit.point.x, closest.hit.point.y, 0))
+    const hit = closest.hit
+    path.push(new THREE.Vector3(hit.point.x, hit.point.y, 0))
 
     if (closest.obj.type === 'mirror') {
       ray = {
-        start: closest.hit.point.clone().add(closest.hit.normal.clone().multiplyScalar(0.01)),
-        dir: calculateReflection(ray.dir, closest.hit.normal),
+        start: hit.point.clone().add(hit.normal.clone().multiplyScalar(0.01)),
+        dir: calculateReflection(ray.dir, hit.normal),
         ior: 1,
         bounces: ray.bounces + 1
       }
     } else {
-      const refracted = calculateRefraction(ray.dir, closest.hit.normal, ray.ior, closest.obj.ior)
+      const refracted = calculateRefraction(ray.dir, hit.normal, ray.ior, closest.obj.ior)
       if (refracted) {
         ray = {
-          start: closest.hit.point.clone().add(refracted.clone().multiplyScalar(0.01)),
+          start: hit.point.clone().add(refracted.clone().multiplyScalar(0.01)),
           dir: refracted,
           ior: closest.obj.ior,
           bounces: ray.bounces + 1
@@ -129,8 +130,8 @@ const traceRay = (start: THREE.Vector2, dir: THREE.Vector2, elements: OpticalEle
       } else {
         // Total internal reflection
         ray = {
-          start: closest.hit.point.clone().add(closest.hit.normal.clone().multiplyScalar(0.01)),
-          dir: calculateReflection(ray.dir, closest.hit.normal),
+          start: hit.point.clone().add(hit.normal.clone().multiplyScalar(0.01)),
+          dir: calculateReflection(ray.dir, hit.normal),
           ior: ray.ior,
           bounces: ray.bounces + 1
         }
