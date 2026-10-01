@@ -397,7 +397,6 @@ export function LightRefractionLab() {
             key={tool.id}
             onMouseDown={(e) => handlePaletteMouseDown(tool.id as Exclude<ElementType, 'laser'>, e)}
             onMouseUp={(e) => handlePaletteMouseUp(tool.id as Exclude<ElementType, 'laser'>, e)}
-            onMouseLeave={(e) => (paletteStartRef.current = null)}
             style={{
               padding: '0.8rem 1.2rem',
               background: '#1a2a3a',
@@ -424,6 +423,7 @@ export function LightRefractionLab() {
               e.currentTarget.style.color = '#fff'
               e.currentTarget.style.boxShadow = 'none'
               e.currentTarget.style.transform = 'scale(1)'
+              paletteStartRef.current = null
             }}
           >
             <span style={{ fontSize: '16px' }}>{tool.icon}</span>
