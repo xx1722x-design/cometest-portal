@@ -62,10 +62,13 @@ export function FreshLangMenu() {
   const currentLanguage = LANGUAGES.find((l) => l.code === i18n.language)
   const currentCode = currentLanguage?.code?.toUpperCase() || 'EN'
 
-  // Detect theme changes
+  // Detect theme changes with fallback checks
   useEffect(() => {
     const detectTheme = () => {
-      const isDarkMode = document.documentElement.classList.contains('dark')
+      const isDarkMode =
+        document.documentElement.classList.contains('dark') ||
+        window.matchMedia('(prefers-color-scheme: dark)').matches ||
+        getComputedStyle(document.documentElement).colorScheme === 'dark'
       setIsDark(isDarkMode)
     }
 
@@ -73,9 +76,16 @@ export function FreshLangMenu() {
 
     // Listen for theme changes
     const observer = new MutationObserver(detectTheme)
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'style'] })
 
-    return () => observer.disconnect()
+    // Also listen to system theme changes
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    mediaQuery.addEventListener('change', detectTheme)
+
+    return () => {
+      observer.disconnect()
+      mediaQuery.removeEventListener('change', detectTheme)
+    }
   }, [])
 
   // Calculate dropdown position with RTL support
@@ -107,7 +117,12 @@ export function FreshLangMenu() {
     setIsOpen(false)
   }
 
-  const theme = isDark ? THEMES.dark : THEMES.light
+  // Detect dark mode at render time for Portal
+  const currentIsDark =
+    document.documentElement.classList.contains('dark') ||
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+
+  const theme = currentIsDark ? THEMES.dark : THEMES.light
 
   // Portal content - renders in document.body
   const portalContent = isOpen
@@ -122,7 +137,7 @@ export function FreshLangMenu() {
             backgroundColor: theme.bg,
             border: `1px solid ${theme.border}`,
             borderRadius: '0.375rem',
-            boxShadow: isDark
+            boxShadow: currentIsDark
               ? `0 0 30px ${theme.glow}, 0 20px 40px rgba(0, 0, 0, 0.8)`
               : `0 2px 12px rgba(0, 0, 0, 0.08), 0 4px 24px rgba(0, 0, 0, 0.05)`,
             zIndex: 999999,
@@ -189,7 +204,7 @@ export function FreshLangMenu() {
 
   return (
     <>
-      {/* Button - Dynamic Theme */}
+      {/* Button - Dynamic Theme with explicit dark mode check */}
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
@@ -207,21 +222,21 @@ export function FreshLangMenu() {
           borderRadius: '0.375rem',
           cursor: 'pointer',
           transition: 'all 0.15s ease',
-          boxShadow: isDark
+          boxShadow: currentIsDark
             ? `0 0 12px ${theme.glow}`
             : `0 1px 3px rgba(0, 0, 0, 0.1)`,
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = theme.bgHover
           e.currentTarget.style.borderColor = theme.borderHover
-          e.currentTarget.style.boxShadow = isDark
+          e.currentTarget.style.boxShadow = currentIsDark
             ? `0 0 20px ${theme.glowHover}`
             : `0 2px 8px rgba(0, 0, 0, 0.08)`
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.backgroundColor = theme.bg
           e.currentTarget.style.borderColor = theme.border
-          e.currentTarget.style.boxShadow = isDark
+          e.currentTarget.style.boxShadow = currentIsDark
             ? `0 0 12px ${theme.glow}`
             : `0 1px 3px rgba(0, 0, 0, 0.1)`
         }}
