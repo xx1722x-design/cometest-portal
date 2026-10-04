@@ -1,92 +1,115 @@
-import React, { useState, useRef, useEffect } from 'react'
-import ReactDOM from 'react-dom'
-import { useTranslation } from 'react-i18next'
-import { LANGUAGES } from '../i18n/languages'
-import { Globe, Check } from 'lucide-react'
+import React, { useState, useRef, useEffect } from 'react';
+import ReactDOM from 'react-dom';
+import { useTranslation } from 'react-i18next';
+import { LANGUAGES } from '../i18n/languages';
+import { Globe, Check } from 'lucide-react';
 
 export function FreshLangMenu() {
-  const [isOpen, setIsOpen] = useState(false)
-  const [coords, setCoords] = useState({ top: 0, right: 0 })
-  const [isDarkMode, setIsDarkMode] = useState(false)
-  const buttonRef = useRef<HTMLButtonElement>(null)
-  const { i18n } = useTranslation()
+  const [isOpen, setIsOpen] = useState(false);
+  const [coords, setCoords] = useState({ top: 0, left: 0 });
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
+  const { i18n } = useTranslation();
 
+  // Monitor dark mode changes
   useEffect(() => {
     const checkDark = () => {
-      setIsDarkMode(document.documentElement.classList.contains('dark'))
-    }
-    checkDark()
-    const observer = new MutationObserver(checkDark)
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
-    return () => observer.disconnect()
-  }, [])
+      setIsDarkMode(document.documentElement.classList.contains('dark'));
+    };
+    checkDark();
+    const observer = new MutationObserver(checkDark);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
   const updatePosition = () => {
     if (buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect()
+      const rect = buttonRef.current.getBoundingClientRect();
       setCoords({
         top: rect.bottom + 8,
-        right: window.innerWidth - rect.right,
-      })
+        left: rect.left,
+      });
     }
-  }
+  };
 
-  const handleOpen = () => {
-    console.log('[Lang] CLICKED!')
-    alert('[Lang Button Clicked!] If you see this alert, the button is working!')
-    updatePosition()
-    setIsOpen(prev => !prev)
-  }
+  const handleToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isOpen) {
+      updatePosition();
+    }
+    setIsOpen(!isOpen);
+  };
 
+  // Handle outside clicks
   useEffect(() => {
-    if (!isOpen) return
-    const handleClick = (e: MouseEvent) => {
-      if (buttonRef.current && !buttonRef.current.contains(e.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClick)
-    return () => document.removeEventListener('mousedown', handleClick)
-  }, [isOpen])
+    if (!isOpen) return;
 
-  const currentLang = LANGUAGES.find((l) => l.code === i18n.language)
-  const currentCode = currentLang?.shortLabel || 'EN'
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as Node;
+      if (
+        buttonRef.current &&
+        !buttonRef.current.contains(target) &&
+        menuRef.current &&
+        !menuRef.current.contains(target)
+      ) {
+        setIsOpen(false);
+      }
+    };
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [isOpen]);
+
+  const currentLang = LANGUAGES.find((l) => l.code === i18n.language);
+  const currentCode = currentLang?.shortLabel || 'EN';
 
   return (
     <>
       <button
         ref={buttonRef}
-        onClick={handleOpen}
-        className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-md transition-colors border ${
+        onClick={handleToggle}
+        className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg transition-all duration-200 border ${
           isDarkMode
-            ? 'text-slate-200 bg-[#0f172a] border-slate-700 hover:bg-slate-800'
-            : 'text-slate-900 bg-white border-slate-200 hover:bg-slate-50'
+            ? 'text-slate-200 bg-slate-800/40 border-slate-700 hover:bg-slate-700/60 active:bg-slate-700'
+            : 'text-slate-900 bg-slate-100 border-slate-300 hover:bg-slate-200 active:bg-slate-300'
         }`}
       >
         <Globe size={16} />
-        {currentCode}
+        <span>{currentCode}</span>
       </button>
 
       {isOpen &&
         ReactDOM.createPortal(
           <div
-            className={`fixed z-[99999] w-56 rounded-lg border shadow-2xl overflow-hidden ${
+            ref={menuRef}
+            className={`fixed z-50 w-64 rounded-lg border shadow-2xl overflow-hidden transition-opacity duration-150 ${
               isDarkMode
-                ? 'bg-[#0f172a] border-slate-700'
+                ? 'bg-slate-900 border-slate-700'
                 : 'bg-white border-slate-200'
             }`}
             style={{
               top: `${coords.top}px`,
-              right: `${coords.right}px`,
-              backdropFilter: 'none',
-              WebkitMaskImage: 'none',
-              maskImage: 'none',
+              left: `${coords.left}px`,
+              pointerEvents: 'auto',
             }}
           >
+            {/* Header */}
             <div
               className={`px-4 py-3 border-b ${
                 isDarkMode
-                  ? 'border-slate-700 bg-slate-900/50'
+                  ? 'border-slate-700 bg-slate-800/50'
                   : 'border-slate-200 bg-slate-50'
               }`}
             >
@@ -98,35 +121,41 @@ export function FreshLangMenu() {
               </div>
             </div>
 
+            {/* Language List */}
             <div className="max-h-80 overflow-y-auto">
-              {LANGUAGES.map((lang) => (
-                <button
-                  key={lang.code}
-                  onClick={() => {
-                    void i18n.changeLanguage(lang.code)
-                    setIsOpen(false)
-                  }}
-                  className={`w-full text-left px-4 py-2.5 text-sm flex items-center justify-between border-b last:border-0 transition-colors ${
-                    i18n.language === lang.code
-                      ? isDarkMode
-                        ? 'bg-purple-600/20 text-purple-300 font-bold'
-                        : 'bg-purple-50 text-purple-700 font-bold'
-                      : isDarkMode
-                        ? 'text-slate-200 hover:bg-slate-800/60'
-                        : 'text-slate-800 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono text-xs font-bold">{lang.shortLabel}</span>
-                    <span>{lang.name}</span>
-                  </div>
-                  {i18n.language === lang.code && <Check size={16} className="text-purple-600" />}
-                </button>
-              ))}
+              {LANGUAGES.map((lang) => {
+                const isSelected = i18n.language === lang.code;
+                return (
+                  <button
+                    key={lang.code}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      void i18n.changeLanguage(lang.code);
+                      setIsOpen(false);
+                    }}
+                    className={`w-full text-left px-4 py-2.5 text-sm flex items-center justify-between border-b last:border-0 transition-colors duration-100 ${
+                      isSelected
+                        ? isDarkMode
+                          ? 'bg-purple-600/20 text-purple-300 font-bold'
+                          : 'bg-purple-100 text-purple-700 font-bold'
+                        : isDarkMode
+                          ? 'text-slate-200 hover:bg-slate-800/60'
+                          : 'text-slate-800 hover:bg-slate-100'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono text-xs font-bold">{lang.shortLabel}</span>
+                      <span>{lang.name}</span>
+                    </div>
+                    {isSelected && <Check size={16} className={isDarkMode ? 'text-purple-400' : 'text-purple-600'} />}
+                  </button>
+                );
+              })}
             </div>
           </div>,
           document.body
         )}
     </>
-  )
+  );
 }
