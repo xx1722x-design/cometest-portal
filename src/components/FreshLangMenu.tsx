@@ -4,19 +4,6 @@ import { useTranslation } from 'react-i18next'
 import { LANGUAGES } from '../i18n/languages'
 import { Globe, Check } from 'lucide-react'
 
-const COUNTRY_CODES: Record<string, string> = {
-  en: 'US',
-  fr: 'FR',
-  es: 'ES',
-  de: 'DE',
-  ru: 'RU',
-  ar: 'SA',
-  zh: 'CN',
-  'zh-TW': 'TW',
-  ja: 'JP',
-  ko: 'KR',
-}
-
 export function FreshLangMenu() {
   const [isOpen, setIsOpen] = useState(false)
   const [coords, setCoords] = useState({ top: 0, right: 0, left: 0 })
@@ -77,10 +64,8 @@ export function FreshLangMenu() {
   }, [isOpen])
 
   const currentLang = LANGUAGES.find((l) => l.code === i18n.language)
-  const currentCode = currentLang
-    ? COUNTRY_CODES[currentLang.code] || currentLang.code.toUpperCase()
-    : 'EN'
-  const isRtl = i18n.language === 'ar'
+  const currentCode = currentLang?.shortLabel || 'EN'
+  const isRtl = currentLang?.dir === 'rtl'
 
   return (
     <>
@@ -139,7 +124,6 @@ export function FreshLangMenu() {
             {/* Languages List */}
             <div className="max-h-96 overflow-y-auto">
               {LANGUAGES.map((lang) => {
-                const code = COUNTRY_CODES[lang.code] || lang.code.toUpperCase()
                 const isSelected = i18n.language === lang.code
 
                 return (
@@ -160,8 +144,8 @@ export function FreshLangMenu() {
                     }`}
                   >
                     <div className="flex items-center gap-3">
-                      <span className="font-mono text-xs font-bold">{code}</span>
-                      <span>{lang.label}</span>
+                      <span className="font-mono text-xs font-bold">{lang.shortLabel}</span>
+                      <span>{lang.name}</span>
                     </div>
                     {isSelected && <Check size={16} className="text-purple-600" />}
                   </button>
