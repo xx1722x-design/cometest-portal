@@ -9,107 +9,153 @@ const COUNTRY_CODES: Record<string, string> = {
   fr: 'FR',
   es: 'ES',
   de: 'DE',
-  it: 'IT',
-  pt: 'PT',
   ru: 'RU',
   ar: 'SA',
-  ko: 'KR',
-  ja: 'JP',
-  'zh-CN': 'CN',
+  zh: 'CN',
   'zh-TW': 'TW',
+  ja: 'JP',
+  ko: 'KR',
+  it: 'IT',
+  pt: 'PT',
 }
 
 export function FreshLangMenu() {
   const [isOpen, setIsOpen] = useState(false)
-  const [position, setPosition] = useState<{ top: number; left: number | string; right: number | string }>({
-    top: 0,
-    left: 0,
-    right: 'auto',
-  })
+  const [coords, setCoords] = useState({ top: 0, right: 0, left: 0, width: 0 })
+  const [isDarkMode, setIsDarkMode] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
+  const menuRef = useRef<HTMLDivElement>(null)
   const { i18n } = useTranslation()
 
-  const currentLanguage = LANGUAGES.find((l) => l.code === i18n.language)
-  const currentCode = currentLanguage?.code?.toUpperCase() || 'EN'
-
+  // 다크 모드(나이트 펑크) 상태 실시간 감지
   useEffect(() => {
-    if (isOpen && buttonRef.current) {
-      const rect = buttonRef.current.getBoundingClientRect()
-      const isRTL = document.dir === 'rtl'
-      const shouldAlignLeft = isRTL || rect.left < window.innerWidth / 2
+    const checkDarkMode = () => {
+      setIsDarkMode(document.documentElement.classList.contains('dark'))
+    }
+    checkDarkMode()
+    const observer = new MutationObserver(checkDarkMode)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+    return () => observer.disconnect()
+  }, [])
 
-      setPosition({
-        top: rect.bottom + 8,
-        left: shouldAlignLeft ? rect.left : 'auto',
-        right: shouldAlignLeft ? 'auto' : window.innerWidth - rect.right,
+  // 버튼 위치 계산 (getBoundingClientRect)
+  const updateCoords = () => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect()
+      setCoords({
+        top: rect.bottom + window.scrollY + 8,
+        right: window.innerWidth - rect.right,
+        left: rect.left + window.scrollX,
+        width: rect.width,
       })
     }
+  }
+
+  const handleToggle = () => {
+    if (!isOpen) {
+      updateCoords()
+    }
+    setIsOpen(!isOpen)
+  }
+
+  // 외부 클릭 시 닫기
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        buttonRef.current &&
+        !buttonRef.current.contains(event.target as Node) &&
+        menuRef.current &&
+        !menuRef.current.contains(event.target as Node)
+      ) {
+        setIsOpen(false)
+      }
+    }
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside)
+    }
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
   }, [isOpen])
+
+  const currentLanguage = LANGUAGES.find((l) => l.code === i18n.language)
+  const currentCode = currentLanguage
+    ? COUNTRY_CODES[currentLanguage.code] || currentLanguage.code.toUpperCase()
+    : 'EN'
 
   const handleLanguageChange = (code: Language) => {
     void i18n.changeLanguage(code)
     setIsOpen(false)
   }
 
-  const portalContent = isOpen
-    ? ReactDOM.createPortal(
-        <div
-          className="fixed bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700 rounded-md shadow-lg dark:shadow-2xl z-[999999] flex flex-col overflow-hidden"
-          style={{
-            top: `${position.top}px`,
-            left: position.left === 'auto' ? 'auto' : `${position.left}px`,
-            right: position.right === 'auto' ? 'auto' : `${position.right}px`,
-            width: '240px',
-            backdropFilter: 'none',
-            WebkitBackdropFilter: 'none',
-            maskImage: 'none',
-            WebkitMaskImage: 'none',
-            filter: 'none',
-          }}
-          onMouseLeave={() => setIsOpen(false)}
-        >
-          {LANGUAGES.map((lang, index) => {
-            const countryCode = COUNTRY_CODES[lang.code] || lang.code.toUpperCase()
-            return (
-              <button
-                key={lang.code}
-                onClick={() => handleLanguageChange(lang.code)}
-                className="flex items-center justify-between w-full px-4 py-3 text-sm cursor-pointer text-slate-900 dark:text-slate-200 bg-white dark:bg-[#0f172a] hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition-colors"
-                style={{
-                  borderBottom:
-                    index < LANGUAGES.length - 1
-                      ? '1px solid rgba(203, 213, 225, 0.3)'
-                      : 'none',
-                }}
-              >
-                <span>{lang.name}</span>
-                <span className="text-xs font-bold text-slate-600 dark:text-slate-400 ml-3">
-                  {countryCode}
-                </span>
-              </button>
-            )
-          })}
-        </div>,
-        document.body
-      )
-    : null
+  const isRtl = i18n.language === 'ar'
+
+  // 테마별 스타일 분기 (나이트 펑크 vs 화이트 펑크)
+  const dropdownStyles = isDarkMode
+    ? 'bg-[#0f172a] text-slate-200 border-slate-700 shadow-2xl'
+    : 'bg-white text-slate-900 border-slate-200 shadow-xl'
+
+  const itemHoverStyles = isDarkMode
+    ? 'hover:bg-slate-800 border-slate-800/50'
+    : 'hover:bg-slate-100 border-slate-100'
 
   return (
-    <div
-      className="relative inline-block"
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
-    >
+    <>
+      {/* Trigger Button */}
       <button
         ref={buttonRef}
-        onClick={() => setIsOpen(!isOpen)}
-        className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-900 dark:text-slate-200 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700 rounded-md cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+        onMouseEnter={() => {
+          updateCoords()
+          setIsOpen(true)
+        }}
+        onMouseLeave={() => setIsOpen(false)}
+        onClick={handleToggle}
+        className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-md transition-colors border ${
+          isDarkMode
+            ? 'text-slate-200 bg-[#0f172a] border-slate-700 hover:bg-slate-800'
+            : 'text-slate-900 bg-white border-slate-200 hover:bg-slate-50'
+        }`}
       >
-        <Globe size={16} className="text-slate-600 dark:text-slate-400" />
+        <Globe size={16} />
         {currentCode}
       </button>
 
-      {portalContent}
-    </div>
+      {/* React Portal Dropdown */}
+      {isOpen &&
+        ReactDOM.createPortal(
+          <div
+            ref={menuRef}
+            onMouseLeave={() => setIsOpen(false)}
+            className={`fixed z-[99999] w-48 rounded-md border overflow-hidden ${dropdownStyles}`}
+            style={{
+              top: `${coords.top}px`,
+              ...(isRtl ? { left: `${coords.left}px` } : { right: `${coords.right}px` }),
+              backgroundColor: isDarkMode ? '#0f172a' : '#ffffff',
+              backdropFilter: 'none',
+              WebkitMaskImage: 'none',
+              maskImage: 'none',
+            }}
+          >
+            {LANGUAGES.map((lang) => {
+              const countryCode = COUNTRY_CODES[lang.code] || lang.code.toUpperCase()
+              const isSelected = i18n.language === lang.code
+              return (
+                <button
+                  key={lang.code}
+                  onClick={() => handleLanguageChange(lang.code)}
+                  className={`flex items-center justify-between px-4 py-3 text-[14px] cursor-pointer transition-colors border-b last:border-0 ${itemHoverStyles} ${
+                    isSelected ? (isDarkMode ? 'bg-slate-800/80 font-bold' : 'bg-slate-100 font-bold') : ''
+                  }`}
+                >
+                  <span>{lang.name}</span>
+                  <span className="text-xs font-bold">{countryCode}</span>
+                  {isSelected && <span>✓</span>}
+                </button>
+              )
+            })}
+          </div>,
+          document.body
+        )}
+    </>
   )
 }
