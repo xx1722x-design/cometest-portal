@@ -22,7 +22,11 @@ const COUNTRY_CODES: Record<string, string> = {
 
 export function FreshLangMenu() {
   const [isOpen, setIsOpen] = useState(false)
-  const [position, setPosition] = useState({ top: 0, left: 0, right: 'auto' })
+  const [position, setPosition] = useState<{ top: number; left: number | string; right: number | string }>({
+    top: 0,
+    left: 0,
+    right: 'auto',
+  })
   const buttonRef = useRef<HTMLButtonElement>(null)
   const { i18n } = useTranslation()
 
