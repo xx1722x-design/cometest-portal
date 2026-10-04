@@ -17,11 +17,11 @@ export function FreshLangMenu() {
 
   return (
     <div
-      className="relative inline-block text-left z-[99999]"
+      className="relative inline-block"
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
     >
-      {/* Button */}
+      {/* Button - Always visible */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-200 bg-[#0f172a] border border-slate-700 rounded-md hover:bg-slate-800 transition-colors"
@@ -30,18 +30,20 @@ export function FreshLangMenu() {
         {currentCode}
       </button>
 
-      {/* Vertical Floating Popup Dropdown */}
+      {/* Dropdown - ONLY visible when isOpen is true */}
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-48 bg-[#0f172a] border border-slate-700 rounded-md shadow-2xl z-[99999] flex flex-col">
-          {LANGUAGES.map((lang) => (
-            <button
-              key={lang.code}
-              onClick={() => handleLanguageChange(lang.code)}
-              className="block px-4 py-3 text-[14px] cursor-pointer text-slate-200 bg-[#0f172a] hover:bg-slate-800 transition-colors text-left border-b border-slate-800/50 last:border-0"
-            >
-              {lang.name}
-            </button>
-          ))}
+        <div className="absolute top-full right-0 mt-2 w-48 bg-[#0f172a] border border-slate-700 rounded-md shadow-2xl z-[99999]">
+          <div className="flex flex-col">
+            {LANGUAGES.map((lang) => (
+              <button
+                key={lang.code}
+                onClick={() => handleLanguageChange(lang.code)}
+                className="block w-full px-4 py-3 text-[14px] cursor-pointer text-slate-200 bg-[#0f172a] hover:bg-slate-800 transition-colors text-left border-b border-slate-800/50 last:border-0"
+              >
+                {lang.name}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>
