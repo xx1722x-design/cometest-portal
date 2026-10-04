@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LANGUAGES, type Language } from '../i18n/languages'
+import { Globe } from 'lucide-react'
 
 export function FreshLangMenu() {
   const [isOpen, setIsOpen] = useState(false)
@@ -9,27 +10,36 @@ export function FreshLangMenu() {
   const currentLanguage = LANGUAGES.find((l) => l.code === i18n.language)
   const currentCode = currentLanguage?.code?.toUpperCase() || 'EN'
 
-  const handleLanguageSelect = (code: Language) => {
+  const handleLanguageChange = (code: Language) => {
     void i18n.changeLanguage(code)
     setIsOpen(false)
   }
 
   return (
     <div className="relative inline-block">
+      {/* Button: Stays perfectly in place */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-200 bg-slate-900 border border-slate-700 rounded hover:bg-slate-800"
+        className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-200 bg-[#0f172a] border border-slate-700 rounded-md hover:bg-slate-800 transition-colors"
       >
+        <Globe size={16} />
         {currentCode}
       </button>
 
+      {/* Dropdown Popup: True absolute overlay, zero impact on header layout */}
       {isOpen && (
-        <ul className="absolute top-full right-0 mt-2 w-48 bg-slate-900 border border-slate-700 rounded shadow-lg z-50 list-none p-0 m-0">
+        <ul
+          className="absolute top-full right-0 mt-2 w-48 bg-[#0f172a] border border-slate-700 rounded-md shadow-lg z-[99999]"
+          style={{ listStyle: 'none', margin: 0, padding: 0 }}
+        >
           {LANGUAGES.map((lang) => (
-            <li key={lang.code} className="m-0 p-0">
+            <li
+              key={lang.code}
+              style={{ listStyle: 'none', margin: 0, padding: 0 }}
+            >
               <button
-                onClick={() => handleLanguageSelect(lang.code)}
-                className="w-full text-left px-4 py-2 text-sm text-slate-200 hover:bg-slate-800 border-b border-slate-800 last:border-0"
+                onClick={() => handleLanguageChange(lang.code)}
+                className="block w-full px-4 py-3 text-[14px] cursor-pointer text-slate-200 bg-[#0f172a] hover:bg-slate-800 transition-colors text-left border-b border-slate-800/50 last:border-0"
               >
                 {lang.name}
               </button>
