@@ -27,6 +27,11 @@ const LightRefractionLab = lazy(() =>
     default: m.LightRefractionLab,
   }))
 )
+const HanoiTower = lazy(() =>
+  import('../components/simulations/HanoiTower').then((m) => ({
+    default: m.HanoiTower,
+  }))
+)
 
 export function Simulation() {
   const navigate = useNavigate()
@@ -40,6 +45,10 @@ export function Simulation() {
       navigate('/chemistry')
     } else if (simulation?.category === 'optics_waves') {
       navigate('/optics')
+    } else if (simulation?.category === 'puzzle') {
+      navigate('/puzzle')
+    } else if (simulation?.category === 'space_universe') {
+      navigate('/astronomy')
     } else {
       navigate('/game')
     }
@@ -81,6 +90,12 @@ export function Simulation() {
         return (
           <Suspense fallback={<div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Loading Simulation...</div>}>
             <LightRefractionLab />
+          </Suspense>
+        )
+      case 'hanoi-tower':
+        return (
+          <Suspense fallback={<div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Loading Simulation...</div>}>
+            <HanoiTower />
           </Suspense>
         )
       default:

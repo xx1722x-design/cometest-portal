@@ -1,103 +1,124 @@
-import { useEffect, useRef, useState } from 'react'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import { Suspense, useRef, useState, useEffect } from 'react'
+import { Canvas, useFrame, useThree, useLoader } from '@react-three/fiber'
+import { OrbitControls, Preload } from '@react-three/drei'
 import * as THREE from 'three'
 
-interface Planet {
+interface PlanetData {
   name: string
-  size: number
+  displaySize: number
   distance: number
   speed: number
-  color: number
+  textureUrl: string
+  rotationSpeed: number
   info: string
   details: string[]
+  initialAngle: number
 }
 
-const PLANETS: Planet[] = [
+const PLANETS: PlanetData[] = [
   {
     name: 'Mercury',
-    size: 0.38,
-    distance: 8,
+    displaySize: 1.2,
+    distance: 15,
     speed: 4.15,
-    color: 0x8c7853,
+    textureUrl: '/2k_mercury.jpg',
+    rotationSpeed: 0.04,
     info: 'Closest to the Sun',
     details: ['Smallest planet', 'Hot surface', 'No atmosphere', 'Fast orbit'],
+    initialAngle: Math.random() * Math.PI * 2,
   },
   {
     name: 'Venus',
-    size: 0.95,
-    distance: 12,
+    displaySize: 1.8,
+    distance: 24,
     speed: 1.62,
-    color: 0xffc649,
+    textureUrl: '/2k_venus_surface.jpg',
+    rotationSpeed: 0.002,
     info: 'Hottest planet',
     details: ['Thick atmosphere', 'Dense clouds', 'Rotates backward', 'Brightest in sky'],
+    initialAngle: Math.random() * Math.PI * 2,
   },
   {
     name: 'Earth',
-    size: 1.0,
-    distance: 16,
+    displaySize: 2.0,
+    distance: 33,
     speed: 1.0,
-    color: 0x4a90e2,
+    textureUrl: '/2k_earth_daymap.jpg',
+    rotationSpeed: 0.02,
     info: 'Our home',
     details: ['Has life', 'One moon', 'Liquid water', 'Protective atmosphere'],
+    initialAngle: Math.random() * Math.PI * 2,
   },
   {
     name: 'Mars',
-    size: 0.53,
-    distance: 20,
+    displaySize: 1.4,
+    distance: 43,
     speed: 0.53,
-    color: 0xe27b58,
+    textureUrl: '/2k_mars.jpg',
+    rotationSpeed: 0.018,
     info: 'The Red Planet',
     details: ['Iron oxide soil', 'Thin atmosphere', 'Two small moons', 'Largest volcano'],
+    initialAngle: Math.random() * Math.PI * 2,
   },
   {
     name: 'Jupiter',
-    size: 11.2,
-    distance: 28,
+    displaySize: 6.0,
+    distance: 65,
     speed: 0.1,
-    color: 0xdaa84f,
+    textureUrl: '/2k_jupiter.jpg',
+    rotationSpeed: 0.03,
     info: 'Largest planet',
     details: ['Gas giant', 'Great Red Spot', 'Strong magnetic field', '79 moons'],
+    initialAngle: Math.random() * Math.PI * 2,
   },
   {
     name: 'Saturn',
-    size: 9.45,
-    distance: 36,
+    displaySize: 5.5,
+    distance: 85,
     speed: 0.04,
-    color: 0xf4d9a8,
+    textureUrl: '/2k_saturn.jpg',
+    rotationSpeed: 0.025,
     info: 'The ringed planet',
     details: ['Spectacular rings', 'Lowest density', 'Tilted rings', '82 moons'],
+    initialAngle: Math.random() * Math.PI * 2,
   },
   {
     name: 'Uranus',
-    size: 4.01,
-    distance: 44,
+    displaySize: 4.0,
+    distance: 105,
     speed: 0.01,
-    color: 0x4fd6e8,
+    textureUrl: '/2k_uranus.jpg',
+    rotationSpeed: 0.015,
     info: 'Ice giant',
     details: ['Extreme tilt', 'Faint rings', 'Icy atmosphere', 'Rotates on side'],
+    initialAngle: Math.random() * Math.PI * 2,
   },
   {
     name: 'Neptune',
-    size: 3.88,
-    distance: 52,
+    displaySize: 3.8,
+    distance: 125,
     speed: 0.005,
-    color: 0x4166f5,
+    textureUrl: '/2k_neptune.jpg',
+    rotationSpeed: 0.016,
     info: 'Windiest planet',
     details: ['Deepest blue', 'Supersonic winds', 'Faint rings', 'Coldest planet'],
+    initialAngle: Math.random() * Math.PI * 2,
   },
 ]
 
 export function SolarSystemSimulator() {
-  const [selectedPlanet, setSelectedPlanet] = useState<Planet | null>(null)
+  const [selectedPlanet, setSelectedPlanet] = useState<PlanetData | null>(null)
   const [isZoomedIn, setIsZoomedIn] = useState(false)
 
   return (
     <div style={{ width: '100%', height: '100vh', position: 'relative', backgroundColor: '#000' }}>
-      <Canvas camera={{ position: [0, 60, 0], fov: 50 }}>
-        <SolarSystemContent selectedPlanet={selectedPlanet} isZoomedIn={isZoomedIn} setIsZoomedIn={setIsZoomedIn} setSelectedPlanet={setSelectedPlanet} />
+      <Canvas camera={{ position: [0, 60, 160], fov: 50 }} gl={{ antialias: true }}>
+        <Suspense fallback={null}>
+          <SolarSystemContent setSelectedPlanet={setSelectedPlanet} setIsZoomedIn={setIsZoomedIn} isZoomedIn={isZoomedIn} selectedPlanet={selectedPlanet} />
+          <Preload all />
+        </Suspense>
       </Canvas>
 
-      {/* Planet Info Card */}
       {selectedPlanet && isZoomedIn && (
         <div
           style={{
@@ -105,11 +126,11 @@ export function SolarSystemSimulator() {
             right: '20px',
             top: '50%',
             transform: 'translateY(-50%)',
-            backgroundColor: 'rgba(0, 0, 0, 0.85)',
-            border: `2px solid ${`#${selectedPlanet.color.toString(16).padStart(6, '0')}`}`,
+            backgroundColor: 'rgba(0, 0, 0, 0.9)',
+            border: '2px solid #64B5F6',
             borderRadius: '12px',
             padding: '20px',
-            width: '280px',
+            width: '300px',
             color: '#fff',
             fontFamily: 'Arial, sans-serif',
             zIndex: 100,
@@ -139,9 +160,7 @@ export function SolarSystemSimulator() {
           <p style={{ margin: '10px 0', fontSize: '14px', color: '#aaa' }}>{selectedPlanet.info}</p>
 
           <div style={{ marginTop: '15px' }}>
-            <h4 style={{ margin: '10px 0 8px 0', fontSize: '12px', textTransform: 'uppercase', color: '#888' }}>
-              Facts
-            </h4>
+            <h4 style={{ margin: '10px 0 8px 0', fontSize: '12px', textTransform: 'uppercase', color: '#888' }}>Facts</h4>
             <ul style={{ margin: 0, paddingLeft: '20px', fontSize: '13px', lineHeight: '1.8' }}>
               {selectedPlanet.details.map((detail, i) => (
                 <li key={i}>{detail}</li>
@@ -158,8 +177,8 @@ export function SolarSystemSimulator() {
               width: '100%',
               marginTop: '15px',
               padding: '8px',
-              backgroundColor: `#${selectedPlanet.color.toString(16).padStart(6, '0')}33`,
-              border: `1px solid #${selectedPlanet.color.toString(16).padStart(6, '0')}`,
+              backgroundColor: '#64B5F633',
+              border: '1px solid #64B5F6',
               color: '#fff',
               borderRadius: '6px',
               cursor: 'pointer',
@@ -172,10 +191,9 @@ export function SolarSystemSimulator() {
         </div>
       )}
 
-      {/* Info at macro view */}
       {!isZoomedIn && (
         <div style={{ position: 'absolute', bottom: '20px', left: '50%', transform: 'translateX(-50%)', color: '#fff', textAlign: 'center', fontFamily: 'Arial', fontSize: '14px' }}>
-          <p style={{ margin: 0 }}>Click on a planet to zoom in and learn more</p>
+          <p style={{ margin: 0 }}>🖱️ Drag to rotate • Scroll to zoom • Click a planet to learn more</p>
         </div>
       )}
     </div>
@@ -183,124 +201,127 @@ export function SolarSystemSimulator() {
 }
 
 function SolarSystemContent({
-  selectedPlanet,
-  isZoomedIn,
-  setIsZoomedIn,
   setSelectedPlanet,
+  setIsZoomedIn,
+  isZoomedIn,
+  selectedPlanet,
 }: {
-  selectedPlanet: Planet | null
-  isZoomedIn: boolean
+  setSelectedPlanet: (planet: PlanetData | null) => void
   setIsZoomedIn: (val: boolean) => void
-  setSelectedPlanet: (planet: Planet | null) => void
+  isZoomedIn: boolean
+  selectedPlanet: PlanetData | null
 }) {
-  const { camera } = useThree()
-  const sunRef = useRef<THREE.Mesh>(null)
-  const planetsRef = useRef<{ [key: string]: THREE.Group }>({})
   const timeRef = useRef(0)
+  const planetsRef = useRef<{ [key: string]: THREE.Group }>({})
+  const { camera } = useThree()
+
+  // Load all textures at once
+  const textureUrls = [
+    '/2k_sun.jpg',
+    ...PLANETS.map(p => p.textureUrl),
+    '/2k_saturn_ring_alpha.png',
+    '/2k_moon.jpg',
+  ]
+
+  const textures = useLoader(THREE.TextureLoader, textureUrls)
+  const [sunTexture, ...planetTextures] = textures
+  const saturnRingTexture = textures[textures.length - 2]
+  const moonTexture = textures[textures.length - 1]
 
   useFrame((_state, deltaTime) => {
     timeRef.current += deltaTime
 
-    // Animate planets
-    PLANETS.forEach((planet) => {
-      if (planetsRef.current[planet.name]) {
-        const angle = (timeRef.current * planet.speed) % (Math.PI * 2)
-        const x = Math.cos(angle) * planet.distance
-        const z = Math.sin(angle) * planet.distance
-        planetsRef.current[planet.name].position.set(x, 0, z)
+    PLANETS.forEach((planet, idx) => {
+      const group = planetsRef.current[planet.name]
+      if (group) {
+        const angle = ((timeRef.current * planet.speed + planet.initialAngle) % (Math.PI * 2))
+        group.position.x = Math.cos(angle) * planet.distance
+        group.position.z = Math.sin(angle) * planet.distance
+
+        const mesh = group.children.find((child) => child instanceof THREE.Mesh) as THREE.Mesh
+        if (mesh) {
+          mesh.rotation.y += deltaTime * planet.rotationSpeed
+        }
       }
     })
 
-    // Animate sun rotation
-    if (sunRef.current) {
-      sunRef.current.rotation.y += deltaTime * 0.5
+    const sunGroup = planetsRef.current['Sun']
+    if (sunGroup) {
+      const sunMesh = sunGroup.children.find((child) => child instanceof THREE.Mesh) as THREE.Mesh
+      if (sunMesh) {
+        sunMesh.rotation.y += deltaTime * 0.3
+      }
     }
 
-    // Smooth camera zoom
     if (selectedPlanet && isZoomedIn && planetsRef.current[selectedPlanet.name]) {
       const planetPos = planetsRef.current[selectedPlanet.name].position
-      const targetCameraPos = new THREE.Vector3(
-        planetPos.x + selectedPlanet.size * 6,
-        selectedPlanet.size * 4,
-        planetPos.z + selectedPlanet.size * 6
+      const targetPos = new THREE.Vector3(
+        planetPos.x + selectedPlanet.displaySize * 8,
+        selectedPlanet.displaySize * 5,
+        planetPos.z + selectedPlanet.displaySize * 8
       )
-      camera.position.lerp(targetCameraPos, 0.05)
-      camera.lookAt(planetPos.x, 0, planetPos.z)
-    } else if (!isZoomedIn) {
-      const targetPos = new THREE.Vector3(0, 60, 0)
-      camera.position.lerp(targetPos, 0.03)
-      camera.lookAt(0, 0, 0)
+      camera.position.lerp(targetPos, 0.05)
+      camera.lookAt(planetPos)
     }
   })
 
   return (
     <>
-      {/* Stars background */}
       <StarField />
 
-      {/* Lighting */}
-      <ambientLight intensity={0.3} />
-      <pointLight position={[0, 20, 0]} intensity={2} color={0xfdb813} distance={200} />
+      <ambientLight intensity={0.4} />
+      <pointLight position={[0, 0, 0]} intensity={2.5} color={0xfdb813} distance={600} />
 
-      {/* Sun */}
-      <mesh ref={sunRef} position={[0, 0, 0]} onClick={() => null}>
-        <sphereGeometry args={[2, 32, 32]} />
-        <meshStandardMaterial color={0xfdb813} metalness={0.3} roughness={0.4} emissive={0xfdb813} emissiveIntensity={0.8} />
-        <pointLight position={[0, 0, 0]} intensity={3} color={0xfdb813} distance={300} />
-      </mesh>
-
-      {/* Orbit lines */}
-      {PLANETS.map((planet) => (
-        <mesh key={`orbit-${planet.name}`} rotation={[Math.PI / 2, 0, 0]} position={[0, -0.1, 0]}>
-          <bufferGeometry>
-            <bufferAttribute
-              attach="attributes-position"
-              count={64}
-              array={new Float32Array(
-                Array.from({ length: 64 }).flatMap((_, i) => [
-                  Math.cos((i / 64) * Math.PI * 2) * planet.distance,
-                  0,
-                  Math.sin((i / 64) * Math.PI * 2) * planet.distance,
-                ])
-              )}
-              itemSize={3}
-            />
-          </bufferGeometry>
-          <lineBasicMaterial color={0x444444} linewidth={1} />
+      <group ref={(ref) => {
+        if (ref) planetsRef.current['Sun'] = ref
+      }} position={[0, 0, 0]}>
+        <mesh>
+          <sphereGeometry args={[6, 64, 64]} />
+          <meshStandardMaterial map={sunTexture} emissive={0xfdb813} emissiveIntensity={0.8} metalness={0} roughness={0.8} />
         </mesh>
-      ))}
+        <pointLight intensity={2} color={0xfdb813} distance={600} />
+      </group>
 
-      {/* Planets */}
-      {PLANETS.map((planet) => (
-        <group key={planet.name} ref={(ref) => {
-          if (ref) planetsRef.current[planet.name] = ref
-        }}>
+      {PLANETS.map((planet, idx) => (
+        <group
+          key={planet.name}
+          ref={(ref) => {
+            if (ref) planetsRef.current[planet.name] = ref
+          }}
+        >
           <mesh
             onClick={() => {
               setSelectedPlanet(planet)
               setIsZoomedIn(true)
             }}
           >
-            <sphereGeometry args={[Math.max(planet.size, 0.5), 32, 32]} />
-            <meshStandardMaterial
-              color={planet.color}
-              metalness={0.7}
-              roughness={0.2}
-              emissive={planet.color}
-              emissiveIntensity={0.3}
-            />
-            <pointLight position={[0, 0, 0]} intensity={0.5} color={planet.color} distance={10} />
+            <sphereGeometry args={[planet.displaySize, 64, 64]} />
+            <meshStandardMaterial map={planetTextures[idx]} metalness={0.2} roughness={0.8} />
           </mesh>
 
-          {/* Saturn rings */}
+          {planet.name === 'Earth' && (
+            <group position={[0, 0, 0]}>
+              <group>
+                <group position={[2.5, 0, 0]}>
+                  <mesh>
+                    <sphereGeometry args={[0.25, 32, 32]} />
+                    <meshStandardMaterial map={moonTexture} metalness={0.1} roughness={0.9} />
+                  </mesh>
+                </group>
+              </group>
+            </group>
+          )}
+
           {planet.name === 'Saturn' && (
-            <mesh rotation={[Math.PI / 6, 0, 0]}>
-              <torusGeometry args={[planet.size * 1.5, planet.size * 0.4, 16, 64]} />
-              <meshStandardMaterial color={0xf4d9a8} metalness={0.5} roughness={0.3} transparent opacity={0.7} />
+            <mesh rotation={[Math.PI / 2.5, 0.2, 0]}>
+              <ringGeometry args={[planet.displaySize * 1.5, planet.displaySize * 2.2, 64, 32]} />
+              <meshStandardMaterial map={saturnRingTexture} side={THREE.DoubleSide} transparent opacity={0.8} metalness={0.3} roughness={0.6} />
             </mesh>
           )}
         </group>
       ))}
+
+      <OrbitControls makeDefault minDistance={50} maxDistance={600} enablePan={true} enableZoom={true} enableRotate={true} />
     </>
   )
 }
@@ -311,32 +332,32 @@ function StarField() {
   useEffect(() => {
     if (!ref.current) return
 
-    const starsGeometry = ref.current.geometry as THREE.BufferGeometry
-    const count = starsGeometry.attributes.position.count
+    const geometry = ref.current.geometry as THREE.BufferGeometry
+    const count = geometry.attributes.position.count
 
     const colors = new Float32Array(count * 3)
     for (let i = 0; i < count * 3; i += 3) {
-      colors[i] = Math.random() * 0.5 + 0.5 // R
-      colors[i + 1] = Math.random() * 0.5 + 0.5 // G
-      colors[i + 2] = Math.random() // B
+      colors[i] = Math.random() * 0.7 + 0.3
+      colors[i + 1] = Math.random() * 0.7 + 0.3
+      colors[i + 2] = Math.random() * 0.7 + 0.3
     }
 
-    starsGeometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
+    geometry.setAttribute('color', new THREE.BufferAttribute(colors, 3))
   }, [])
 
-  const positions = new Float32Array(1000 * 3)
-  for (let i = 0; i < 1000 * 3; i += 3) {
-    positions[i] = (Math.random() - 0.5) * 400
-    positions[i + 1] = (Math.random() - 0.5) * 400
-    positions[i + 2] = (Math.random() - 0.5) * 400
+  const positions = new Float32Array(2000 * 3)
+  for (let i = 0; i < 2000 * 3; i += 3) {
+    positions[i] = (Math.random() - 0.5) * 1000
+    positions[i + 1] = (Math.random() - 0.5) * 1000
+    positions[i + 2] = (Math.random() - 0.5) * 1000
   }
 
   return (
     <points ref={ref}>
       <bufferGeometry>
-        <bufferAttribute attach="attributes-position" count={1000} array={positions} itemSize={3} />
+        <bufferAttribute attach="attributes-position" count={2000} array={positions} itemSize={3} />
       </bufferGeometry>
-      <pointsMaterial size={0.5} sizeAttenuation vertexColors />
+      <pointsMaterial size={0.8} sizeAttenuation vertexColors />
     </points>
   )
 }

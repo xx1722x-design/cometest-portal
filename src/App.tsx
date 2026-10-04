@@ -8,6 +8,8 @@ import { Category } from './pages/Category'
 import { Simulation } from './pages/Simulation'
 import { ChemistryPage } from './pages/ChemistryPage'
 import { OpticsPage } from './pages/OpticsPage'
+import { PuzzlePage } from './pages/PuzzlePage'
+import { AstronomyPage } from './pages/AstronomyPage'
 
 function App() {
   return (
@@ -20,6 +22,8 @@ function App() {
         <Route path="/simulation/:simulationId" element={<Simulation />} />
         <Route path="/chemistry" element={<ChemistryPage />} />
         <Route path="/optics" element={<OpticsPage />} />
+        <Route path="/puzzle" element={<PuzzlePage />} />
+        <Route path="/astronomy" element={<AstronomyPage />} />
         <Route path="/store" element={<Store />} />
         <Route path="/category/:categoryId" element={<Category />} />
         <Route path="*" element={<Navigate to="/" replace />} />

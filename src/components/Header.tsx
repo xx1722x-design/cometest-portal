@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import LanguageSelector from './LanguageSelector'
+import { FreshLangMenu } from './FreshLangMenu'
 import { useDarkMode } from '../theme'
 import { searchPortal, type SearchItem } from '../config/searchData'
 
@@ -226,7 +226,7 @@ export function Header() {
           </button>
 
           {/* 언어 선택 드롭다운 */}
-          <LanguageSelector />
+          <FreshLangMenu />
 
           <button
             type="button"

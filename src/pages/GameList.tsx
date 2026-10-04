@@ -7,9 +7,8 @@ import { SiteFooter } from '../components/SiteFooter'
 import { GAMES_DATA } from '../config/gamesData'
 import { SIMULATIONS_DATA } from '../config/simulationsData'
 
-const SIMULATION_CATEGORIES = ['space_universe', 'biology', 'earth_science']
+const SIMULATION_CATEGORIES = ['biology', 'earth_science']
 const CATEGORY_LABELS: { [key: string]: string } = {
-  space_universe: '🌍 Space & Universe',
   biology: '🧬 Biology',
   earth_science: '🌎 Earth Science',
 }

@@ -7,6 +7,8 @@ export interface SimulationItem {
   path: string
   component: string
   isTranslationKey?: boolean
+  tags?: string[]
+  play_count?: number
 }
 
 export const SIMULATIONS_DATA: SimulationItem[] = [
@@ -18,6 +20,8 @@ export const SIMULATIONS_DATA: SimulationItem[] = [
     icon: '🌍',
     path: '/simulation/solar-system',
     component: 'SolarSystemSimulator',
+    tags: ['space', 'astronomy', '3d', 'interactive'],
+    play_count: 5200,
   },
   {
     id: 'moon-phases',
@@ -27,6 +31,8 @@ export const SIMULATIONS_DATA: SimulationItem[] = [
     icon: '🌙',
     path: '/simulation/moon-phases',
     component: 'MoonPhaseSimulator',
+    tags: ['space', 'astronomy', 'lunar', 'science'],
+    play_count: 3400,
   },
   {
     id: 'candle-extinguishing',
@@ -36,6 +42,8 @@ export const SIMULATIONS_DATA: SimulationItem[] = [
     icon: '🔥',
     path: '/simulation/candle-extinguishing',
     component: 'CandleExtinguishingSimulator',
+    tags: ['chemistry', 'physics', 'combustion', 'science'],
+    play_count: 1950,
   },
   {
     id: 'states-of-water',
@@ -46,6 +54,8 @@ export const SIMULATIONS_DATA: SimulationItem[] = [
     path: '/simulation/states-of-water',
     component: 'StatesOfWaterSimulator',
     isTranslationKey: true,
+    tags: ['chemistry', 'physics', 'states', 'water'],
+    play_count: 2100,
   },
   {
     id: 'states-of-matter',
@@ -56,6 +66,8 @@ export const SIMULATIONS_DATA: SimulationItem[] = [
     path: '/simulation/states-of-matter',
     component: 'StatesOfMatter',
     isTranslationKey: true,
+    tags: ['physics', 'chemistry', 'science', 'matter'],
+    play_count: 1650,
   },
   {
     id: 'light-refraction',
@@ -66,6 +78,19 @@ export const SIMULATIONS_DATA: SimulationItem[] = [
     path: '/simulation/light-refraction',
     component: 'LightRefractionLab',
     isTranslationKey: true,
+    tags: ['optics', 'physics', 'light', 'science'],
+    play_count: 2800,
+  },
+  {
+    id: 'hanoi-tower',
+    title: 'Hanoi Tower Puzzle',
+    description: 'Move all disks from one peg to another following the rules - A 3D interactive puzzle',
+    category: 'puzzle',
+    icon: '🗼',
+    path: '/simulation/hanoi-tower',
+    component: 'HanoiTower',
+    tags: ['puzzle', 'game', 'logic', 'brain'],
+    play_count: 4100,
   },
 ]
 

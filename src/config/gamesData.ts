@@ -6,6 +6,8 @@ export interface GameItem {
   category: 'web_games' | 'simulation' | '3d_physics'
   icon: string
   path: string
+  tags?: string[]
+  play_count?: number
 }
 
 export const GAMES_DATA: GameItem[] = [
@@ -17,6 +19,8 @@ export const GAMES_DATA: GameItem[] = [
     category: 'web_games',
     icon: '🚀',
     path: '/game/space-racer',
+    tags: ['action', 'arcade', 'racing'],
+    play_count: 2450,
   },
   {
     id: 'all-you-can-tycoon',
@@ -26,6 +30,8 @@ export const GAMES_DATA: GameItem[] = [
     category: 'web_games',
     icon: '🏪',
     path: '/game/all-you-can-tycoon',
+    tags: ['strategy', 'simulation', 'business'],
+    play_count: 1800,
   },
   {
     id: 'prism-rush',
@@ -35,6 +41,8 @@ export const GAMES_DATA: GameItem[] = [
     category: 'web_games',
     icon: '✨',
     path: '/game/prism-rush',
+    tags: ['action', 'puzzle', 'arcade'],
+    play_count: 3200,
   },
 ]
 
