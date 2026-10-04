@@ -9,7 +9,6 @@ export function FreshLangMenu() {
   const [coords, setCoords] = useState({ top: 0, left: 0 });
   const [isDarkMode, setIsDarkMode] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
-  const menuRef = useRef<HTMLDivElement>(null);
   const { i18n } = useTranslation();
 
   // Monitor dark mode changes
@@ -33,42 +32,24 @@ export function FreshLangMenu() {
     }
   };
 
-  const handleToggle = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    if (!isOpen) {
-      updatePosition();
-    }
-    setIsOpen(!isOpen);
-  };
-
-  // Handle outside clicks
+  // Outside click listener with 150ms delay to prevent event bubbling
   useEffect(() => {
     if (!isOpen) return;
 
-    const handleClickOutside = (event: MouseEvent) => {
-      const target = event.target as Node;
-      if (
-        buttonRef.current &&
-        !buttonRef.current.contains(target) &&
-        menuRef.current &&
-        !menuRef.current.contains(target)
-      ) {
+    const timeoutId = setTimeout(() => {
+      const handleOutside = () => {
         setIsOpen(false);
-      }
-    };
+      };
+      window.addEventListener('click', handleOutside);
 
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsOpen(false);
-      }
-    };
+      return () => {
+        window.removeEventListener('click', handleOutside);
+      };
+    }, 150);
 
-    document.addEventListener('mousedown', handleClickOutside);
-    document.addEventListener('keydown', handleKeyDown);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-      document.removeEventListener('keydown', handleKeyDown);
+      clearTimeout(timeoutId);
+      window.removeEventListener('click', () => {});
     };
   }, [isOpen]);
 
@@ -79,7 +60,12 @@ export function FreshLangMenu() {
     <>
       <button
         ref={buttonRef}
-        onClick={handleToggle}
+        onClick={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setIsOpen(!isOpen);
+          updatePosition();
+        }}
         className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg transition-all duration-200 border ${
           isDarkMode
             ? 'text-slate-200 bg-slate-800/40 border-slate-700 hover:bg-slate-700/60 active:bg-slate-700'
@@ -93,24 +79,19 @@ export function FreshLangMenu() {
       {isOpen &&
         ReactDOM.createPortal(
           <div
-            ref={menuRef}
-            className={`fixed z-50 w-64 rounded-lg border shadow-2xl overflow-hidden transition-opacity duration-150 ${
-              isDarkMode
-                ? 'bg-slate-900 border-slate-700'
-                : 'bg-white border-slate-200'
+            onClick={(e) => e.stopPropagation()}
+            className={`fixed z-50 w-64 rounded-lg border shadow-2xl overflow-hidden ${
+              isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'
             }`}
             style={{
               top: `${coords.top}px`,
               left: `${coords.left}px`,
-              pointerEvents: 'auto',
             }}
           >
             {/* Header */}
             <div
               className={`px-4 py-3 border-b ${
-                isDarkMode
-                  ? 'border-slate-700 bg-slate-800/50'
-                  : 'border-slate-200 bg-slate-50'
+                isDarkMode ? 'border-slate-700 bg-slate-800/50' : 'border-slate-200 bg-slate-50'
               }`}
             >
               <div className={`text-sm font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>
