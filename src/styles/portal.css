@@ -4,6 +4,53 @@
  * 네온 내비 탭, 4열 글래스 푸터. 라이트 모드는 .theme-light 로 덮어쓴다.
  * ------------------------------------------------------------------ */
 
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   DO NOT MODIFY: COMETEST SIGNATURE GLITCH CSS (10-Year Approved)
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   청량한 Chromatic Aberration + TV 노이즈 스캔라인
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@keyframes chzzk-glitch-anim {
+  0% { transform: skewX(0deg) translateX(0); filter: drop-shadow(0 0 0 rgba(0,0,0,0)); }
+  15% { transform: skewX(-10deg) translateX(-4px); filter: drop-shadow(-4px 0 0 rgba(0,255,170,0.9)) drop-shadow(4px 0 0 rgba(255,0,255,0.9)) contrast(150%); }
+  30% { transform: skewX(10deg) translateX(4px); filter: drop-shadow(4px 0 0 rgba(0,255,170,0.9)) drop-shadow(-4px 0 0 rgba(255,0,255,0.9)) contrast(120%); }
+  45% { transform: skewX(-5deg) translateX(-2px); filter: drop-shadow(0 0 0 rgba(0,0,0,0)); }
+  60% { transform: skewX(5deg) translateX(3px); filter: drop-shadow(-2px 0 0 rgba(0,255,170,0.9)) contrast(150%); }
+  75% { transform: skewX(0deg) translateX(0); filter: drop-shadow(0 0 0 rgba(0,0,0,0)); }
+  100% { transform: skewX(0deg) translateX(0); }
+}
+
+@keyframes static-flicker {
+  0% { opacity: 0.3; background-position: 0 0; }
+  50% { opacity: 0.8; background-position: 10% 10%; }
+  100% { opacity: 0.3; background-position: -10% -10%; }
+}
+
+.chzzk-static-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  border-radius: inherit;
+  background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.2), rgba(0,0,0,0.2) 2px, transparent 2px, transparent 4px),
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512"><defs><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="8" numOctaves="4" result="noise" /></filter></defs><rect width="512" height="512" fill="rgba(255,255,255,0.3)" filter="url(%23noise)" /></svg>');
+  opacity: 0.6;
+  mix-blend-mode: overlay;
+  animation: static-flicker 0.1s infinite;
+}
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* LanguageSelector 드롭다운: 부모의 backdrop-filter를 완벽하게 무효화 */
+[style*="position: absolute"][style*="top: 100%"],
+[style*="position: absolute"][style*="top: 100%"] * {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+  filter: none !important;
+  mask-image: none !important;
+  -webkit-mask-image: none !important;
+  background-image: none !important;
+}
+
 :root {
   --neon-violet: 124, 58, 237;
   --neon-blue: 59, 130, 246;
@@ -1120,105 +1167,8 @@ html, body { background-color: var(--page-bg); }
 .lang__chevron { width: 14px; height: 14px; color: var(--text-muted); transition: transform 0.3s ease; }
 .lang__chevron.is-open { transform: rotate(180deg); }
 
-.lang__menu {
-  position: absolute;
-  inset-inline-end: 0;
-  top: 100%;
-  margin-top: 0.5rem;
-  width: 14rem;
-  z-index: 200;
-  transform-origin: top right;
-  animation: lang-dropdown 0.18s ease-out;
-}
-[dir='rtl'] .lang__menu { transform-origin: top left; }
-
-.lang__panel {
-  overflow: hidden;
-  border-radius: 12px;
-  border: 1px solid var(--header-border);
-  background: var(--menu-bg);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45);
-  color: var(--text-strong);
-}
-
-.lang__header {
-  padding: 0.75rem 1rem;
-  border-bottom: 1px solid var(--header-border);
-  background: linear-gradient(to bottom, rgba(var(--neon-violet), 0.08), transparent);
-}
-.lang__header-title { display: flex; align-items: center; gap: 0.5rem; }
-.lang__header-title h3 { margin: 0; font-size: 14px; font-weight: 600; }
-.lang__header-icon { width: 16px; height: 16px; color: #a78bfa; }
-.lang__header p { margin: 0.25rem 0 0; font-size: 12px; color: var(--text-muted); }
-
-.lang__list { padding: 0.5rem 0; max-height: 24rem; overflow-y: auto; }
-
-.lang__item {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0.7rem 1rem;
-  border: 0;
-  border-inline-start: 2px solid transparent;
-  border-bottom: 1px solid var(--glass-border);
-  background: transparent;
-  color: var(--text-strong);
-  font: inherit;
-  text-align: start;
-  cursor: pointer;
-  transition: background-color 0.15s ease-out;
-}
-.lang__item:last-child { border-bottom: 0; }
-.lang__item:hover { background: var(--glass-bg-hover); }
-.lang__item:focus-visible { outline: none; background: rgba(var(--neon-violet), 0.14); }
-.lang__item.is-selected {
-  border-inline-start-color: #a78bfa;
-  background: rgba(var(--neon-violet), 0.1);
-  color: var(--accent-text);
-  font-weight: 500;
-}
-
-.lang__item-main { display: flex; align-items: center; gap: 0.75rem; min-width: 0; flex: 1; }
-.lang__flag { font-size: 18px; flex-shrink: 0; }
-.lang__name { font-size: 14px; font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.lang__item-meta { display: flex; align-items: center; gap: 0.5rem; flex-shrink: 0; margin-inline-start: 0.5rem; }
-.lang__chip { font-size: 10px; font-weight: 600; letter-spacing: 0.04em; color: var(--text-muted); }
-.lang__check { width: 16px; height: 16px; color: #a78bfa; }
-
-.lang__footer {
-  padding: 0.5rem 1rem;
-  border-top: 1px solid var(--header-border);
-  background: var(--glass-bg);
-  text-align: center;
-  font-size: 12px;
-  color: var(--text-muted);
-}
-.lang__footer strong { color: var(--text-strong); font-weight: 600; }
-
-.lang__arrow {
-  position: absolute;
-  inset-inline-end: 1.5rem;
-  top: -4px;
-  width: 8px;
-  height: 8px;
-  transform: rotate(45deg);
-  background: var(--menu-bg);
-  border-top: 1px solid var(--header-border);
-  border-left: 1px solid var(--header-border);
-}
-
-@keyframes lang-dropdown {
-  from { opacity: 0; transform: translateY(-4px) scale(0.97); }
-  to   { opacity: 1; transform: translateY(0) scale(1); }
-}
-
-
-@media (prefers-reduced-motion: reduce) {
-  .lang__menu { animation: none; }
-}
+/* LanguageSelector는 이제 순수 커스텀 드롭다운으로 재구축됨
+   모든 스타일이 inline style로 관리되므로 CSS에서는 제거됨 */
 
 /* 좁은 화면: 1열 카드가 화면 폭에 가까워 1.1배로 키우면 가장자리가 잘리므로 확대 폭을 줄이고,
  * 마우스가 없는 기기(탭하면 :hover 가 남는 터치 화면)에서는 확대하지 않는다 */
@@ -1270,6 +1220,81 @@ html, body { background-color: var(--page-bg); }
 .category-hero__subtitle { margin: 0; font-size: clamp(14px, 1.6vw, 16px); color: rgba(255, 255, 255, 0.85); }
 .category-main__more { margin: 0; padding: 1rem 1rem 2.5rem; text-align: center; font-size: 14px; color: var(--text-muted); }
 
-@media (max-width: 420px) {
-  .lang__menu { width: min(14rem, calc(100vw - 2rem)); }
+
+/* ---------- 진짜 화염(Realistic Fire) 애니메이션 ---------- */
+@keyframes flame-glow {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(255, 80, 0, 0.5), 0 0 40px rgba(255, 140, 0, 0.3), inset 0 -20px 40px rgba(200, 20, 0, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(255, 140, 0, 0.7), 0 0 60px rgba(255, 200, 60, 0.4), inset 0 -20px 40px rgba(255, 80, 0, 0.4);
+  }
 }
+
+.fire-layer {
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: linear-gradient(to top,
+    rgba(200, 20, 0, 0.3) 0%,
+    rgba(255, 80, 0, 0.2) 30%,
+    rgba(255, 150, 0, 0.1) 60%,
+    transparent 100%);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.curated-grid-card.fire-hover {
+  animation: flame-glow 0.8s ease-in-out infinite;
+  border-color: rgba(255, 100, 0, 0.4) !important;
+}
+
+.curated-grid-card.fire-hover .fire-layer {
+  opacity: 1;
+}
+
+/* Store 카드 스타일 */
+.store-card {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%) !important;
+  border: none !important;
+  box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+  transition: all 0.3s ease;
+}
+
+.store-card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 0 20px 60px rgba(102, 126, 234, 0.6);
+}
+
+/* ---------- 네이버 치지직(CHZZK) 완벽 클론: Chromatic Aberration + TV 노이즈 ---------- */
+@keyframes chzzk-glitch-anim {
+  0% { transform: skewX(0deg) translateX(0); filter: drop-shadow(0 0 0 rgba(0,0,0,0)); }
+  15% { transform: skewX(-10deg) translateX(-4px); filter: drop-shadow(-4px 0 0 rgba(0,255,170,0.9)) drop-shadow(4px 0 0 rgba(255,0,255,0.9)) contrast(150%); }
+  30% { transform: skewX(10deg) translateX(4px); filter: drop-shadow(4px 0 0 rgba(0,255,170,0.9)) drop-shadow(-4px 0 0 rgba(255,0,255,0.9)) contrast(120%); }
+  45% { transform: skewX(-5deg) translateX(-2px); filter: drop-shadow(0 0 0 rgba(0,0,0,0)); }
+  60% { transform: skewX(5deg) translateX(3px); filter: drop-shadow(-2px 0 0 rgba(0,255,170,0.9)) contrast(150%); }
+  75% { transform: skewX(0deg) translateX(0); filter: drop-shadow(0 0 0 rgba(0,0,0,0)); }
+  100% { transform: skewX(0deg) translateX(0); }
+}
+
+@keyframes static-flicker {
+  0% { opacity: 0.3; background-position: 0 0; }
+  50% { opacity: 0.8; background-position: 10% 10%; }
+  100% { opacity: 0.3; background-position: -10% -10%; }
+}
+
+.chzzk-static-overlay {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 100;
+  border-radius: inherit;
+  background:
+    repeating-linear-gradient(0deg, rgba(0,0,0,0.2), rgba(0,0,0,0.2) 2px, transparent 2px, transparent 4px),
+    url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512"><defs><filter id="noise"><feTurbulence type="fractalNoise" baseFrequency="8" numOctaves="4" result="noise" /></filter></defs><rect width="512" height="512" fill="rgba(255,255,255,0.3)" filter="url(%23noise)" /></svg>');
+  opacity: 0.6;
+  mix-blend-mode: overlay;
+  animation: static-flicker 0.1s infinite;
+}
+

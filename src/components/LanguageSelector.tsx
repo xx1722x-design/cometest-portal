@@ -26,7 +26,7 @@ export default function LanguageSelector() {
         {currentLangLabel}
       </button>
 
-      {/* Dropdown: 100% Solid Background, Zero Fog/Mask */}
+      {/* Dropdown: 100% Solid Background, Zero Fog/Mask - ULTRA OVERRIDE */}
       {isOpen && (
         <div
           style={{
@@ -40,15 +40,25 @@ export default function LanguageSelector() {
             borderRadius: '0.375rem',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
             zIndex: 99999,
-            listStyle: 'none',
-            margin: 0,
-            padding: 0,
-            backgroundImage: 'none',
-            maskImage: 'none',
-            WebkitMaskImage: 'none',
-          }}
+            backdropFilter: 'none !important',
+            WebkitBackdropFilter: 'none !important',
+            filter: 'none !important',
+            maskImage: 'none !important',
+            WebkitMaskImage: 'none !important',
+            backgroundImage: 'none !important',
+          } as React.CSSProperties}
         >
-          <ul style={{ listStyle: 'none', margin: 0, padding: 0, backgroundColor: '#0f172a' }}>
+          <ul
+            style={{
+              listStyle: 'none',
+              margin: 0,
+              padding: 0,
+              backgroundColor: '#0f172a',
+              backdropFilter: 'none !important',
+              WebkitBackdropFilter: 'none !important',
+              filter: 'none !important',
+            } as React.CSSProperties}
+          >
             {LANGUAGES.map((lang) => (
               <li
                 key={lang.code}
@@ -57,6 +67,8 @@ export default function LanguageSelector() {
                   margin: 0,
                   padding: 0,
                   backgroundColor: '#0f172a',
+                  backdropFilter: 'none !important',
+                  WebkitBackdropFilter: 'none !important',
                 }}
               >
                 <button
@@ -73,10 +85,10 @@ export default function LanguageSelector() {
                     borderBottom: '1px solid rgba(71, 85, 105, 0.5)',
                     backgroundColor: '#0f172a',
                     transition: 'background-color 0.2s',
-                    backgroundImage: 'none',
-                    maskImage: 'none',
-                    WebkitMaskImage: 'none',
-                  }}
+                    backdropFilter: 'none !important',
+                    WebkitBackdropFilter: 'none !important',
+                    filter: 'none !important',
+                  } as React.CSSProperties}
                   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1e293b')}
                   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0f172a')}
                 >
