@@ -33,14 +33,21 @@ export function FreshLangMenu() {
   }
 
   const handleOpen = () => {
+    console.log('[Lang] Opening dropdown, current isOpen:', isOpen)
     updatePosition()
-    setIsOpen(true)
+    setIsOpen(prev => {
+      console.log('[Lang] Setting isOpen to:', !prev)
+      return !prev
+    })
   }
 
   useEffect(() => {
+    console.log('[Lang] isOpen changed to:', isOpen)
     if (!isOpen) return
+
     const handleClick = (e: MouseEvent) => {
       if (buttonRef.current && !buttonRef.current.contains(e.target as Node)) {
+        console.log('[Lang] Outside click detected, closing')
         setIsOpen(false)
       }
     }
@@ -51,6 +58,8 @@ export function FreshLangMenu() {
   const currentLang = LANGUAGES.find((l) => l.code === i18n.language)
   const currentCode = currentLang?.shortLabel || 'EN'
   const isRtl = currentLang?.dir === 'rtl'
+
+  console.log('[Lang] Rendering. isOpen:', isOpen, 'isDarkMode:', isDarkMode)
 
   return (
     <>
@@ -67,64 +76,72 @@ export function FreshLangMenu() {
         {currentCode}
       </button>
 
-      {isOpen &&
-        ReactDOM.createPortal(
-          <div
-            className={`fixed z-[9999] w-56 rounded-lg border shadow-2xl ${
-              isDarkMode
-                ? 'bg-[#0f172a] border-slate-700'
-                : 'bg-white border-slate-200'
-            }`}
-            style={{
-              top: `${coords.top}px`,
-              left: isRtl ? `${coords.left}px` : 'auto',
-              right: isRtl ? 'auto' : `${coords.right}px`,
-            }}
-          >
+      {isOpen && (
+        <>
+          {console.log('[Lang] Portal rendering with isOpen=true')}
+          {ReactDOM.createPortal(
             <div
-              className={`px-4 py-3 border-b ${
+              className={`fixed z-[9999] w-56 rounded-lg border shadow-2xl overflow-hidden ${
                 isDarkMode
-                  ? 'border-slate-700 bg-slate-900/50'
-                  : 'border-slate-200 bg-slate-50'
+                  ? 'bg-[#0f172a] border-slate-700'
+                  : 'bg-white border-slate-200'
               }`}
+              style={{
+                top: `${coords.top}px`,
+                left: isRtl ? `${coords.left}px` : 'auto',
+                right: isRtl ? 'auto' : `${coords.right}px`,
+                backdropFilter: 'none',
+                WebkitMaskImage: 'none',
+                maskImage: 'none',
+              }}
             >
-              <div className={`text-sm font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>
-                Select Language
+              <div
+                className={`px-4 py-3 border-b ${
+                  isDarkMode
+                    ? 'border-slate-700 bg-slate-900/50'
+                    : 'border-slate-200 bg-slate-50'
+                }`}
+              >
+                <div className={`text-sm font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>
+                  Select Language
+                </div>
+                <div className={`text-xs mt-1 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
+                  10 languages available
+                </div>
               </div>
-              <div className={`text-xs mt-1 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                10 languages available
-              </div>
-            </div>
 
-            <div className="max-h-80 overflow-y-auto">
-              {LANGUAGES.map((lang) => (
-                <button
-                  key={lang.code}
-                  onClick={() => {
-                    void i18n.changeLanguage(lang.code)
-                    setIsOpen(false)
-                  }}
-                  className={`w-full text-left px-4 py-2.5 text-sm flex items-center justify-between border-b last:border-0 transition-colors ${
-                    i18n.language === lang.code
-                      ? isDarkMode
-                        ? 'bg-purple-600/20 text-purple-300 font-bold'
-                        : 'bg-purple-50 text-purple-700 font-bold'
-                      : isDarkMode
-                        ? 'text-slate-200 hover:bg-slate-800/60'
-                        : 'text-slate-800 hover:bg-slate-100'
-                  }`}
-                >
-                  <div className="flex items-center gap-3">
-                    <span className="font-mono text-xs font-bold">{lang.shortLabel}</span>
-                    <span>{lang.name}</span>
-                  </div>
-                  {i18n.language === lang.code && <Check size={16} className="text-purple-600" />}
-                </button>
-              ))}
-            </div>
-          </div>,
-          document.body
-        )}
+              <div className="max-h-80 overflow-y-auto">
+                {LANGUAGES.map((lang) => (
+                  <button
+                    key={lang.code}
+                    onClick={() => {
+                      console.log('[Lang] Selected:', lang.code)
+                      void i18n.changeLanguage(lang.code)
+                      setIsOpen(false)
+                    }}
+                    className={`w-full text-left px-4 py-2.5 text-sm flex items-center justify-between border-b last:border-0 transition-colors ${
+                      i18n.language === lang.code
+                        ? isDarkMode
+                          ? 'bg-purple-600/20 text-purple-300 font-bold'
+                          : 'bg-purple-50 text-purple-700 font-bold'
+                        : isDarkMode
+                          ? 'text-slate-200 hover:bg-slate-800/60'
+                          : 'text-slate-800 hover:bg-slate-100'
+                    }`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <span className="font-mono text-xs font-bold">{lang.shortLabel}</span>
+                      <span>{lang.name}</span>
+                    </div>
+                    {i18n.language === lang.code && <Check size={16} className="text-purple-600" />}
+                  </button>
+                ))}
+              </div>
+            </div>,
+            document.body
+          )}
+        </>
+      )}
     </>
   )
 }
