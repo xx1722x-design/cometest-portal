@@ -31,12 +31,11 @@ export default function LanguageSelector() {
           border: '1px solid #475569',
           borderRadius: '0.375rem',
           cursor: 'pointer',
-          transition: 'background-color 0.2s',
         }}
         onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1e293b')}
         onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0f172a')}
       >
-        <Globe size={16} style={{ color: '#e2e8f0' }} />
+        <Globe size={16} />
         {currentLangLabel}
       </button>
 
@@ -53,17 +52,9 @@ export default function LanguageSelector() {
             borderRadius: '0.375rem',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
             zIndex: 99999,
-            maxHeight: '400px',
-            overflowY: 'auto',
-            backdropFilter: 'none !important',
-            WebkitBackdropFilter: 'none !important',
-            filter: 'none !important',
-            maskImage: 'none !important',
-            WebkitMaskImage: 'none !important',
-            backgroundImage: 'none !important',
-          } as React.CSSProperties}
+          }}
         >
-          {LANGUAGES.map((lang) => {
+          {LANGUAGES.map((lang, index) => {
             const isSelected = i18n.language === lang.code
             return (
               <div
@@ -74,15 +65,8 @@ export default function LanguageSelector() {
                   fontSize: '14px',
                   color: '#e2e8f0',
                   backgroundColor: isSelected ? '#1e293b' : '#0f172a',
-                  borderBottom: '1px solid rgba(71, 85, 105, 0.5)',
+                  borderBottom: index < LANGUAGES.length - 1 ? '1px solid rgba(71, 85, 105, 0.5)' : 'none',
                   cursor: 'pointer',
-                  transition: 'background-color 0.2s',
-                  textAlign: 'left',
-                  backdropFilter: 'none !important',
-                  WebkitBackdropFilter: 'none !important',
-                  filter: 'none !important',
-                  maskImage: 'none !important',
-                  WebkitMaskImage: 'none !important',
                 }}
                 onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1e293b')}
                 onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = isSelected ? '#1e293b' : '#0f172a')}
