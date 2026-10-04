@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import React, { useState, useRef, useEffect, useCallback } from 'react'
 import ReactDOM from 'react-dom'
 import { useTranslation } from 'react-i18next'
 import { LANGUAGES } from '../i18n/languages'
@@ -24,7 +24,7 @@ export function FreshLangMenu() {
   }, [])
 
   // 버튼 위치 계산
-  const updatePosition = () => {
+  const updatePosition = useCallback(() => {
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect()
       setCoords({
@@ -33,40 +33,43 @@ export function FreshLangMenu() {
         left: rect.left + window.scrollX,
       })
     }
-  }
+  }, [])
 
-  const handleToggle = () => {
-    if (!isOpen) {
-      updatePosition()
-      setIsOpen(true)
-    } else {
-      setIsOpen(false)
-    }
-  }
+  // 토글 핸들러
+  const handleToggle = useCallback(() => {
+    setIsOpen((prev) => {
+      if (!prev) {
+        updatePosition()
+      }
+      return !prev
+    })
+  }, [updatePosition])
 
-  // 외부 클릭 시 닫기 (타이밍 문제 해결)
+  // 외부 클릭 감지 - 한 번만 설정
   useEffect(() => {
     if (!isOpen) return
 
     const handleOutsideClick = (event: MouseEvent) => {
       const target = event.target as Node
+      // 버튼이나 메뉴 안을 클릭했으면 무시
       if (
-        buttonRef.current &&
-        !buttonRef.current.contains(target) &&
-        menuRef.current &&
-        !menuRef.current.contains(target)
+        (buttonRef.current && buttonRef.current.contains(target)) ||
+        (menuRef.current && menuRef.current.contains(target))
       ) {
-        setIsOpen(false)
+        return
       }
+      // 그 외 다른 곳을 클릭했으면 닫기
+      setIsOpen(false)
     }
 
-    // 클릭 이벤트 사용 (mousedown 대신)
-    setTimeout(() => {
-      document.addEventListener('click', handleOutsideClick, true)
-    }, 0)
+    // 약간의 지연 후 리스너 추가 (버튼 클릭 이벤트와 분리)
+    const timer = setTimeout(() => {
+      document.addEventListener('mousedown', handleOutsideClick)
+    }, 100)
 
     return () => {
-      document.removeEventListener('click', handleOutsideClick, true)
+      clearTimeout(timer)
+      document.removeEventListener('mousedown', handleOutsideClick)
     }
   }, [isOpen])
 
@@ -95,7 +98,6 @@ export function FreshLangMenu() {
         ReactDOM.createPortal(
           <div
             ref={menuRef}
-            onClick={(e) => e.stopPropagation()}
             className={`fixed z-[99999] w-56 rounded-lg border shadow-2xl overflow-hidden ${
               isDarkMode
                 ? 'bg-[#0f172a] border-slate-700'
