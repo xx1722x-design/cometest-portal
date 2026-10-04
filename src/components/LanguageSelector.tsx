@@ -16,7 +16,12 @@ export default function LanguageSelector() {
   }
 
   return (
-    <div className="relative inline-block">
+    // ⚠️ CRITICAL: 'relative' makes this wrapper the positioning anchor
+    <div
+      className="relative inline-block"
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
+    >
       {/* Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -26,18 +31,12 @@ export default function LanguageSelector() {
         {currentLangLabel}
       </button>
 
-      {/* Dropdown */}
+      {/* ⚠️ CRITICAL: 'absolute top-full right-0' ensures it floats independently without shifting the header */}
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-48 bg-slate-900 border border-slate-700 rounded-md shadow-lg z-50">
-          <ul
-            className="m-0 p-0"
-            style={{ listStyle: 'none', margin: 0, padding: 0 }}
-          >
+        <div className="absolute top-full right-0 mt-2 w-48 bg-slate-900 border border-slate-700 rounded-md shadow-lg z-[99999]">
+          <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
             {LANGUAGES.map((lang) => (
-              <li
-                key={lang.code}
-                style={{ listStyle: 'none', margin: 0, padding: 0 }}
-              >
+              <li key={lang.code} style={{ listStyle: 'none', margin: 0, padding: 0 }}>
                 <button
                   onClick={() => { handleLanguageSelect(lang.code); setIsOpen(false); }}
                   className="block w-full px-4 py-3 text-[14px] cursor-pointer text-slate-200 hover:bg-slate-800 transition-colors text-left border-b border-slate-800/50 last:border-0"
