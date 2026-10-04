@@ -15,12 +15,28 @@ export function FreshLangMenu() {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { i18n } = useTranslation();
 
+  // Bulletproof Omni-Detector for Dark Mode
+  const detectTheme = () => {
+    if (typeof document === 'undefined') return false;
+    const html = document.documentElement;
+    const body = document.body;
+    return (
+      html.classList.contains('dark') ||
+      body.classList.contains('dark') ||
+      html.getAttribute('data-theme') === 'dark' ||
+      html.getAttribute('data-mode') === 'dark' ||
+      (buttonRef.current && buttonRef.current.closest('.dark') !== null)
+    );
+  };
+
   useEffect(() => {
-    if (typeof document === 'undefined') return;
-    const checkDark = () => setIsDark(document.documentElement.classList.contains('dark'));
-    checkDark();
-    const obs = new MutationObserver(checkDark);
-    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    setIsDark(detectTheme());
+
+    const obs = new MutationObserver(() => setIsDark(detectTheme()));
+    if (typeof document !== 'undefined') {
+      obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-theme', 'data-mode'] });
+      obs.observe(document.body, { attributes: true, attributeFilter: ['class'] });
+    }
     return () => obs.disconnect();
   }, []);
 
@@ -30,6 +46,8 @@ export function FreshLangMenu() {
     if (!isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
       setPos({ top: rect.bottom + 8, right: window.innerWidth - rect.right });
+      // Force re-check theme exactly when opening
+      setIsDark(detectTheme());
     }
     setIsOpen(!isOpen);
   };
@@ -41,11 +59,30 @@ export function FreshLangMenu() {
       <button
         ref={buttonRef}
         onClick={toggleMenu}
-        className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg border transition-all ${
-          isDark
-            ? 'text-slate-200 bg-slate-800/40 border-slate-700 hover:bg-slate-700/60'
-            : 'text-slate-900 bg-slate-100 border-slate-300 hover:bg-slate-200'
-        }`}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: '8px',
+          padding: '8px 12px',
+          fontSize: '14px',
+          fontWeight: '600',
+          borderRadius: '0.5rem',
+          border: `1px solid ${isDark ? '#475569' : '#cbd5e1'}`,
+          backgroundColor: isDark ? 'rgba(51, 65, 85, 0.4)' : '#f3f4f6',
+          color: isDark ? '#e2e8f0' : '#111827',
+          cursor: 'pointer',
+          transition: 'all 0.2s',
+        }}
+        onMouseEnter={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.backgroundColor = isDark
+            ? 'rgba(71, 85, 105, 0.6)'
+            : '#e5e7eb';
+        }}
+        onMouseLeave={(e) => {
+          (e.currentTarget as HTMLButtonElement).style.backgroundColor = isDark
+            ? 'rgba(51, 65, 85, 0.4)'
+            : '#f3f4f6';
+        }}
       >
         <Globe size={16} />
         {currentCode}
@@ -68,7 +105,7 @@ export function FreshLangMenu() {
             }}
           />
 
-          {/* Dropdown Menu - 100% Inline Styles */}
+          {/* Dropdown Menu */}
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
