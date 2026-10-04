@@ -15,7 +15,6 @@ export function FreshLangMenu() {
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { i18n } = useTranslation();
 
-  // Real-time Dark Mode detection
   useEffect(() => {
     if (typeof document === 'undefined') return;
     const checkDark = () => setIsDark(document.documentElement.classList.contains('dark'));
@@ -54,6 +53,7 @@ export function FreshLangMenu() {
 
       {isOpen && typeof document !== 'undefined' && createPortal(
         <>
+          {/* Invisible Overlay */}
           <div
             onClick={() => setIsOpen(false)}
             style={{
@@ -68,6 +68,7 @@ export function FreshLangMenu() {
             }}
           />
 
+          {/* Dropdown Menu - 100% Inline Styles */}
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
@@ -83,16 +84,20 @@ export function FreshLangMenu() {
                 ? '0 20px 25px -5px rgba(0, 0, 0, 0.4)'
                 : '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
               overflow: 'hidden',
+              display: 'flex',
+              flexDirection: 'column',
               backdropFilter: 'none',
               WebkitMaskImage: 'none',
               maskImage: 'none',
             }}
           >
+            {/* Header */}
             <div
               style={{
                 padding: '12px 16px',
                 borderBottom: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
                 backgroundColor: isDark ? '#1a2332' : '#f9fafb',
+                flexShrink: 0,
               }}
             >
               <div
@@ -100,6 +105,8 @@ export function FreshLangMenu() {
                   fontSize: '14px',
                   fontWeight: 'bold',
                   color: isDark ? '#e2e8f0' : '#1f2937',
+                  margin: 0,
+                  padding: 0,
                 }}
               >
                 Select Language
@@ -109,13 +116,24 @@ export function FreshLangMenu() {
                   fontSize: '12px',
                   marginTop: '4px',
                   color: isDark ? '#94a3b8' : '#6b7280',
+                  margin: 0,
+                  padding: 0,
                 }}
               >
                 10 languages available
               </div>
             </div>
 
-            <div style={{ maxHeight: '320px', overflowY: 'auto' }}>
+            {/* Language List */}
+            <div
+              style={{
+                maxHeight: '320px',
+                overflowY: 'auto',
+                display: 'flex',
+                flexDirection: 'column',
+                flex: 1,
+              }}
+            >
               {LANGUAGES.map((lang) => {
                 const isSelected = lang.code === i18n.language;
                 return (
@@ -125,17 +143,54 @@ export function FreshLangMenu() {
                       i18n.changeLanguage(lang.code);
                       setIsOpen(false);
                     }}
-                    className={`flex items-center gap-3 px-3 py-2.5 my-0.5 rounded-lg text-sm cursor-pointer transition-colors ${
-                      isSelected
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '12px',
+                      padding: '10px 12px',
+                      margin: '2px 0',
+                      borderRadius: '0.5rem',
+                      fontSize: '14px',
+                      cursor: 'pointer',
+                      border: 'none',
+                      backgroundColor: isSelected
                         ? isDark
-                          ? 'bg-purple-600/30 text-purple-200 font-bold'
-                          : 'bg-purple-100 text-purple-800 font-bold'
+                          ? 'rgba(147, 51, 234, 0.2)'
+                          : '#f3e8ff'
+                        : 'transparent',
+                      color: isSelected
+                        ? isDark
+                          ? '#d8b4fe'
+                          : '#7e22ce'
                         : isDark
-                          ? 'hover:bg-slate-800 text-slate-300 hover:text-white'
-                          : 'hover:bg-slate-100 text-slate-700 hover:text-black'
-                    }`}
+                          ? '#cbd5e1'
+                          : '#374151',
+                      fontWeight: isSelected ? 'bold' : 'normal',
+                      transition: 'background-color 0.2s',
+                      width: '100%',
+                      textAlign: 'left',
+                    }}
+                    onMouseEnter={(e) => {
+                      if (!isSelected) {
+                        (e.currentTarget as HTMLButtonElement).style.backgroundColor = isDark
+                          ? '#1e293b'
+                          : '#f1f5f9';
+                      }
+                    }}
+                    onMouseLeave={(e) => {
+                      if (!isSelected) {
+                        (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'transparent';
+                      }
+                    }}
                   >
-                    <span style={{ fontFamily: 'monospace', fontSize: '12px', fontWeight: 'bold' }}>
+                    <span
+                      style={{
+                        fontFamily: 'monospace',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        minWidth: '28px',
+                      }}
+                    >
                       {COUNTRY_CODES[lang.code] || lang.code.toUpperCase()}
                     </span>
                     <span>{lang.name}</span>
