@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { LANGUAGES } from '../i18n/languages';
@@ -11,11 +11,22 @@ const COUNTRY_CODES: Record<string, string> = {
 export function FreshLangMenu() {
   const [isOpen, setIsOpen] = useState(false);
   const [pos, setPos] = useState({ top: 0, right: 0 });
+  const [isDark, setIsDark] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { i18n } = useTranslation();
   const currentCode = COUNTRY_CODES[i18n.language] || 'EN';
 
-  const isDark = typeof document !== 'undefined' && document.documentElement.classList.contains('dark');
+  // 실시간 다크모드(나이트 펑크) 감지
+  useEffect(() => {
+    if (typeof document !== 'undefined') {
+      setIsDark(document.documentElement.classList.contains('dark'));
+      const obs = new MutationObserver(() => {
+        setIsDark(document.documentElement.classList.contains('dark'));
+      });
+      obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+      return () => obs.disconnect();
+    }
+  }, []);
 
   const toggleMenu = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -44,7 +55,7 @@ export function FreshLangMenu() {
 
       {isOpen && typeof document !== 'undefined' && createPortal(
         <>
-          {/* Failproof Invisible Overlay for Outside Clicks */}
+          {/* Failproof Invisible Overlay */}
           <div
             onClick={() => setIsOpen(false)}
             style={{
@@ -59,7 +70,7 @@ export function FreshLangMenu() {
             }}
           />
 
-          {/* Actual Dropdown Menu */}
+          {/* Dropdown Menu */}
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
@@ -69,9 +80,11 @@ export function FreshLangMenu() {
               zIndex: 9999999,
               width: '256px',
               borderRadius: '0.5rem',
-              border: `1px solid ${isDark ? '#1e293b' : '#e2e8f0'}`,
+              border: `1px solid ${isDark ? '#334155' : '#d1d5db'}`,
               backgroundColor: isDark ? '#0f172a' : '#ffffff',
-              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
+              boxShadow: isDark
+                ? '0 20px 25px -5px rgba(0, 0, 0, 0.4)'
+                : '0 20px 25px -5px rgba(0, 0, 0, 0.1)',
               overflow: 'hidden',
               backdropFilter: 'none',
               WebkitMaskImage: 'none',
@@ -82,14 +95,26 @@ export function FreshLangMenu() {
             <div
               style={{
                 padding: '12px 16px',
-                borderBottom: `1px solid ${isDark ? '#1e293b' : '#e2e8f0'}`,
-                backgroundColor: isDark ? 'rgba(15, 23, 42, 0.5)' : '#f8fafc',
+                borderBottom: `1px solid ${isDark ? '#334155' : '#e5e7eb'}`,
+                backgroundColor: isDark ? '#1a2332' : '#f9fafb',
               }}
             >
-              <div style={{ fontSize: '14px', fontWeight: 'bold', color: isDark ? '#f1f5f9' : '#0f172a' }}>
+              <div
+                style={{
+                  fontSize: '14px',
+                  fontWeight: 'bold',
+                  color: isDark ? '#e2e8f0' : '#1f2937',
+                }}
+              >
                 Select Language
               </div>
-              <div style={{ fontSize: '12px', marginTop: '4px', color: isDark ? '#94a3b8' : '#64748b' }}>
+              <div
+                style={{
+                  fontSize: '12px',
+                  marginTop: '4px',
+                  color: isDark ? '#94a3b8' : '#6b7280',
+                }}
+              >
                 10 languages available
               </div>
             </div>
@@ -117,28 +142,47 @@ export function FreshLangMenu() {
                       cursor: 'pointer',
                       border: 'none',
                       backgroundColor: isSelected
-                        ? isDark ? '#5b21b6' : '#ede9fe'
+                        ? isDark
+                          ? '#5b21b6'
+                          : '#ede9fe'
                         : 'transparent',
                       color: isSelected
-                        ? isDark ? '#e9d5ff' : '#6b21a8'
-                        : isDark ? '#cbd5e1' : '#334155',
+                        ? isDark
+                          ? '#e9d5ff'
+                          : '#6b21a8'
+                        : isDark
+                          ? '#cbd5e1'
+                          : '#374151',
                       fontWeight: isSelected ? 'bold' : 'normal',
-                      transition: 'background-color 0.1s',
+                      transition: 'background-color 0.15s ease',
                     }}
                     onMouseEnter={(e) => {
                       if (!isSelected) {
                         (e.currentTarget as HTMLButtonElement).style.backgroundColor = isDark
-                          ? 'rgba(30, 41, 59, 0.6)'
-                          : '#f1f5f9';
+                          ? '#1e293b'
+                          : '#f3f4f6';
+                        (e.currentTarget as HTMLButtonElement).style.color = isDark
+                          ? '#f1f5f9'
+                          : '#1f2937';
                       }
                     }}
                     onMouseLeave={(e) => {
                       if (!isSelected) {
                         (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'transparent';
+                        (e.currentTarget as HTMLButtonElement).style.color = isDark
+                          ? '#cbd5e1'
+                          : '#374151';
                       }
                     }}
                   >
-                    <span style={{ fontFamily: 'monospace', fontSize: '12px', fontWeight: 'bold' }}>
+                    <span
+                      style={{
+                        fontFamily: 'monospace',
+                        fontSize: '12px',
+                        fontWeight: 'bold',
+                        minWidth: '28px',
+                      }}
+                    >
                       {COUNTRY_CODES[lang.code] || lang.code.toUpperCase()}
                     </span>
                     <span>{lang.name}</span>
