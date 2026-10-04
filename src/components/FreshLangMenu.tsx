@@ -35,31 +35,38 @@ export function FreshLangMenu() {
     }
   }
 
-  const handleToggle = (e: React.MouseEvent) => {
-    e.stopPropagation()
+  const handleToggle = () => {
     if (!isOpen) {
       updatePosition()
+      setIsOpen(true)
+    } else {
+      setIsOpen(false)
     }
-    setIsOpen(!isOpen)
   }
 
-  // 외부 클릭 시 닫기
+  // 외부 클릭 시 닫기 (타이밍 문제 해결)
   useEffect(() => {
+    if (!isOpen) return
+
     const handleOutsideClick = (event: MouseEvent) => {
+      const target = event.target as Node
       if (
         buttonRef.current &&
-        !buttonRef.current.contains(event.target as Node) &&
+        !buttonRef.current.contains(target) &&
         menuRef.current &&
-        !menuRef.current.contains(event.target as Node)
+        !menuRef.current.contains(target)
       ) {
         setIsOpen(false)
       }
     }
-    if (isOpen) {
-      document.addEventListener('mousedown', handleOutsideClick)
-    }
+
+    // 클릭 이벤트 사용 (mousedown 대신)
+    setTimeout(() => {
+      document.addEventListener('click', handleOutsideClick, true)
+    }, 0)
+
     return () => {
-      document.removeEventListener('mousedown', handleOutsideClick)
+      document.removeEventListener('click', handleOutsideClick, true)
     }
   }, [isOpen])
 
@@ -88,6 +95,7 @@ export function FreshLangMenu() {
         ReactDOM.createPortal(
           <div
             ref={menuRef}
+            onClick={(e) => e.stopPropagation()}
             className={`fixed z-[99999] w-56 rounded-lg border shadow-2xl overflow-hidden ${
               isDarkMode
                 ? 'bg-[#0f172a] border-slate-700'
