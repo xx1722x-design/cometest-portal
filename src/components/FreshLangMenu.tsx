@@ -4,7 +4,6 @@ import { useTranslation } from 'react-i18next'
 import { LANGUAGES, type Language } from '../i18n/languages'
 import { Globe } from 'lucide-react'
 
-// Country code mapping
 const COUNTRY_CODES: Record<string, string> = {
   en: 'US',
   fr: 'FR',
@@ -33,7 +32,6 @@ export function FreshLangMenu() {
   const currentLanguage = LANGUAGES.find((l) => l.code === i18n.language)
   const currentCode = currentLanguage?.code?.toUpperCase() || 'EN'
 
-  // Calculate position for dropdown
   useEffect(() => {
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect()
@@ -53,11 +51,10 @@ export function FreshLangMenu() {
     setIsOpen(false)
   }
 
-  // Portal content
   const portalContent = isOpen
     ? ReactDOM.createPortal(
         <div
-          className="fixed bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md shadow-lg dark:shadow-2xl z-[999999] flex flex-col overflow-hidden"
+          className="fixed bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700 rounded-md shadow-lg dark:shadow-2xl z-[999999] flex flex-col overflow-hidden"
           style={{
             top: `${position.top}px`,
             left: position.left === 'auto' ? 'auto' : `${position.left}px`,
@@ -77,11 +74,11 @@ export function FreshLangMenu() {
               <button
                 key={lang.code}
                 onClick={() => handleLanguageChange(lang.code)}
-                className="flex items-center justify-between w-full px-4 py-3 text-sm cursor-pointer text-slate-900 dark:text-slate-200 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 text-left transition-colors"
+                className="flex items-center justify-between w-full px-4 py-3 text-sm cursor-pointer text-slate-900 dark:text-slate-200 bg-white dark:bg-[#0f172a] hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition-colors"
                 style={{
                   borderBottom:
                     index < LANGUAGES.length - 1
-                      ? '1px solid rgba(203, 213, 225, 0.3) dark:rgba(71, 85, 105, 0.3)'
+                      ? '1px solid rgba(203, 213, 225, 0.3)'
                       : 'none',
                 }}
               >
@@ -98,19 +95,21 @@ export function FreshLangMenu() {
     : null
 
   return (
-    <>
-      {/* Button with working toggle */}
+    <div
+      className="relative inline-block"
+      onMouseEnter={() => setIsOpen(true)}
+      onMouseLeave={() => setIsOpen(false)}
+    >
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
-        className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-900 dark:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
+        className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-900 dark:text-slate-200 bg-white dark:bg-[#0f172a] border border-slate-200 dark:border-slate-700 rounded-md cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
       >
         <Globe size={16} className="text-slate-600 dark:text-slate-400" />
         {currentCode}
       </button>
 
-      {/* Portal */}
       {portalContent}
-    </>
+    </div>
   )
 }
