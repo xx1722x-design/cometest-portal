@@ -20,32 +20,10 @@ const COUNTRY_CODES: Record<string, string> = {
   'zh-TW': 'TW',
 }
 
-// Theme configurations
-const THEMES = {
-  dark: {
-    // Night-Punk
-    bg: '#0a0f1a',
-    bgHover: '#1a2845',
-    text: '#d4d9e0',
-    border: '#2d5a8c',
-    borderHover: '#4a8fd9',
-    glow: 'rgba(45, 90, 140, 0.3)',
-    glowHover: 'rgba(45, 90, 140, 0.4)',
-    itemBorder: 'rgba(45, 90, 140, 0.2)',
-    countryCode: '#5a7fa0',
-  },
-  light: {
-    // White-Punk
-    bg: '#ffffff',
-    bgHover: '#f8fafc',
-    text: '#1e293b',
-    border: '#cbd5e1',
-    borderHover: '#94a3b8',
-    glow: 'rgba(203, 213, 225, 0.3)',
-    glowHover: 'rgba(203, 213, 225, 0.5)',
-    itemBorder: 'rgba(203, 213, 225, 0.4)',
-    countryCode: '#64748b',
-  },
+// Helper function to detect dark mode
+function isDarkModeActive(): boolean {
+  if (typeof document === 'undefined') return true // Default to dark
+  return document.documentElement.classList.contains('dark')
 }
 
 export function FreshLangMenu() {
@@ -55,38 +33,11 @@ export function FreshLangMenu() {
     left: 0,
     right: 'auto',
   })
-  const [isDark, setIsDark] = useState(true)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const { i18n } = useTranslation()
 
   const currentLanguage = LANGUAGES.find((l) => l.code === i18n.language)
   const currentCode = currentLanguage?.code?.toUpperCase() || 'EN'
-
-  // Detect theme changes with fallback checks
-  useEffect(() => {
-    const detectTheme = () => {
-      const isDarkMode =
-        document.documentElement.classList.contains('dark') ||
-        window.matchMedia('(prefers-color-scheme: dark)').matches ||
-        getComputedStyle(document.documentElement).colorScheme === 'dark'
-      setIsDark(isDarkMode)
-    }
-
-    detectTheme()
-
-    // Listen for theme changes
-    const observer = new MutationObserver(detectTheme)
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'style'] })
-
-    // Also listen to system theme changes
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
-    mediaQuery.addEventListener('change', detectTheme)
-
-    return () => {
-      observer.disconnect()
-      mediaQuery.removeEventListener('change', detectTheme)
-    }
-  }, [])
 
   // Calculate dropdown position with RTL support
   useEffect(() => {
@@ -117,14 +68,33 @@ export function FreshLangMenu() {
     setIsOpen(false)
   }
 
-  // Detect dark mode at render time for Portal
-  const currentIsDark =
-    document.documentElement.classList.contains('dark') ||
-    window.matchMedia('(prefers-color-scheme: dark)').matches
+  // Detect dark mode at render time - EXPLICIT CHECK
+  const isDark = isDarkModeActive()
 
-  const theme = currentIsDark ? THEMES.dark : THEMES.light
+  // Night-Punk (Dark Mode) - PRIMARY
+  const darkColors = {
+    bg: '#0f172a',
+    bgHover: '#1e293b',
+    text: '#e2e8f0',
+    border: '#475569',
+    itemBorder: 'rgba(71, 85, 105, 0.3)',
+    countryCode: '#94a3b8',
+  }
 
-  // Portal content - renders in document.body
+  // White-Punk (Light Mode) - SECONDARY
+  const lightColors = {
+    bg: '#ffffff',
+    bgHover: '#f8fafc',
+    text: '#1e293b',
+    border: '#cbd5e1',
+    itemBorder: 'rgba(203, 213, 225, 0.3)',
+    countryCode: '#64748b',
+  }
+
+  // USE DARK MODE BY DEFAULT, SWITCH TO LIGHT ONLY IF isDark === false
+  const colors = isDark ? darkColors : lightColors
+
+  // Portal content - renders in document.body with explicit dark mode colors
   const portalContent = isOpen
     ? ReactDOM.createPortal(
         <div
@@ -133,13 +103,11 @@ export function FreshLangMenu() {
             top: `${position.top}px`,
             left: position.left === 'auto' ? 'auto' : `${position.left}px`,
             right: position.right === 'auto' ? 'auto' : `${position.right}px`,
-            width: '260px',
-            backgroundColor: theme.bg,
-            border: `1px solid ${theme.border}`,
+            width: '240px',
+            backgroundColor: colors.bg,
+            border: `1px solid ${colors.border}`,
             borderRadius: '0.375rem',
-            boxShadow: currentIsDark
-              ? `0 0 30px ${theme.glow}, 0 20px 40px rgba(0, 0, 0, 0.8)`
-              : `0 2px 12px rgba(0, 0, 0, 0.08), 0 4px 24px rgba(0, 0, 0, 0.05)`,
+            boxShadow: isDark ? '0 20px 25px -5px rgba(0, 0, 0, 0.5)' : '0 1px 3px rgba(0, 0, 0, 0.1)',
             zIndex: 999999,
             display: 'flex',
             flexDirection: 'column',
@@ -163,33 +131,30 @@ export function FreshLangMenu() {
                   alignItems: 'center',
                   justifyContent: 'space-between',
                   width: '100%',
-                  padding: '0.875rem 1.25rem',
-                  fontSize: '13px',
-                  fontWeight: '500',
-                  letterSpacing: '0.3px',
+                  padding: '0.75rem 1rem',
+                  fontSize: '14px',
                   cursor: 'pointer',
-                  color: theme.text,
-                  backgroundColor: theme.bg,
+                  color: colors.text,
+                  backgroundColor: colors.bg,
                   border: 'none',
-                  borderBottom: index < LANGUAGES.length - 1 ? `1px solid ${theme.itemBorder}` : 'none',
+                  borderBottom: index < LANGUAGES.length - 1 ? `1px solid ${colors.itemBorder}` : 'none',
                   textAlign: 'left',
-                  transition: 'all 0.15s ease',
+                  transition: 'background-color 0.2s',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = theme.bgHover
+                  e.currentTarget.style.backgroundColor = colors.bgHover
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = theme.bg
+                  e.currentTarget.style.backgroundColor = colors.bg
                 }}
               >
                 <span>{lang.name}</span>
                 <span
                   style={{
-                    fontSize: '11px',
+                    fontSize: '12px',
                     fontWeight: '700',
-                    letterSpacing: '0.5px',
-                    color: theme.countryCode,
-                    marginLeft: '1rem',
+                    color: colors.countryCode,
+                    marginLeft: '0.75rem',
                   }}
                 >
                   {countryCode}
@@ -204,7 +169,7 @@ export function FreshLangMenu() {
 
   return (
     <>
-      {/* Button - Dynamic Theme with explicit dark mode check */}
+      {/* Button - Explicit dark mode colors */}
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
@@ -212,36 +177,24 @@ export function FreshLangMenu() {
           display: 'inline-flex',
           alignItems: 'center',
           gap: '0.5rem',
-          padding: '0.5rem 0.875rem',
-          fontSize: '13px',
+          padding: '0.5rem 0.75rem',
+          fontSize: '14px',
           fontWeight: '600',
-          letterSpacing: '0.3px',
-          color: theme.text,
-          backgroundColor: theme.bg,
-          border: `1px solid ${theme.border}`,
+          color: colors.text,
+          backgroundColor: colors.bg,
+          border: `1px solid ${colors.border}`,
           borderRadius: '0.375rem',
           cursor: 'pointer',
-          transition: 'all 0.15s ease',
-          boxShadow: currentIsDark
-            ? `0 0 12px ${theme.glow}`
-            : `0 1px 3px rgba(0, 0, 0, 0.1)`,
+          transition: 'background-color 0.2s',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = theme.bgHover
-          e.currentTarget.style.borderColor = theme.borderHover
-          e.currentTarget.style.boxShadow = currentIsDark
-            ? `0 0 20px ${theme.glowHover}`
-            : `0 2px 8px rgba(0, 0, 0, 0.08)`
+          e.currentTarget.style.backgroundColor = colors.bgHover
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = theme.bg
-          e.currentTarget.style.borderColor = theme.border
-          e.currentTarget.style.boxShadow = currentIsDark
-            ? `0 0 12px ${theme.glow}`
-            : `0 1px 3px rgba(0, 0, 0, 0.1)`
+          e.currentTarget.style.backgroundColor = colors.bg
         }}
       >
-        <Globe size={16} style={{ color: theme.countryCode }} />
+        <Globe size={16} style={{ color: colors.countryCode }} />
         {currentCode}
       </button>
 
