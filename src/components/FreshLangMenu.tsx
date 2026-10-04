@@ -14,18 +14,15 @@ export function FreshLangMenu() {
   const [isDark, setIsDark] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { i18n } = useTranslation();
-  const currentCode = COUNTRY_CODES[i18n.language] || 'EN';
 
-  // 실시간 다크모드(나이트 펑크) 감지
+  // Real-time Dark Mode detection
   useEffect(() => {
-    if (typeof document !== 'undefined') {
-      setIsDark(document.documentElement.classList.contains('dark'));
-      const obs = new MutationObserver(() => {
-        setIsDark(document.documentElement.classList.contains('dark'));
-      });
-      obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-      return () => obs.disconnect();
-    }
+    if (typeof document === 'undefined') return;
+    const checkDark = () => setIsDark(document.documentElement.classList.contains('dark'));
+    checkDark();
+    const obs = new MutationObserver(checkDark);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => obs.disconnect();
   }, []);
 
   const toggleMenu = (e: React.MouseEvent) => {
@@ -37,6 +34,8 @@ export function FreshLangMenu() {
     }
     setIsOpen(!isOpen);
   };
+
+  const currentCode = COUNTRY_CODES[i18n.language] || 'EN';
 
   return (
     <>
@@ -55,7 +54,6 @@ export function FreshLangMenu() {
 
       {isOpen && typeof document !== 'undefined' && createPortal(
         <>
-          {/* Failproof Invisible Overlay */}
           <div
             onClick={() => setIsOpen(false)}
             style={{
@@ -70,7 +68,6 @@ export function FreshLangMenu() {
             }}
           />
 
-          {/* Dropdown Menu */}
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
@@ -91,7 +88,6 @@ export function FreshLangMenu() {
               maskImage: 'none',
             }}
           >
-            {/* Header */}
             <div
               style={{
                 padding: '12px 16px',
@@ -119,7 +115,6 @@ export function FreshLangMenu() {
               </div>
             </div>
 
-            {/* Language List */}
             <div style={{ maxHeight: '320px', overflowY: 'auto' }}>
               {LANGUAGES.map((lang) => {
                 const isSelected = lang.code === i18n.language;
@@ -130,59 +125,17 @@ export function FreshLangMenu() {
                       i18n.changeLanguage(lang.code);
                       setIsOpen(false);
                     }}
-                    style={{
-                      width: '100%',
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '12px',
-                      padding: '10px 12px',
-                      margin: '2px 0',
-                      borderRadius: '0.5rem',
-                      fontSize: '14px',
-                      cursor: 'pointer',
-                      border: 'none',
-                      backgroundColor: isSelected
+                    className={`flex items-center gap-3 px-3 py-2.5 my-0.5 rounded-lg text-sm cursor-pointer transition-colors ${
+                      isSelected
                         ? isDark
-                          ? '#5b21b6'
-                          : '#ede9fe'
-                        : 'transparent',
-                      color: isSelected
-                        ? isDark
-                          ? '#e9d5ff'
-                          : '#6b21a8'
+                          ? 'bg-purple-600/30 text-purple-200 font-bold'
+                          : 'bg-purple-100 text-purple-800 font-bold'
                         : isDark
-                          ? '#cbd5e1'
-                          : '#374151',
-                      fontWeight: isSelected ? 'bold' : 'normal',
-                      transition: 'background-color 0.15s ease',
-                    }}
-                    onMouseEnter={(e) => {
-                      if (!isSelected) {
-                        (e.currentTarget as HTMLButtonElement).style.backgroundColor = isDark
-                          ? '#1e293b'
-                          : '#f3f4f6';
-                        (e.currentTarget as HTMLButtonElement).style.color = isDark
-                          ? '#f1f5f9'
-                          : '#1f2937';
-                      }
-                    }}
-                    onMouseLeave={(e) => {
-                      if (!isSelected) {
-                        (e.currentTarget as HTMLButtonElement).style.backgroundColor = 'transparent';
-                        (e.currentTarget as HTMLButtonElement).style.color = isDark
-                          ? '#cbd5e1'
-                          : '#374151';
-                      }
-                    }}
+                          ? 'hover:bg-slate-800 text-slate-300 hover:text-white'
+                          : 'hover:bg-slate-100 text-slate-700 hover:text-black'
+                    }`}
                   >
-                    <span
-                      style={{
-                        fontFamily: 'monospace',
-                        fontSize: '12px',
-                        fontWeight: 'bold',
-                        minWidth: '28px',
-                      }}
-                    >
+                    <span style={{ fontFamily: 'monospace', fontSize: '12px', fontWeight: 'bold' }}>
                       {COUNTRY_CODES[lang.code] || lang.code.toUpperCase()}
                     </span>
                     <span>{lang.name}</span>
