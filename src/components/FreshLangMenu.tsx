@@ -2,141 +2,113 @@ import React, { useState, useRef, useEffect } from 'react';
 import ReactDOM from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { LANGUAGES } from '../i18n/languages';
-import { Globe, Check } from 'lucide-react';
+import { Globe } from 'lucide-react';
+
+const COUNTRY_CODES: Record<string, string> = {
+  en: 'US', fr: 'FR', es: 'ES', de: 'DE', ru: 'RU', ar: 'SA', zh: 'CN', 'zh-TW': 'TW', ja: 'JP', ko: 'KR',
+};
 
 export function FreshLangMenu() {
   const [isOpen, setIsOpen] = useState(false);
-  const [coords, setCoords] = useState({ top: 0, left: 0 });
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [position, setPosition] = useState({ top: 0, right: 0 });
+  const [isDark, setIsDark] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { i18n } = useTranslation();
 
-  // Monitor dark mode changes
   useEffect(() => {
-    const checkDark = () => {
-      setIsDarkMode(document.documentElement.classList.contains('dark'));
-    };
-    checkDark();
-    const observer = new MutationObserver(checkDark);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-    return () => observer.disconnect();
+    setIsDark(document.documentElement.classList.contains('dark'));
+    const obs = new MutationObserver(() => setIsDark(document.documentElement.classList.contains('dark')));
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => obs.disconnect();
   }, []);
 
-  const updatePosition = () => {
-    if (buttonRef.current) {
+  const toggleMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (buttonRef.current && !isOpen) {
       const rect = buttonRef.current.getBoundingClientRect();
-      setCoords({
-        top: rect.bottom + 8,
-        left: rect.left,
-      });
+      setPosition({ top: rect.bottom + 8, right: window.innerWidth - rect.right });
     }
+    setIsOpen(!isOpen);
   };
 
-  // Outside click listener with 150ms delay to prevent event bubbling
   useEffect(() => {
     if (!isOpen) return;
-
-    const timeoutId = setTimeout(() => {
-      const handleOutside = () => {
-        setIsOpen(false);
-      };
+    const handleOutside = () => setIsOpen(false);
+    const timer = setTimeout(() => {
       window.addEventListener('click', handleOutside);
-
-      return () => {
-        window.removeEventListener('click', handleOutside);
-      };
     }, 150);
-
     return () => {
-      clearTimeout(timeoutId);
-      window.removeEventListener('click', () => {});
+      clearTimeout(timer);
+      window.removeEventListener('click', handleOutside);
     };
   }, [isOpen]);
 
-  const currentLang = LANGUAGES.find((l) => l.code === i18n.language);
-  const currentCode = currentLang?.shortLabel || 'EN';
+  const currentCode = COUNTRY_CODES[i18n.language] || 'EN';
 
   return (
     <>
       <button
         ref={buttonRef}
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          setIsOpen(!isOpen);
-          updatePosition();
-        }}
-        className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg transition-all duration-200 border ${
-          isDarkMode
-            ? 'text-slate-200 bg-slate-800/40 border-slate-700 hover:bg-slate-700/60 active:bg-slate-700'
-            : 'text-slate-900 bg-slate-100 border-slate-300 hover:bg-slate-200 active:bg-slate-300'
+        onClick={toggleMenu}
+        className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-lg border ${
+          isDark
+            ? 'text-slate-200 bg-slate-800/40 border-slate-700 hover:bg-slate-700/60'
+            : 'text-slate-900 bg-slate-100 border-slate-300 hover:bg-slate-200'
         }`}
       >
         <Globe size={16} />
-        <span>{currentCode}</span>
+        {currentCode}
       </button>
 
-      {isOpen &&
-        ReactDOM.createPortal(
-          <div
-            onClick={(e) => e.stopPropagation()}
-            className={`fixed z-50 w-64 rounded-lg border shadow-2xl overflow-hidden ${
-              isDarkMode ? 'bg-slate-900 border-slate-700' : 'bg-white border-slate-200'
-            }`}
-            style={{
-              top: `${coords.top}px`,
-              left: `${coords.left}px`,
-            }}
-          >
-            {/* Header */}
-            <div
-              className={`px-4 py-3 border-b ${
-                isDarkMode ? 'border-slate-700 bg-slate-800/50' : 'border-slate-200 bg-slate-50'
-              }`}
-            >
-              <div className={`text-sm font-bold ${isDarkMode ? 'text-slate-100' : 'text-slate-900'}`}>
-                Select Language
-              </div>
-              <div className={`text-xs mt-1 ${isDarkMode ? 'text-slate-400' : 'text-slate-500'}`}>
-                10 languages available
-              </div>
+      {isOpen && typeof document !== 'undefined' && ReactDOM.createPortal(
+        <div
+          onClick={(e) => e.stopPropagation()}
+          className={`fixed z-[999999] w-64 rounded-xl border shadow-2xl overflow-hidden ${
+            isDark ? 'bg-[#121826] text-slate-100 border-slate-800' : 'bg-white text-slate-900 border-slate-200'
+          }`}
+          style={{ top: `${position.top}px`, right: `${position.right}px` }}
+        >
+          <div className={`px-4 py-3 border-b ${isDark ? 'border-slate-800 bg-slate-900/50' : 'border-slate-200 bg-slate-50'}`}>
+            <div className={`text-sm font-bold ${isDark ? 'text-slate-100' : 'text-slate-900'}`}>
+              Select Language
             </div>
+            <div className={`text-xs mt-1 ${isDark ? 'text-slate-400' : 'text-slate-500'}`}>
+              10 languages available
+            </div>
+          </div>
 
-            {/* Language List */}
-            <div className="max-h-80 overflow-y-auto">
-              {LANGUAGES.map((lang) => {
-                const isSelected = i18n.language === lang.code;
-                return (
-                  <button
-                    key={lang.code}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      void i18n.changeLanguage(lang.code);
-                      setIsOpen(false);
-                    }}
-                    className={`w-full text-left px-4 py-2.5 text-sm flex items-center justify-between border-b last:border-0 transition-colors duration-100 ${
-                      isSelected
-                        ? isDarkMode
-                          ? 'bg-purple-600/20 text-purple-300 font-bold'
-                          : 'bg-purple-100 text-purple-700 font-bold'
-                        : isDarkMode
-                          ? 'text-slate-200 hover:bg-slate-800/60'
-                          : 'text-slate-800 hover:bg-slate-100'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <span className="font-mono text-xs font-bold">{lang.shortLabel}</span>
-                      <span>{lang.name}</span>
-                    </div>
-                    {isSelected && <Check size={16} className={isDarkMode ? 'text-purple-400' : 'text-purple-600'} />}
-                  </button>
-                );
-              })}
-            </div>
-          </div>,
-          document.body
-        )}
+          <div className="max-h-80 overflow-y-auto">
+            {LANGUAGES.map((lang) => {
+              const isSelected = i18n.language === lang.code;
+              return (
+                <button
+                  key={lang.code}
+                  onClick={() => {
+                    i18n.changeLanguage(lang.code);
+                    setIsOpen(false);
+                  }}
+                  className={`w-full text-left flex items-center justify-between px-3 py-2 my-0.5 rounded-lg text-sm cursor-pointer ${
+                    isSelected
+                      ? isDark
+                        ? 'bg-purple-600/20 text-purple-300 font-bold'
+                        : 'bg-purple-50 text-purple-700 font-bold'
+                      : isDark
+                        ? 'hover:bg-slate-800/60'
+                        : 'hover:bg-slate-100'
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    <span className="font-mono text-xs font-bold">{COUNTRY_CODES[lang.code] || lang.code.toUpperCase()}</span>
+                    <span>{lang.label}</span>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
+        </div>,
+        document.body
+      )}
     </>
   );
 }
