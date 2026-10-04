@@ -26,7 +26,7 @@ export default function LanguageSelector() {
         {currentLangLabel}
       </button>
 
-      {/* Dropdown: TRUE ABSOLUTE FLOATING OVERLAY */}
+      {/* Dropdown: 100% Solid Background, Zero Fog/Mask */}
       {isOpen && (
         <div
           style={{
@@ -35,16 +35,30 @@ export default function LanguageSelector() {
             right: 0,
             marginTop: '0.5rem',
             width: '192px',
-            backgroundColor: '#1e293b',
+            backgroundColor: '#0f172a',
             border: '1px solid #475569',
             borderRadius: '0.375rem',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
             zIndex: 99999,
+            listStyle: 'none',
+            margin: 0,
+            padding: 0,
+            backgroundImage: 'none',
+            maskImage: 'none',
+            WebkitMaskImage: 'none',
           }}
         >
-          <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+          <ul style={{ listStyle: 'none', margin: 0, padding: 0, backgroundColor: '#0f172a' }}>
             {LANGUAGES.map((lang) => (
-              <li key={lang.code} style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+              <li
+                key={lang.code}
+                style={{
+                  listStyle: 'none',
+                  margin: 0,
+                  padding: 0,
+                  backgroundColor: '#0f172a',
+                }}
+              >
                 <button
                   onClick={() => { handleLanguageSelect(lang.code); setIsOpen(false); }}
                   style={{
@@ -56,12 +70,15 @@ export default function LanguageSelector() {
                     color: '#e2e8f0',
                     textAlign: 'left',
                     border: 'none',
-                    borderBottom: '1px solid rgba(30, 41, 59, 0.5)',
-                    backgroundColor: 'transparent',
+                    borderBottom: '1px solid rgba(71, 85, 105, 0.5)',
+                    backgroundColor: '#0f172a',
                     transition: 'background-color 0.2s',
+                    backgroundImage: 'none',
+                    maskImage: 'none',
+                    WebkitMaskImage: 'none',
                   }}
                   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1e293b')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0f172a')}
                 >
                   {lang.name}
                 </button>
