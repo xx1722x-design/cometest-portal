@@ -5,8 +5,8 @@ import { LANGUAGES } from '../i18n/languages'
 import { Globe, Check } from 'lucide-react'
 
 export function FreshLangMenu() {
-  const [isOpen, setIsOpen] = useState(true) // ALWAYS OPEN FOR TESTING
-  const [coords, setCoords] = useState({ top: 100, left: 200, right: 200 })
+  const [isOpen, setIsOpen] = useState(false)
+  const [coords, setCoords] = useState({ top: 0, right: 0 })
   const [isDarkMode, setIsDarkMode] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const { i18n } = useTranslation()
@@ -21,22 +21,40 @@ export function FreshLangMenu() {
     return () => observer.disconnect()
   }, [])
 
+  const updatePosition = () => {
+    if (buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect()
+      setCoords({
+        top: rect.bottom + window.scrollY + 8,
+        right: window.innerWidth - rect.right + window.scrollX,
+      })
+    }
+  }
+
+  const handleOpen = () => {
+    updatePosition()
+    setIsOpen(prev => !prev)
+  }
+
+  useEffect(() => {
+    if (!isOpen) return
+    const handleClick = (e: MouseEvent) => {
+      if (buttonRef.current && !buttonRef.current.contains(e.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [isOpen])
+
   const currentLang = LANGUAGES.find((l) => l.code === i18n.language)
   const currentCode = currentLang?.shortLabel || 'EN'
-  const isRtl = currentLang?.dir === 'rtl'
-
-  console.log('[Lang] Component rendered. isOpen:', isOpen)
 
   return (
     <>
       <button
         ref={buttonRef}
-        onClick={() => {
-          console.log('[Lang] Button clicked!')
-          setIsOpen(false)
-        }}
-        onMouseEnter={() => console.log('[Lang] Mouse enter')}
-        onMouseLeave={() => console.log('[Lang] Mouse leave')}
+        onClick={handleOpen}
         className={`flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-md transition-colors border ${
           isDarkMode
             ? 'text-slate-200 bg-[#0f172a] border-slate-700 hover:bg-slate-800'
@@ -50,14 +68,15 @@ export function FreshLangMenu() {
       {isOpen &&
         ReactDOM.createPortal(
           <div
-            className={`fixed z-[9999] w-56 rounded-lg border shadow-2xl overflow-hidden ${
+            className={`fixed w-56 rounded-lg border shadow-2xl overflow-hidden ${
               isDarkMode
                 ? 'bg-[#0f172a] border-slate-700'
                 : 'bg-white border-slate-200'
             }`}
             style={{
-              top: '100px',
-              right: '20px',
+              top: `${coords.top}px`,
+              right: `${coords.right}px`,
+              zIndex: 99999,
               backdropFilter: 'none',
               WebkitMaskImage: 'none',
               maskImage: 'none',
@@ -83,7 +102,6 @@ export function FreshLangMenu() {
                 <button
                   key={lang.code}
                   onClick={() => {
-                    console.log('[Lang] Selected:', lang.code)
                     void i18n.changeLanguage(lang.code)
                     setIsOpen(false)
                   }}
