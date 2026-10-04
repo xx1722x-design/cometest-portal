@@ -18,7 +18,7 @@ export default function LanguageSelector() {
 
   return (
     <div className="relative inline-block">
-      {/* Button: positioned at top-right corner */}
+      {/* Button: Fixed to top-right, rounded dark theme */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-200 bg-[#0f172a] border border-slate-700 rounded-md hover:bg-slate-800 transition-colors"
@@ -31,39 +31,40 @@ export default function LanguageSelector() {
         {currentLanguageCode}
       </button>
 
-      {/* Dropdown: vertically stacked with flex-col on OUTER container */}
+      {/* Dropdown Popup: Expands vertically directly below the button */}
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-56 bg-slate-900 border border-slate-700 rounded-md shadow-lg z-50 flex flex-col max-h-96">
-          {/* Header section - does NOT scroll */}
-          <div className="px-4 py-3 border-b border-slate-700 flex-shrink-0">
+        <div className="absolute top-full ltr:right-0 rtl:left-0 mt-2 w-56 bg-slate-900 border border-slate-700 rounded-md shadow-lg z-50">
+          {/* Header */}
+          <div className="px-4 py-3 border-b border-slate-700">
             <h3 className="text-sm font-semibold text-slate-100">{t('select_language')}</h3>
             <p className="text-xs text-slate-400 mt-1">{t('languages_available', { count: LANGUAGES.length })}</p>
           </div>
 
-          {/* Languages list - scrollable, MUST be flex-col */}
-          <div className="flex flex-col overflow-y-auto">
+          {/* STRICT VERTICAL LIST (flex-col) */}
+          <ul className="flex flex-col max-h-96 overflow-y-auto list-none m-0 p-0">
             {LANGUAGES.map((lang) => {
               const isSelected = language === lang.code
               return (
-                <button
-                  key={lang.code}
-                  onClick={() => { handleLanguageSelect(lang.code); setIsOpen(false); }}
-                  className={`flex justify-between items-center px-4 py-3 cursor-pointer text-slate-200 hover:bg-slate-700 transition-colors border-b border-slate-800/50 last:border-0 ${
-                    isSelected ? 'bg-slate-700 font-medium' : ''
-                  }`}
-                >
-                  <span className="flex items-center gap-3">
-                    <span className="text-base">{lang.flag}</span>
-                    {lang.name}
-                  </span>
-                  <span className="text-xs font-semibold text-slate-400">{lang.shortLabel}</span>
-                </button>
+                <li key={lang.code}>
+                  <button
+                    onClick={() => { handleLanguageSelect(lang.code); setIsOpen(false); }}
+                    className={`flex justify-between items-center w-full px-4 py-3 cursor-pointer text-slate-200 hover:bg-slate-700 border-b border-slate-800/50 last:border-0 transition-colors ${
+                      isSelected ? 'bg-slate-700 font-medium' : ''
+                    }`}
+                  >
+                    <span className="flex items-center gap-3">
+                      <span className="text-base">{lang.flag}</span>
+                      {lang.name}
+                    </span>
+                    <span className="text-xs font-semibold text-slate-400">{lang.shortLabel}</span>
+                  </button>
+                </li>
               )
             })}
-          </div>
+          </ul>
 
-          {/* Footer section - does NOT scroll */}
-          <div className="px-4 py-3 border-t border-slate-700 flex-shrink-0">
+          {/* Footer */}
+          <div className="px-4 py-3 border-t border-slate-700">
             <p className="text-xs text-slate-400">
               {t('current_language')}: <strong className="text-slate-100">{currentLangLabel}</strong>
             </p>
