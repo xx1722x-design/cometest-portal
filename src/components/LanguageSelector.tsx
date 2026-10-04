@@ -18,7 +18,7 @@ export default function LanguageSelector() {
 
   return (
     <div className="relative inline-block">
-      {/* Button: Fixed to top-right, rounded dark theme */}
+      {/* Button: positioned at top-right corner */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-200 bg-[#0f172a] border border-slate-700 rounded-md hover:bg-slate-800 transition-colors"
@@ -31,17 +31,17 @@ export default function LanguageSelector() {
         {currentLanguageCode}
       </button>
 
-      {/* Dropdown: Expands vertically directly below the button */}
+      {/* Dropdown: vertically stacked with flex-col on OUTER container */}
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-56 bg-slate-900 border border-slate-700 rounded-md shadow-lg z-50">
-          {/* Header */}
-          <div className="px-4 py-3 border-b border-slate-700">
+        <div className="absolute top-full right-0 mt-2 w-56 bg-slate-900 border border-slate-700 rounded-md shadow-lg z-50 flex flex-col max-h-96">
+          {/* Header section - does NOT scroll */}
+          <div className="px-4 py-3 border-b border-slate-700 flex-shrink-0">
             <h3 className="text-sm font-semibold text-slate-100">{t('select_language')}</h3>
             <p className="text-xs text-slate-400 mt-1">{t('languages_available', { count: LANGUAGES.length })}</p>
           </div>
 
-          {/* ⚠️ You MUST use flex-col to force a single vertical column! */}
-          <div className="flex flex-col max-h-96 overflow-y-auto">
+          {/* Languages list - scrollable, MUST be flex-col */}
+          <div className="flex flex-col overflow-y-auto">
             {LANGUAGES.map((lang) => {
               const isSelected = language === lang.code
               return (
@@ -62,8 +62,8 @@ export default function LanguageSelector() {
             })}
           </div>
 
-          {/* Footer */}
-          <div className="px-4 py-3 border-t border-slate-700">
+          {/* Footer section - does NOT scroll */}
+          <div className="px-4 py-3 border-t border-slate-700 flex-shrink-0">
             <p className="text-xs text-slate-400">
               {t('current_language')}: <strong className="text-slate-100">{currentLangLabel}</strong>
             </p>
