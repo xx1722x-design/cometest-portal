@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { LanguageSelector } from './LanguageSelector'
+import LanguageSelector from './LanguageSelector'
 import { useDarkMode } from '../theme'
 import { searchPortal, type SearchItem } from '../config/searchData'
 
@@ -20,6 +20,7 @@ const CATEGORIES = [
   { key: 'technology', i18nKey: 'technology', path: '/category/technology' },
   { key: 'others', i18nKey: 'others', path: '/category/others' },
   { key: 'web_games', i18nKey: 'web_games', path: '/game' },
+  { key: 'puzzle', i18nKey: 'puzzle', path: '/puzzle' },
 ]
 
 // 반응형 헤더. 색은 모두 테마 CSS 변수, 배치는 src/styles/portal.css 의 .site-header 참고.
@@ -224,7 +225,7 @@ export function Header() {
             {isDarkMode ? '🌙' : '☀️'}
           </button>
 
-          {/* 언어 선택 드롭다운 (store.cometest.com 과 동일 컴포넌트) */}
+          {/* 언어 선택 드롭다운 */}
           <LanguageSelector />
 
           <button

@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LANGUAGES, type Language } from '../i18n/languages'
 
-export function LanguageSelector() {
+export default function LanguageSelector() {
   const [isOpen, setIsOpen] = useState(false)
   const { t, i18n } = useTranslation()
 
@@ -18,7 +18,7 @@ export function LanguageSelector() {
 
   return (
     <div className="relative inline-block">
-      {/* 1. 언어 선택 버튼 (우측 상단 위치 유지) */}
+      {/* Button: Fixed to top-right, rounded dark theme */}
       <button
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-slate-200 bg-[#0f172a] border border-slate-700 rounded-md hover:bg-slate-800 transition-colors"
@@ -31,25 +31,25 @@ export function LanguageSelector() {
         {currentLanguageCode}
       </button>
 
-      {/* 2. 드롭다운 팝업 (버튼 바로 아래에 세로형으로 촥 펼쳐짐) */}
+      {/* Dropdown: Expands vertically directly below the button */}
       {isOpen && (
         <div className="absolute top-full right-0 mt-2 w-56 bg-slate-900 border border-slate-700 rounded-md shadow-lg z-50">
-          {/* 헤더 */}
+          {/* Header */}
           <div className="px-4 py-3 border-b border-slate-700">
             <h3 className="text-sm font-semibold text-slate-100">{t('select_language')}</h3>
             <p className="text-xs text-slate-400 mt-1">{t('languages_available', { count: LANGUAGES.length })}</p>
           </div>
 
-          {/* ⚠️ flex-col 로 세로 1열 강제 정렬 */}
+          {/* ⚠️ You MUST use flex-col to force a single vertical column! */}
           <div className="flex flex-col max-h-96 overflow-y-auto">
             {LANGUAGES.map((lang) => {
               const isSelected = language === lang.code
               return (
                 <button
                   key={lang.code}
-                  onClick={() => handleLanguageSelect(lang.code)}
-                  className={`flex justify-between items-center px-4 py-3 cursor-pointer text-slate-200 transition-colors border-b border-slate-800/50 last:border-0 ${
-                    isSelected ? 'bg-slate-700 font-medium' : 'hover:bg-slate-800'
+                  onClick={() => { handleLanguageSelect(lang.code); setIsOpen(false); }}
+                  className={`flex justify-between items-center px-4 py-3 cursor-pointer text-slate-200 hover:bg-slate-700 transition-colors border-b border-slate-800/50 last:border-0 ${
+                    isSelected ? 'bg-slate-700 font-medium' : ''
                   }`}
                 >
                   <span className="flex items-center gap-3">
@@ -62,7 +62,7 @@ export function LanguageSelector() {
             })}
           </div>
 
-          {/* 푸터 */}
+          {/* Footer */}
           <div className="px-4 py-3 border-t border-slate-700">
             <p className="text-xs text-slate-400">
               {t('current_language')}: <strong className="text-slate-100">{currentLangLabel}</strong>
