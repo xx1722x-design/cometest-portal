@@ -20,6 +20,34 @@ const COUNTRY_CODES: Record<string, string> = {
   'zh-TW': 'TW',
 }
 
+// Theme configurations
+const THEMES = {
+  dark: {
+    // Night-Punk
+    bg: '#0a0f1a',
+    bgHover: '#1a2845',
+    text: '#d4d9e0',
+    border: '#2d5a8c',
+    borderHover: '#4a8fd9',
+    glow: 'rgba(45, 90, 140, 0.3)',
+    glowHover: 'rgba(45, 90, 140, 0.4)',
+    itemBorder: 'rgba(45, 90, 140, 0.2)',
+    countryCode: '#5a7fa0',
+  },
+  light: {
+    // White-Punk
+    bg: '#ffffff',
+    bgHover: '#f8fafc',
+    text: '#1e293b',
+    border: '#cbd5e1',
+    borderHover: '#94a3b8',
+    glow: 'rgba(203, 213, 225, 0.3)',
+    glowHover: 'rgba(203, 213, 225, 0.5)',
+    itemBorder: 'rgba(203, 213, 225, 0.4)',
+    countryCode: '#64748b',
+  },
+}
+
 export function FreshLangMenu() {
   const [isOpen, setIsOpen] = useState(false)
   const [position, setPosition] = useState<{ top: number; left: number | string; right: number | string }>({
@@ -27,11 +55,28 @@ export function FreshLangMenu() {
     left: 0,
     right: 'auto',
   })
+  const [isDark, setIsDark] = useState(true)
   const buttonRef = useRef<HTMLButtonElement>(null)
   const { i18n } = useTranslation()
 
   const currentLanguage = LANGUAGES.find((l) => l.code === i18n.language)
   const currentCode = currentLanguage?.code?.toUpperCase() || 'EN'
+
+  // Detect theme changes
+  useEffect(() => {
+    const detectTheme = () => {
+      const isDarkMode = document.documentElement.classList.contains('dark')
+      setIsDark(isDarkMode)
+    }
+
+    detectTheme()
+
+    // Listen for theme changes
+    const observer = new MutationObserver(detectTheme)
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] })
+
+    return () => observer.disconnect()
+  }, [])
 
   // Calculate dropdown position with RTL support
   useEffect(() => {
@@ -39,7 +84,6 @@ export function FreshLangMenu() {
       const rect = buttonRef.current.getBoundingClientRect()
       const isRTL = document.dir === 'rtl'
 
-      // Decide left or right alignment based on RTL or button position
       const shouldAlignLeft = isRTL || rect.left < window.innerWidth / 2
 
       if (shouldAlignLeft) {
@@ -63,6 +107,8 @@ export function FreshLangMenu() {
     setIsOpen(false)
   }
 
+  const theme = isDark ? THEMES.dark : THEMES.light
+
   // Portal content - renders in document.body
   const portalContent = isOpen
     ? ReactDOM.createPortal(
@@ -73,10 +119,12 @@ export function FreshLangMenu() {
             left: position.left === 'auto' ? 'auto' : `${position.left}px`,
             right: position.right === 'auto' ? 'auto' : `${position.right}px`,
             width: '260px',
-            backgroundColor: '#0a0f1a',
-            border: '1px solid #2d5a8c',
+            backgroundColor: theme.bg,
+            border: `1px solid ${theme.border}`,
             borderRadius: '0.375rem',
-            boxShadow: '0 0 30px rgba(45, 90, 140, 0.3), 0 20px 40px rgba(0, 0, 0, 0.8)',
+            boxShadow: isDark
+              ? `0 0 30px ${theme.glow}, 0 20px 40px rgba(0, 0, 0, 0.8)`
+              : `0 2px 12px rgba(0, 0, 0, 0.08), 0 4px 24px rgba(0, 0, 0, 0.05)`,
             zIndex: 999999,
             display: 'flex',
             flexDirection: 'column',
@@ -105,19 +153,18 @@ export function FreshLangMenu() {
                   fontWeight: '500',
                   letterSpacing: '0.3px',
                   cursor: 'pointer',
-                  color: '#d4d9e0',
-                  backgroundColor: '#0a0f1a',
+                  color: theme.text,
+                  backgroundColor: theme.bg,
                   border: 'none',
-                  borderBottom: index < LANGUAGES.length - 1 ? '1px solid rgba(45, 90, 140, 0.2)' : 'none',
+                  borderBottom: index < LANGUAGES.length - 1 ? `1px solid ${theme.itemBorder}` : 'none',
                   textAlign: 'left',
                   transition: 'all 0.15s ease',
                 }}
                 onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = '#1a2845'
-                  e.currentTarget.style.borderLeftColor = '#2d5a8c'
+                  e.currentTarget.style.backgroundColor = theme.bgHover
                 }}
                 onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = '#0a0f1a'
+                  e.currentTarget.style.backgroundColor = theme.bg
                 }}
               >
                 <span>{lang.name}</span>
@@ -126,7 +173,7 @@ export function FreshLangMenu() {
                     fontSize: '11px',
                     fontWeight: '700',
                     letterSpacing: '0.5px',
-                    color: '#5a7fa0',
+                    color: theme.countryCode,
                     marginLeft: '1rem',
                   }}
                 >
@@ -142,7 +189,7 @@ export function FreshLangMenu() {
 
   return (
     <>
-      {/* Button - Night-Punk Aesthetic */}
+      {/* Button - Dynamic Theme */}
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
@@ -154,26 +201,32 @@ export function FreshLangMenu() {
           fontSize: '13px',
           fontWeight: '600',
           letterSpacing: '0.3px',
-          color: '#d4d9e0',
-          backgroundColor: '#0a0f1a',
-          border: '1px solid #2d5a8c',
+          color: theme.text,
+          backgroundColor: theme.bg,
+          border: `1px solid ${theme.border}`,
           borderRadius: '0.375rem',
           cursor: 'pointer',
           transition: 'all 0.15s ease',
-          boxShadow: '0 0 12px rgba(45, 90, 140, 0.2)',
+          boxShadow: isDark
+            ? `0 0 12px ${theme.glow}`
+            : `0 1px 3px rgba(0, 0, 0, 0.1)`,
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = '#1a2845'
-          e.currentTarget.style.boxShadow = '0 0 20px rgba(45, 90, 140, 0.4)'
-          e.currentTarget.style.borderColor = '#4a8fd9'
+          e.currentTarget.style.backgroundColor = theme.bgHover
+          e.currentTarget.style.borderColor = theme.borderHover
+          e.currentTarget.style.boxShadow = isDark
+            ? `0 0 20px ${theme.glowHover}`
+            : `0 2px 8px rgba(0, 0, 0, 0.08)`
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = '#0a0f1a'
-          e.currentTarget.style.boxShadow = '0 0 12px rgba(45, 90, 140, 0.2)'
-          e.currentTarget.style.borderColor = '#2d5a8c'
+          e.currentTarget.style.backgroundColor = theme.bg
+          e.currentTarget.style.borderColor = theme.border
+          e.currentTarget.style.boxShadow = isDark
+            ? `0 0 12px ${theme.glow}`
+            : `0 1px 3px rgba(0, 0, 0, 0.1)`
         }}
       >
-        <Globe size={16} style={{ color: '#5a7fa0' }} />
+        <Globe size={16} style={{ color: theme.countryCode }} />
         {currentCode}
       </button>
 
