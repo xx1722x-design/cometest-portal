@@ -17,16 +17,29 @@ export default function LanguageSelector() {
 
   return (
     <div style={{ position: 'relative', display: 'inline-block', zIndex: 10 }}>
-      {/* Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-200 bg-[#0f172a] border border-slate-700 rounded-md hover:bg-slate-800 transition-colors"
+        style={{
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: '0.5rem',
+          padding: '0.5rem 0.75rem',
+          fontSize: '14px',
+          fontWeight: '600',
+          color: '#e2e8f0',
+          backgroundColor: '#0f172a',
+          border: '1px solid #475569',
+          borderRadius: '0.375rem',
+          cursor: 'pointer',
+          transition: 'background-color 0.2s',
+        }}
+        onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1e293b')}
+        onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0f172a')}
       >
-        <Globe className="w-4 h-4" />
+        <Globe size={16} style={{ color: '#e2e8f0' }} />
         {currentLangLabel}
       </button>
 
-      {/* Dropdown: 100% Solid Background, Zero Fog/Mask - ULTRA OVERRIDE */}
       {isOpen && (
         <div
           style={{
@@ -40,6 +53,8 @@ export default function LanguageSelector() {
             borderRadius: '0.375rem',
             boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
             zIndex: 99999,
+            maxHeight: '400px',
+            overflowY: 'auto',
             backdropFilter: 'none !important',
             WebkitBackdropFilter: 'none !important',
             filter: 'none !important',
@@ -48,55 +63,34 @@ export default function LanguageSelector() {
             backgroundImage: 'none !important',
           } as React.CSSProperties}
         >
-          <ul
-            style={{
-              listStyle: 'none',
-              margin: 0,
-              padding: 0,
-              backgroundColor: '#0f172a',
-              backdropFilter: 'none !important',
-              WebkitBackdropFilter: 'none !important',
-              filter: 'none !important',
-            } as React.CSSProperties}
-          >
-            {LANGUAGES.map((lang) => (
-              <li
+          {LANGUAGES.map((lang) => {
+            const isSelected = i18n.language === lang.code
+            return (
+              <div
                 key={lang.code}
+                onClick={() => { handleLanguageSelect(lang.code); setIsOpen(false); }}
                 style={{
-                  listStyle: 'none',
-                  margin: 0,
-                  padding: 0,
-                  backgroundColor: '#0f172a',
+                  padding: '0.75rem 1rem',
+                  fontSize: '14px',
+                  color: '#e2e8f0',
+                  backgroundColor: isSelected ? '#1e293b' : '#0f172a',
+                  borderBottom: '1px solid rgba(71, 85, 105, 0.5)',
+                  cursor: 'pointer',
+                  transition: 'background-color 0.2s',
+                  textAlign: 'left',
                   backdropFilter: 'none !important',
                   WebkitBackdropFilter: 'none !important',
+                  filter: 'none !important',
+                  maskImage: 'none !important',
+                  WebkitMaskImage: 'none !important',
                 }}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1e293b')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = isSelected ? '#1e293b' : '#0f172a')}
               >
-                <button
-                  onClick={() => { handleLanguageSelect(lang.code); setIsOpen(false); }}
-                  style={{
-                    display: 'block',
-                    width: '100%',
-                    padding: '0.75rem 1rem',
-                    fontSize: '14px',
-                    cursor: 'pointer',
-                    color: '#e2e8f0',
-                    textAlign: 'left',
-                    border: 'none',
-                    borderBottom: '1px solid rgba(71, 85, 105, 0.5)',
-                    backgroundColor: '#0f172a',
-                    transition: 'background-color 0.2s',
-                    backdropFilter: 'none !important',
-                    WebkitBackdropFilter: 'none !important',
-                    filter: 'none !important',
-                  } as React.CSSProperties}
-                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1e293b')}
-                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '#0f172a')}
-                >
-                  {lang.name}
-                </button>
-              </li>
-            ))}
-          </ul>
+                {lang.name}
+              </div>
+            )
+          })}
         </div>
       )}
     </div>
