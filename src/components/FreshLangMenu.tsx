@@ -25,8 +25,8 @@ export function FreshLangMenu() {
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect()
       setCoords({
-        top: rect.bottom + window.scrollY + 8,
-        right: window.innerWidth - rect.right + window.scrollX,
+        top: rect.bottom + 8, // ✓ fixed는 뷰포트 기준! window.scrollY 제거!
+        right: window.innerWidth - rect.right, // ✓ window.scrollX 제거!
       })
     }
   }
@@ -68,7 +68,7 @@ export function FreshLangMenu() {
       {isOpen &&
         ReactDOM.createPortal(
           <div
-            className={`fixed w-56 rounded-lg border shadow-2xl overflow-hidden ${
+            className={`fixed z-[99999] w-56 rounded-lg border shadow-2xl overflow-hidden ${
               isDarkMode
                 ? 'bg-[#0f172a] border-slate-700'
                 : 'bg-white border-slate-200'
@@ -76,7 +76,6 @@ export function FreshLangMenu() {
             style={{
               top: `${coords.top}px`,
               right: `${coords.right}px`,
-              zIndex: 99999,
               backdropFilter: 'none',
               WebkitMaskImage: 'none',
               maskImage: 'none',
