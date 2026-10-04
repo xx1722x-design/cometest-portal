@@ -16,12 +16,7 @@ export default function LanguageSelector() {
   }
 
   return (
-    // ⚠️ CRITICAL: 'relative' makes this wrapper the positioning anchor
-    <div
-      className="relative inline-block"
-      onMouseEnter={() => setIsOpen(true)}
-      onMouseLeave={() => setIsOpen(false)}
-    >
+    <div style={{ position: 'relative', display: 'inline-block', zIndex: 10 }}>
       {/* Button */}
       <button
         onClick={() => setIsOpen(!isOpen)}
@@ -31,15 +26,42 @@ export default function LanguageSelector() {
         {currentLangLabel}
       </button>
 
-      {/* ⚠️ CRITICAL: 'absolute top-full right-0' ensures it floats independently without shifting the header */}
+      {/* Dropdown: TRUE ABSOLUTE FLOATING OVERLAY */}
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-48 bg-slate-900 border border-slate-700 rounded-md shadow-lg z-[99999]">
+        <div
+          style={{
+            position: 'absolute',
+            top: '100%',
+            right: 0,
+            marginTop: '0.5rem',
+            width: '192px',
+            backgroundColor: '#1e293b',
+            border: '1px solid #475569',
+            borderRadius: '0.375rem',
+            boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.3)',
+            zIndex: 99999,
+          }}
+        >
           <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
             {LANGUAGES.map((lang) => (
               <li key={lang.code} style={{ listStyle: 'none', margin: 0, padding: 0 }}>
                 <button
                   onClick={() => { handleLanguageSelect(lang.code); setIsOpen(false); }}
-                  className="block w-full px-4 py-3 text-[14px] cursor-pointer text-slate-200 hover:bg-slate-800 transition-colors text-left border-b border-slate-800/50 last:border-0"
+                  style={{
+                    display: 'block',
+                    width: '100%',
+                    padding: '0.75rem 1rem',
+                    fontSize: '14px',
+                    cursor: 'pointer',
+                    color: '#e2e8f0',
+                    textAlign: 'left',
+                    border: 'none',
+                    borderBottom: '1px solid rgba(30, 41, 59, 0.5)',
+                    backgroundColor: 'transparent',
+                    transition: 'background-color 0.2s',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#1e293b')}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
                 >
                   {lang.name}
                 </button>
