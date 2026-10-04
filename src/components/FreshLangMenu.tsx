@@ -25,13 +25,15 @@ export function FreshLangMenu() {
     if (buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect()
       setCoords({
-        top: rect.bottom + 8, // ✓ fixed는 뷰포트 기준! window.scrollY 제거!
-        right: window.innerWidth - rect.right, // ✓ window.scrollX 제거!
+        top: rect.bottom + 8,
+        right: window.innerWidth - rect.right,
       })
     }
   }
 
   const handleOpen = () => {
+    console.log('[Lang] CLICKED!')
+    alert('[Lang Button Clicked!] If you see this alert, the button is working!')
     updatePosition()
     setIsOpen(prev => !prev)
   }
