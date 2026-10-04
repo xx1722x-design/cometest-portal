@@ -20,12 +20,6 @@ const COUNTRY_CODES: Record<string, string> = {
   'zh-TW': 'TW',
 }
 
-// Helper function to detect dark mode
-function isDarkModeActive(): boolean {
-  if (typeof document === 'undefined') return true // Default to dark
-  return document.documentElement.classList.contains('dark')
-}
-
 export function FreshLangMenu() {
   const [isOpen, setIsOpen] = useState(false)
   const [position, setPosition] = useState<{ top: number; left: number | string; right: number | string }>({
@@ -68,50 +62,16 @@ export function FreshLangMenu() {
     setIsOpen(false)
   }
 
-  // Detect dark mode at render time - EXPLICIT CHECK
-  const isDark = isDarkModeActive()
-
-  // Night-Punk (Dark Mode) - PRIMARY
-  const darkColors = {
-    bg: '#0f172a',
-    bgHover: '#1e293b',
-    text: '#e2e8f0',
-    border: '#475569',
-    itemBorder: 'rgba(71, 85, 105, 0.3)',
-    countryCode: '#94a3b8',
-  }
-
-  // White-Punk (Light Mode) - SECONDARY
-  const lightColors = {
-    bg: '#ffffff',
-    bgHover: '#f8fafc',
-    text: '#1e293b',
-    border: '#cbd5e1',
-    itemBorder: 'rgba(203, 213, 225, 0.3)',
-    countryCode: '#64748b',
-  }
-
-  // USE DARK MODE BY DEFAULT, SWITCH TO LIGHT ONLY IF isDark === false
-  const colors = isDark ? darkColors : lightColors
-
-  // Portal content - renders in document.body with explicit dark mode colors
+  // Portal content - renders in document.body with Tailwind dark: classes
   const portalContent = isOpen
     ? ReactDOM.createPortal(
         <div
+          className="fixed bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md shadow-lg dark:shadow-2xl z-[999999] flex flex-col overflow-hidden"
           style={{
-            position: 'fixed',
             top: `${position.top}px`,
             left: position.left === 'auto' ? 'auto' : `${position.left}px`,
             right: position.right === 'auto' ? 'auto' : `${position.right}px`,
             width: '240px',
-            backgroundColor: colors.bg,
-            border: `1px solid ${colors.border}`,
-            borderRadius: '0.375rem',
-            boxShadow: isDark ? '0 20px 25px -5px rgba(0, 0, 0, 0.5)' : '0 1px 3px rgba(0, 0, 0, 0.1)',
-            zIndex: 999999,
-            display: 'flex',
-            flexDirection: 'column',
-            overflow: 'hidden',
             backdropFilter: 'none',
             WebkitBackdropFilter: 'none',
             maskImage: 'none',
@@ -126,37 +86,13 @@ export function FreshLangMenu() {
               <button
                 key={lang.code}
                 onClick={() => handleLanguageChange(lang.code)}
+                className="flex items-center justify-between w-full px-4 py-3 text-sm cursor-pointer text-slate-900 dark:text-slate-200 bg-white dark:bg-slate-900 hover:bg-slate-100 dark:hover:bg-slate-800 text-left transition-colors"
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  width: '100%',
-                  padding: '0.75rem 1rem',
-                  fontSize: '14px',
-                  cursor: 'pointer',
-                  color: colors.text,
-                  backgroundColor: colors.bg,
-                  border: 'none',
-                  borderBottom: index < LANGUAGES.length - 1 ? `1px solid ${colors.itemBorder}` : 'none',
-                  textAlign: 'left',
-                  transition: 'background-color 0.2s',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = colors.bgHover
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = colors.bg
+                  borderBottom: index < LANGUAGES.length - 1 ? '1px solid rgba(203, 213, 225, 0.3)' : 'none',
                 }}
               >
                 <span>{lang.name}</span>
-                <span
-                  style={{
-                    fontSize: '12px',
-                    fontWeight: '700',
-                    color: colors.countryCode,
-                    marginLeft: '0.75rem',
-                  }}
-                >
+                <span className="text-xs font-bold text-slate-600 dark:text-slate-400 ml-3">
                   {countryCode}
                 </span>
               </button>
@@ -169,32 +105,13 @@ export function FreshLangMenu() {
 
   return (
     <>
-      {/* Button - Explicit dark mode colors */}
+      {/* Button - Tailwind dark: classes for automatic theme detection */}
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
-        style={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          gap: '0.5rem',
-          padding: '0.5rem 0.75rem',
-          fontSize: '14px',
-          fontWeight: '600',
-          color: colors.text,
-          backgroundColor: colors.bg,
-          border: `1px solid ${colors.border}`,
-          borderRadius: '0.375rem',
-          cursor: 'pointer',
-          transition: 'background-color 0.2s',
-        }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.backgroundColor = colors.bgHover
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.backgroundColor = colors.bg
-        }}
+        className="inline-flex items-center gap-2 px-3 py-2 text-sm font-semibold text-slate-900 dark:text-slate-200 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-md cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
       >
-        <Globe size={16} style={{ color: colors.countryCode }} />
+        <Globe size={16} className="text-slate-600 dark:text-slate-400" />
         {currentCode}
       </button>
 
