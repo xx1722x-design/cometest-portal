@@ -92,6 +92,18 @@ export const SIMULATIONS_DATA: SimulationItem[] = [
     tags: ['puzzle', 'game', 'logic', 'brain'],
     play_count: 4100,
   },
+  {
+    id: 'room-convection',
+    title: 'room_convection_title',
+    description: 'room_convection_desc',
+    category: 'physics_chemistry',
+    icon: '🌬️',
+    path: '/simulation/room-convection',
+    component: 'RoomConvectionSimulator',
+    isTranslationKey: true,
+    tags: ['physics', 'convection', 'thermodynamics', 'science'],
+    play_count: 0,
+  },
 ]
 
 export const getSimulationById = (simulationId: string): SimulationItem | undefined => {

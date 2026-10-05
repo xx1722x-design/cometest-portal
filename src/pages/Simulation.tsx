@@ -32,6 +32,11 @@ const HanoiTower = lazy(() =>
     default: m.HanoiTower,
   }))
 )
+const RoomConvectionSimulator = lazy(() =>
+  import('../components/simulations/RoomConvectionSimulator').then((m) => ({
+    default: m.RoomConvectionSimulator,
+  }))
+)
 
 export function Simulation() {
   const navigate = useNavigate()
@@ -96,6 +101,12 @@ export function Simulation() {
         return (
           <Suspense fallback={<div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Loading Simulation...</div>}>
             <HanoiTower />
+          </Suspense>
+        )
+      case 'room-convection':
+        return (
+          <Suspense fallback={<div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Loading Simulation...</div>}>
+            <RoomConvectionSimulator />
           </Suspense>
         )
       default:
