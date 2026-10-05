@@ -54,9 +54,6 @@ export function CatchGamePhaser() {
           this.basket.x = Phaser.Math.Clamp(pointer.x, 40, 760)
         })
 
-        // Test: spawn first fruit immediately to verify mechanism works
-        this.spawnFruit()
-
         // Spawn fruits every 1500ms
         this.spawnTimer = this.time.addEvent({
           delay: 1500,
