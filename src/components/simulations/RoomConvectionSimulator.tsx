@@ -17,8 +17,8 @@ export function RoomConvectionSimulator() {
   const [heaterOn, setHeaterOn] = useState(false)
 
   return (
-    <div style={{ width: '100%', height: '100vh', position: 'relative', backgroundColor: '#0a0a1a' }}>
-      <Canvas camera={{ position: [20, 12, 20], fov: 50 }} style={{ width: '100%', height: '100%' }}>
+    <div style={{ width: '100vw', height: '100vh', position: 'fixed', top: 0, left: 0, backgroundColor: '#0a0a1a', overflow: 'hidden' }}>
+      <Canvas camera={{ position: [0, 0, 0], zoom: 1 }} orthographic={false} style={{ width: '100%', height: '100%', display: 'block' }}>
         <RoomConvectionContent isRunning={isRunning} acOn={acOn} heaterOn={heaterOn} />
       </Canvas>
 
@@ -327,7 +327,7 @@ function RoomConvectionContent({
       <pointLight position={[-12, -10, -8]} intensity={0.8} color={0x4a9eff} />
 
       {/* Orthographic Camera for 2.9D isometric view */}
-      <OrthographicCamera makeDefault position={[20, 12, 20]} zoom={3} near={0.1} far={1000} />
+      <OrthographicCamera makeDefault position={[20, 12, 20]} zoom={2} near={0.1} far={1000} onUpdate={(cam) => cam.lookAt(0, 0, 0)} />
 
       {/* Room Container (wireframe box) */}
       <mesh>
