@@ -12,6 +12,17 @@ export interface GameItem {
 
 export const GAMES_DATA: GameItem[] = [
   {
+    id: 'catch-game',
+    title: 'Catch Game',
+    description: '떨어지는 과일을 잡으세요! 마우스를 움직여 바구니를 제어하는 클래식 아케이드 게임',
+    thumbnail: '🎮',
+    category: 'web_games',
+    icon: '🎮',
+    path: '/game/catch-game',
+    tags: ['action', 'arcade', 'casual', 'phaser'],
+    play_count: 0,
+  },
+  {
     id: 'space-racer',
     title: 'Infinite Space Racer',
     description: '무한 우주선 레이싱 - 장애물을 피하고 최고 거리를 기록하세요!',
@@ -53,17 +64,6 @@ export const GAMES_DATA: GameItem[] = [
     icon: '🚗',
     path: '/game/drift-boss',
     tags: ['action', 'arcade', 'casual', 'hypercasual'],
-    play_count: 0,
-  },
-  {
-    id: 'catch-game',
-    title: 'Catch Game',
-    description: '떨어지는 과일을 잡으세요! 마우스를 움직여 바구니를 제어하는 클래식 아케이드 게임',
-    thumbnail: '🎮',
-    category: 'web_games',
-    icon: '🎮',
-    path: '/game/catch-game',
-    tags: ['action', 'arcade', 'casual', 'phaser'],
     play_count: 0,
   },
 ]
