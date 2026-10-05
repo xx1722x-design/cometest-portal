@@ -20,7 +20,7 @@ export function Index() {
   const { t } = useTranslation()
   const [activeCategory, setActiveCategory] = useState('all')
 
-  // 게임과 시뮬레이션 통합
+  // 게임과 시뮬레이션 통합 - 게임을 우선
   const allItems: ContentItemUnion[] = useMemo(() => {
     const games = GAMES_DATA.map(g => ({
       ...g,
@@ -28,6 +28,9 @@ export function Index() {
     })) as any
     const sims = SIMULATIONS_DATA
 
+    // GAMES_DATA를 항상 맨 앞에 배치 (catch-game이 visible range에 들어오도록)
+    console.log('✓ allItems includes', games.length, 'games and', sims.length, 'simulations')
+    console.log('✓ catch-game present?', games.some((g: any) => g.id === 'catch-game'))
     return [...games, ...sims]
   }, [])
 
