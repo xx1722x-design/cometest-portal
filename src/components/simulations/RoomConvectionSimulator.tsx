@@ -4,17 +4,17 @@ import { OrbitControls } from '@react-three/drei'
 import { useTranslation } from 'react-i18next'
 import * as THREE from 'three'
 
-const NUM_PARTICLES = 450
+const NUM_PARTICLES = 380
 const ROOM_WIDTH = 20
 const ROOM_HEIGHT = 8
 const ROOM_DEPTH = 8
-const PARTICLE_RADIUS = 0.15
+const PARTICLE_RADIUS = 0.14
 
 interface Particle3D {
   id: number
   position: THREE.Vector3
-  velocity: THREE.Vector3
   isHot: boolean
+  phase: number // 0-1 circulation phase
 }
 
 export function RoomConvectionSimulator() {
@@ -36,7 +36,7 @@ export function RoomConvectionSimulator() {
         </p>
         <p style={{ margin: '8px 0', fontSize: '12px', color: '#ef4444' }}>🔴 Red: Hot rises</p>
         <p style={{ margin: '8px 0', fontSize: '12px', color: '#3b82f6' }}>🔵 Blue: Cold sinks</p>
-        <p style={{ margin: '0', fontSize: '11px', color: '#888' }}>Drag mouse to rotate</p>
+        <p style={{ margin: '0', fontSize: '11px', color: '#888' }}>Drag to rotate</p>
       </div>
 
       <div style={{ position: 'absolute', left: '20px', bottom: '30px', width: '340px', backgroundColor: 'rgba(10, 10, 26, 0.95)', border: '2px solid #ff8c42', borderRadius: '12px', padding: '20px', fontFamily: "'Segoe UI', sans-serif", zIndex: 100, backdropFilter: 'blur(10px)', boxShadow: '0 8px 32px rgba(255, 140, 66, 0.2)' }}>
@@ -47,14 +47,14 @@ export function RoomConvectionSimulator() {
           </label>
           <label style={{ color: '#fff', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'space-between' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <input type="checkbox" checked={acOn} onChange={(e) => setAcOn(e.target.checked)} style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: '#3b82f6' }} />
+              <input type="checkbox" checked={acOn} onChange={(e) => setAcOn(e.target.checked)} style={{ width: '20px', height: '20px', cursor: 'pointer' }} />
               ❄️ AC
             </span>
             <span style={{ fontSize: '12px', color: acOn ? '#3b82f6' : '#666' }}>{acOn ? 'ON' : 'OFF'}</span>
           </label>
           <label style={{ color: '#fff', fontWeight: 'bold', fontSize: '14px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '8px', justifyContent: 'space-between' }}>
             <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <input type="checkbox" checked={heaterOn} onChange={(e) => setHeaterOn(e.target.checked)} style={{ width: '20px', height: '20px', cursor: 'pointer', accentColor: '#ef4444' }} />
+              <input type="checkbox" checked={heaterOn} onChange={(e) => setHeaterOn(e.target.checked)} style={{ width: '20px', height: '20px', cursor: 'pointer' }} />
               🔥 Heat
             </span>
             <span style={{ fontSize: '12px', color: heaterOn ? '#ef4444' : '#666' }}>{heaterOn ? 'ON' : 'OFF'}</span>
@@ -78,15 +78,16 @@ function RoomConvectionContent({ isRunning, acOn, heaterOn }: { isRunning: boole
   useEffect(() => {
     const newParticles: Particle3D[] = []
     for (let i = 0; i < NUM_PARTICLES; i++) {
+      // Random initial positions throughout the room
       newParticles.push({
         id: i,
         position: new THREE.Vector3(
-          (Math.random() - 0.5) * (ROOM_WIDTH * 0.9),
-          (Math.random() - 0.5) * (ROOM_HEIGHT * 0.9),
-          (Math.random() - 0.5) * (ROOM_DEPTH * 0.9)
+          (Math.random() - 0.5) * (ROOM_WIDTH * 0.85),
+          (Math.random() - 0.5) * (ROOM_HEIGHT * 0.85),
+          (Math.random() - 0.5) * (ROOM_DEPTH * 0.85)
         ),
-        velocity: new THREE.Vector3(0, 0, 0),
         isHot: Math.random() > 0.5,
+        phase: Math.random(),
       })
     }
     particlesRef.current = newParticles
@@ -100,93 +101,102 @@ function RoomConvectionContent({ isRunning, acOn, heaterOn }: { isRunning: boole
     if (!particles.length) return
 
     const acPos = new THREE.Vector3(-ROOM_WIDTH / 2 + 2, ROOM_HEIGHT / 2 - 1, 0)
-    const acRadius = 2.8
+    const acRadius = 3
     const heaterPos = new THREE.Vector3(ROOM_WIDTH / 2 - 2, -ROOM_HEIGHT / 2 + 1, 0)
-    const heaterRadius = 3.2
+    const heaterRadius = 3.5
 
     const boundX = ROOM_WIDTH / 2 - PARTICLE_RADIUS
     const boundY = ROOM_HEIGHT / 2 - PARTICLE_RADIUS
     const boundZ = ROOM_DEPTH / 2 - PARTICLE_RADIUS
 
-    // ========== UPDATE EACH PARTICLE INDEPENDENTLY ==========
+    // ========== RULE-BASED CIRCULATION ENGINE ==========
     for (let i = 0; i < particles.length; i++) {
       const p = particles[i]
 
-      // STATE TRANSITIONS
-      if (acOn && p.isHot && p.position.distanceTo(acPos) < acRadius) {
-        p.isHot = false
-        p.velocity.y = -1.2
+      // RULE 1: Continuous Motion - Particles always move
+      // RULE 2: Global Clockwise Circulation - Follow smooth path
+      p.phase += deltaTime * 0.15 // Continuous progression through circulation cycle
+      if (p.phase > 1) p.phase -= 1
+
+      // Define clockwise circulation path through the room
+      // Phase 0-0.25: Right side, moving UP (hot side)
+      // Phase 0.25-0.5: Top, moving LEFT (AC side)
+      // Phase 0.5-0.75: Left side, moving DOWN (AC side)
+      // Phase 0.75-1.0: Bottom, moving RIGHT (heater side)
+
+      const quarterPhase = p.phase * 4
+      let targetX, targetY, targetZ
+
+      if (quarterPhase < 1) {
+        // RIGHT SIDE, MOVING UP
+        targetX = (ROOM_WIDTH / 2 - 1.5)
+        targetY = (quarterPhase * ROOM_HEIGHT) - ROOM_HEIGHT / 2
+        targetZ = 0
+      } else if (quarterPhase < 2) {
+        // TOP, MOVING LEFT
+        targetX = (ROOM_WIDTH / 2 - 1.5) - ((quarterPhase - 1) * ROOM_WIDTH)
+        targetY = ROOM_HEIGHT / 2 - 1
+        targetZ = 0
+      } else if (quarterPhase < 3) {
+        // LEFT SIDE, MOVING DOWN
+        targetX = -(ROOM_WIDTH / 2 - 1.5)
+        targetY = (ROOM_HEIGHT / 2 - 1) - ((quarterPhase - 2) * ROOM_HEIGHT)
+        targetZ = 0
+      } else {
+        // BOTTOM, MOVING RIGHT
+        targetX = -(ROOM_WIDTH / 2 - 1.5) + ((quarterPhase - 3) * ROOM_WIDTH)
+        targetY = -ROOM_HEIGHT / 2 + 1
+        targetZ = 0
       }
 
+      // Smoothly move toward target position
+      const moveSpeed = 0.35
+      p.position.x += (targetX - p.position.x) * moveSpeed * deltaTime
+      p.position.y += (targetY - p.position.y) * moveSpeed * deltaTime
+      p.position.z += (targetZ - p.position.z) * moveSpeed * deltaTime
+
+      // ========== RULE 3 & 4: STATE TRANSITIONS ==========
+      // Heater: Blue -> Red when nearby
       if (heaterOn && !p.isHot && p.position.distanceTo(heaterPos) < heaterRadius) {
         p.isHot = true
-        p.velocity.y = 1.3
       }
 
-      // THERMAL BUOYANCY
-      if (p.isHot) {
-        p.velocity.y += 0.65
-      } else {
-        p.velocity.y -= 0.55
+      // AC: Red -> Blue when nearby
+      if (acOn && p.isHot && p.position.distanceTo(acPos) < acRadius) {
+        p.isHot = false
       }
 
-      // CLOCKWISE CIRCULATION
-      if (p.position.y > ROOM_HEIGHT / 3) {
-        p.velocity.x += 0.35 // Upper: sweep right
-      } else if (p.position.y < -ROOM_HEIGHT / 3) {
-        p.velocity.x -= 0.35 // Lower: sweep left
-      }
-
-      // BROWNIAN MOTION
-      p.velocity.x += (Math.random() - 0.5) * 0.08
-      p.velocity.y += (Math.random() - 0.5) * 0.06
-      p.velocity.z += (Math.random() - 0.5) * 0.08
-
-      // DAMPING
-      p.velocity.multiplyScalar(0.95)
-
-      // UPDATE POSITION
-      p.position.add(p.velocity.clone().multiplyScalar(deltaTime * 0.8))
-
-      // SOFT SEPARATION/REPULSION (Prevent merging)
-      for (let j = i + 1; j < Math.min(i + 50, particles.length); j++) {
+      // ========== RULE 5: PERSONAL SPACE & REPULSION ==========
+      // Check nearby particles for overlap prevention
+      for (let j = i + 1; j < Math.min(i + 40, particles.length); j++) {
         const other = particles[j]
         const dx = other.position.x - p.position.x
         const dy = other.position.y - p.position.y
         const dz = other.position.z - p.position.z
         const distSq = dx * dx + dy * dy + dz * dz
-        const minDistSq = (PARTICLE_RADIUS * 2 + 0.12) ** 2
+        const minDistSq = (PARTICLE_RADIUS * 2 + 0.1) ** 2
 
         if (distSq < minDistSq && distSq > 0.001) {
           const dist = Math.sqrt(distSq)
-          const nx = dx / dist
-          const ny = dy / dist
-          const nz = dz / dist
-          const repulsion = (minDistSq - distSq) * 0.08
+          const strength = (minDistSq - distSq) * 0.05
+          const nx = (dx / dist) * strength
+          const ny = (dy / dist) * strength
+          const nz = (dz / dist) * strength
 
-          p.velocity.x -= nx * repulsion
-          p.velocity.y -= ny * repulsion
-          p.velocity.z -= nz * repulsion
+          p.position.x -= nx
+          p.position.y -= ny
+          p.position.z -= nz
 
-          other.velocity.x += nx * repulsion
-          other.velocity.y += ny * repulsion
-          other.velocity.z += nz * repulsion
+          other.position.x += nx
+          other.position.y += ny
+          other.position.z += nz
         }
       }
 
-      // BOUNDARY COLLISION
-      if (Math.abs(p.position.x) > boundX) {
-        p.position.x = Math.sign(p.position.x) * boundX
-        p.velocity.x *= -0.8
-      }
-      if (Math.abs(p.position.y) > boundY) {
-        p.position.y = Math.sign(p.position.y) * boundY
-        p.velocity.y *= -0.8
-      }
-      if (Math.abs(p.position.z) > boundZ) {
-        p.position.z = Math.sign(p.position.z) * boundZ
-        p.velocity.z *= -0.8
-      }
+      // ========== BOUNDARY ENFORCEMENT ==========
+      if (Math.abs(p.position.x) > boundX) p.position.x = Math.sign(p.position.x) * boundX
+      if (Math.abs(p.position.y) > boundY) p.position.y = Math.sign(p.position.y) * boundY
+      if (Math.abs(p.position.z) > boundZ) p.position.z = Math.sign(p.position.z) * boundZ
     }
 
     // Update mesh positions
@@ -206,7 +216,7 @@ function RoomConvectionContent({ isRunning, acOn, heaterOn }: { isRunning: boole
       <pointLight position={[25, 10, 15]} intensity={1.1} color={0xffffff} />
       <pointLight position={[-20, -8, -12]} intensity={0.8} color={0xff8c42} />
 
-      {/* Room */}
+      {/* Room Container */}
       <mesh>
         <boxGeometry args={[ROOM_WIDTH, ROOM_HEIGHT, ROOM_DEPTH]} />
         <meshPhysicalMaterial transparent opacity={0.03} color={0xff8c42} metalness={0.1} roughness={0.8} />
@@ -217,7 +227,7 @@ function RoomConvectionContent({ isRunning, acOn, heaterOn }: { isRunning: boole
         <lineBasicMaterial attach="material" color={0xff8c42} linewidth={2} />
       </lineSegments>
 
-      {/* AC */}
+      {/* AC Unit */}
       <group position={[-ROOM_WIDTH / 2 + 2, ROOM_HEIGHT / 2 - 1, 0]}>
         <mesh>
           <boxGeometry args={[2.5, 1, 1.5]} />
@@ -231,7 +241,7 @@ function RoomConvectionContent({ isRunning, acOn, heaterOn }: { isRunning: boole
         ))}
       </group>
 
-      {/* Heater */}
+      {/* Heater Unit */}
       <group position={[ROOM_WIDTH / 2 - 2, -ROOM_HEIGHT / 2 + 0.7, 0]}>
         <mesh>
           <boxGeometry args={[2, 0.8, 2]} />
@@ -245,7 +255,7 @@ function RoomConvectionContent({ isRunning, acOn, heaterOn }: { isRunning: boole
         ))}
       </group>
 
-      {/* Particles - Rich Volumetric Cloud */}
+      {/* Rich Volumetric Particle Cloud */}
       {particles.map((particle, idx) => (
         <mesh
           key={particle.id}
