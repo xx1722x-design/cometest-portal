@@ -4,16 +4,16 @@ import { OrbitControls } from '@react-three/drei'
 import { useTranslation } from 'react-i18next'
 import * as THREE from 'three'
 
-const NUM_PARTICLES = 400
+const NUM_PARTICLES = 3500 // 10x density
 const ROOM_WIDTH = 20
 const ROOM_HEIGHT = 8
 const ROOM_DEPTH = 8
-const PARTICLE_RADIUS = 0.15
+const PARTICLE_RADIUS = 0.12
 
 interface Particle3D {
   position: THREE.Vector3
   velocity: THREE.Vector3
-  temperature: number
+  isHot: boolean // true = red/hot, false = blue/cold
 }
 
 export function RoomConvectionSimulator() {
@@ -32,13 +32,13 @@ export function RoomConvectionSimulator() {
       <div style={{ position: 'absolute', top: '20px', left: '20px', backgroundColor: 'rgba(10, 10, 26, 0.95)', border: '2px solid #ff8c42', borderRadius: '12px', padding: '20px', color: '#fff', fontFamily: "'Segoe UI', sans-serif", maxWidth: '340px', fontSize: '13px', lineHeight: '1.6', backdropFilter: 'blur(10px)', boxShadow: '0 8px 32px rgba(255, 140, 66, 0.2)', zIndex: 100 }}>
         <h2 style={{ margin: '0 0 12px 0', fontSize: '18px', color: '#ff8c42', fontWeight: '700' }}>🌬️ Room Convection</h2>
         <p style={{ margin: '8px 0 12px 0', fontSize: '14px', color: '#fff', fontWeight: 'bold' }}>
-          {(!acOn && !heaterOn) ? '💤 Calm' : '🌪️ Circulating'}
+          {(!acOn && !heaterOn) ? '💤 Calm' : '🌀 Clockwise Circulation'}
         </p>
-        <p style={{ margin: '8px 0', fontSize: '12px', color: '#aaa' }}>
-          ❄️ AC: Cold air flows to Heater
+        <p style={{ margin: '8px 0', fontSize: '12px', color: '#ff6b6b' }}>
+          🔴 Red: Hot air rises
         </p>
-        <p style={{ margin: '8px 0', fontSize: '12px', color: '#aaa' }}>
-          🔥 Heater: Hot air flows to AC
+        <p style={{ margin: '8px 0', fontSize: '12px', color: '#4a9eff' }}>
+          🔵 Blue: Cold air sinks
         </p>
         <p style={{ margin: '0', fontSize: '11px', color: '#888' }}>
           Drag mouse to rotate view
@@ -81,7 +81,7 @@ function RoomConvectionContent({ isRunning, acOn, heaterOn }: { isRunning: boole
   const groupsRef = useRef<THREE.Group[]>([])
   const particlesRef = useRef<Particle3D[]>([])
 
-  // Initialize high-density particles
+  // Initialize massive particle density
   useEffect(() => {
     const particles: Particle3D[] = []
     for (let i = 0; i < NUM_PARTICLES; i++) {
@@ -92,7 +92,7 @@ function RoomConvectionContent({ isRunning, acOn, heaterOn }: { isRunning: boole
           (Math.random() - 0.5) * (ROOM_DEPTH * 0.9)
         ),
         velocity: new THREE.Vector3(0, 0, 0),
-        temperature: 30 + Math.random() * 20,
+        isHot: Math.random() > 0.5, // Random initial state
       })
     }
     particlesRef.current = particles
@@ -102,15 +102,14 @@ function RoomConvectionContent({ isRunning, acOn, heaterOn }: { isRunning: boole
     if (!isRunning) return
 
     const particles = particlesRef.current
-    const convectionActive = acOn || heaterOn
 
     // AC: top-left ceiling
     const acPos = new THREE.Vector3(-ROOM_WIDTH / 2 + 2, ROOM_HEIGHT / 2 - 1, 0)
-    const acRadius = 3
+    const acRadius = 2.5
 
     // Heater: bottom-right floor
     const heaterPos = new THREE.Vector3(ROOM_WIDTH / 2 - 2, -ROOM_HEIGHT / 2 + 1, 0)
-    const heaterRadius = 3.5
+    const heaterRadius = 3
 
     const bounceDistance = {
       x: ROOM_WIDTH / 2 - PARTICLE_RADIUS,
@@ -119,67 +118,82 @@ function RoomConvectionContent({ isRunning, acOn, heaterOn }: { isRunning: boole
     }
 
     particles.forEach((particle, idx) => {
-      if (!convectionActive) {
-        particle.velocity.multiplyScalar(0.88)
-        particle.velocity.x += (Math.random() - 0.5) * 0.06
-        particle.velocity.y += (Math.random() - 0.5) * 0.06
-        particle.velocity.z += (Math.random() - 0.5) * 0.06
-      } else {
-        // AC cooling: turn blue, push toward heater
-        if (acOn) {
-          const distToAC = particle.position.distanceTo(acPos)
-          if (distToAC < acRadius) {
-            particle.temperature = Math.max(10, particle.temperature - 0.6)
-            // Push down and toward heater direction
-            particle.velocity.y -= 0.8
-            const toHeater = heaterPos.clone().sub(particle.position).normalize()
-            particle.velocity.x += toHeater.x * 0.5
-            particle.velocity.z += toHeater.z * 0.3
-          }
+      // ========== STATE TRANSITIONS ==========
+      // Hot particle reaches AC: turn blue and push down
+      if (acOn && particle.isHot) {
+        const distToAC = particle.position.distanceTo(acPos)
+        if (distToAC < acRadius) {
+          particle.isHot = false // Turn BLUE (cold)
+          particle.velocity.y -= 1.2 // Strong downward push
         }
-
-        // Heater heating: turn red, push toward AC
-        if (heaterOn) {
-          const distToHeater = particle.position.distanceTo(heaterPos)
-          if (distToHeater < heaterRadius) {
-            particle.temperature = Math.min(80, particle.temperature + 0.7)
-            // Push up and toward AC direction
-            particle.velocity.y += 0.9
-            const toAC = acPos.clone().sub(particle.position).normalize()
-            particle.velocity.x += toAC.x * 0.5
-            particle.velocity.z += toAC.z * 0.3
-          }
-        }
-
-        // Natural buoyancy
-        const buoyancy = (particle.temperature - 35) / 50
-        particle.velocity.y += buoyancy * 0.3
-
-        // Brownian motion
-        particle.velocity.x += (Math.random() - 0.5) * 0.15
-        particle.velocity.y += (Math.random() - 0.5) * 0.1
-        particle.velocity.z += (Math.random() - 0.5) * 0.15
-
-        particle.velocity.multiplyScalar(0.92)
       }
+
+      // Cold particle reaches Heater: turn red and push up
+      if (heaterOn && !particle.isHot) {
+        const distToHeater = particle.position.distanceTo(heaterPos)
+        if (distToHeater < heaterRadius) {
+          particle.isHot = true // Turn RED (hot)
+          particle.velocity.y += 1.3 // Strong upward push
+        }
+      }
+
+      // ========== BUOYANCY PHYSICS ==========
+      if (particle.isHot) {
+        // Hot particles: natural upward buoyancy
+        particle.velocity.y += 0.7
+      } else {
+        // Cold particles: natural downward gravity
+        particle.velocity.y -= 0.6
+      }
+
+      // ========== CLOCKWISE CIRCULATION ==========
+      // Red particles sweep right across ceiling, then left across floor
+      if (particle.position.y > ROOM_HEIGHT / 3) {
+        // Upper region: sweep rightward (toward heater)
+        particle.velocity.x += 0.4
+      } else if (particle.position.y < -ROOM_HEIGHT / 3) {
+        // Lower region: sweep leftward (toward AC)
+        particle.velocity.x -= 0.4
+      }
+
+      // Brownian motion
+      particle.velocity.x += (Math.random() - 0.5) * 0.1
+      particle.velocity.y += (Math.random() - 0.5) * 0.08
+      particle.velocity.z += (Math.random() - 0.5) * 0.1
+
+      // Damping
+      particle.velocity.multiplyScalar(0.94)
 
       // Update position
       particle.position.add(particle.velocity.clone().multiplyScalar(deltaTime))
 
-      // Particle-particle collision (high density repulsion)
-      for (let j = idx + 1; j < particles.length; j++) {
+      // ========== PARTICLE-PARTICLE COLLISION ==========
+      for (let j = idx + 1; j < Math.min(idx + 40, particles.length); j++) {
         const other = particles[j]
-        const dist = particle.position.distanceTo(other.position)
-        const minDist = PARTICLE_RADIUS * 2 + 0.1
-        if (dist < minDist && dist > 0.01) {
-          const direction = other.position.clone().sub(particle.position).normalize()
-          const pushForce = (minDist - dist) * 0.3
-          particle.velocity.sub(direction.multiplyScalar(pushForce))
-          other.velocity.add(direction.clone().multiplyScalar(pushForce))
+        const dx = other.position.x - particle.position.x
+        const dy = other.position.y - particle.position.y
+        const dz = other.position.z - particle.position.z
+        const distSq = dx * dx + dy * dy + dz * dz
+        const minDistSq = (PARTICLE_RADIUS * 2 + 0.08) ** 2
+
+        if (distSq < minDistSq && distSq > 0.001) {
+          const dist = Math.sqrt(distSq)
+          const nx = dx / dist
+          const ny = dy / dist
+          const nz = dz / dist
+          const pushForce = (minDistSq - distSq) * 0.15
+
+          particle.velocity.x -= nx * pushForce
+          particle.velocity.y -= ny * pushForce
+          particle.velocity.z -= nz * pushForce
+
+          other.velocity.x += nx * pushForce
+          other.velocity.y += ny * pushForce
+          other.velocity.z += nz * pushForce
         }
       }
 
-      // Strict boundary collision
+      // ========== STRICT BOUNDARY COLLISION ==========
       if (Math.abs(particle.position.x) > bounceDistance.x) {
         particle.position.x = Math.sign(particle.position.x) * bounceDistance.x
         particle.velocity.x *= -0.8
@@ -200,13 +214,6 @@ function RoomConvectionContent({ isRunning, acOn, heaterOn }: { isRunning: boole
     })
   })
 
-  const getParticleColor = (temperature: number) => {
-    if (temperature < 20) return 0x4a9eff
-    if (temperature < 35) return 0x9966ff
-    if (temperature < 50) return 0xffcc66
-    return 0xff4444
-  }
-
   return (
     <>
       <ambientLight intensity={0.8} />
@@ -216,7 +223,7 @@ function RoomConvectionContent({ isRunning, acOn, heaterOn }: { isRunning: boole
       {/* Wide rectangular room */}
       <mesh>
         <boxGeometry args={[ROOM_WIDTH, ROOM_HEIGHT, ROOM_DEPTH]} />
-        <meshPhysicalMaterial transparent opacity={0.05} color={0xff8c42} metalness={0.1} roughness={0.8} />
+        <meshPhysicalMaterial transparent opacity={0.04} color={0xff8c42} metalness={0.1} roughness={0.8} />
       </mesh>
 
       <lineSegments>
@@ -224,13 +231,12 @@ function RoomConvectionContent({ isRunning, acOn, heaterOn }: { isRunning: boole
         <lineBasicMaterial attach="material" color={0xff8c42} linewidth={2} />
       </lineSegments>
 
-      {/* Large AC Unit (Ceiling, Top-Left) */}
+      {/* Large AC Unit */}
       <group position={[-ROOM_WIDTH / 2 + 2, ROOM_HEIGHT / 2 - 1, 0]}>
         <mesh>
           <boxGeometry args={[2.5, 1, 1.5]} />
           <meshPhongMaterial color={acOn ? 0x4a9eff : 0x2a4a6a} emissive={acOn ? 0x2577ff : 0x1a2a3a} emissiveIntensity={acOn ? 1.3 : 0.3} shininess={90} />
         </mesh>
-        {/* AC Vents */}
         {[-0.6, 0, 0.6].map((x) => (
           <mesh key={`ac-${x}`} position={[x, 0, 0.85]}>
             <boxGeometry args={[0.4, 0.3, 0.3]} />
@@ -239,13 +245,12 @@ function RoomConvectionContent({ isRunning, acOn, heaterOn }: { isRunning: boole
         ))}
       </group>
 
-      {/* Large Heater Unit (Floor, Bottom-Right) */}
+      {/* Large Heater Unit */}
       <group position={[ROOM_WIDTH / 2 - 2, -ROOM_HEIGHT / 2 + 0.7, 0]}>
         <mesh>
           <boxGeometry args={[2, 0.8, 2]} />
           <meshPhongMaterial color={heaterOn ? 0xff6b35 : 0x6a3a2a} emissive={heaterOn ? 0xff4422 : 0x3a1a0a} emissiveIntensity={heaterOn ? 1.4 : 0.3} shininess={80} />
         </mesh>
-        {/* Heater Grille */}
         {[-0.5, 0, 0.5].map((x) => (
           <mesh key={`heater-${x}`} position={[x, 0.5, 0]}>
             <boxGeometry args={[0.3, 0.7, 1.8]} />
@@ -254,7 +259,7 @@ function RoomConvectionContent({ isRunning, acOn, heaterOn }: { isRunning: boole
         ))}
       </group>
 
-      {/* High-density particles */}
+      {/* Ultra-high-density particle system */}
       {particlesRef.current.map((particle, idx) => (
         <group
           key={idx}
@@ -264,11 +269,11 @@ function RoomConvectionContent({ isRunning, acOn, heaterOn }: { isRunning: boole
           position={[particle.position.x, particle.position.y, particle.position.z]}
         >
           <mesh>
-            <sphereGeometry args={[PARTICLE_RADIUS, 6, 6]} />
+            <sphereGeometry args={[PARTICLE_RADIUS, 5, 5]} />
             <meshPhongMaterial
-              color={getParticleColor(particle.temperature)}
-              emissive={getParticleColor(particle.temperature)}
-              emissiveIntensity={0.6}
+              color={particle.isHot ? 0xff4444 : 0x4a9eff}
+              emissive={particle.isHot ? 0xff2222 : 0x2577ff}
+              emissiveIntensity={0.7}
               shininess={100}
             />
           </mesh>
