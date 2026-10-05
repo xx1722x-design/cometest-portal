@@ -1,7 +1,5 @@
-import React, { Suspense, useRef, useState, ReactNode } from 'react'
+import React, { Suspense, useRef, ReactNode } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
-import { OrbitControls, Box } from '@react-three/drei'
-import { EffectComposer, Bloom } from '@react-three/postprocessing'
 import * as THREE from 'three'
 
 // Error Boundary Component
@@ -43,7 +41,7 @@ class ErrorBoundary extends React.Component<
         >
           <div style={{ maxWidth: '600px' }}>
             <h2 style={{ color: '#ff4444', marginBottom: '16px', fontSize: '20px' }}>
-              ⚠️ SIMULATION RENDER ERROR
+              ⚠️ SIMULATION ERROR
             </h2>
             <p style={{ color: '#ffaaaa', marginBottom: '12px' }}>
               {this.state.error?.message || 'Unknown error'}
@@ -57,6 +55,7 @@ class ErrorBoundary extends React.Component<
                 color: '#0f0',
                 fontSize: '11px',
                 marginBottom: '16px',
+                maxHeight: '300px',
               }}
             >
               {this.state.error?.stack || 'No stack trace'}
@@ -84,7 +83,7 @@ class ErrorBoundary extends React.Component<
   }
 }
 
-// Ultra-Simple Rotating Cube
+// Ultra-Simple Rotating Cube Component
 function RotatingCube() {
   const cubeRef = useRef<THREE.Mesh>(null)
 
@@ -96,97 +95,32 @@ function RotatingCube() {
   })
 
   return (
-    <Box ref={cubeRef} args={[2, 2, 2]} position={[0, 0, 0]} castShadow>
+    <mesh ref={cubeRef}>
+      <boxGeometry args={[2, 2, 2]} />
       <meshStandardMaterial color="#00ff88" emissive="#00ff88" emissiveIntensity={0.8} />
-    </Box>
+    </mesh>
   )
 }
 
-// Minimal 3D Scene - No Complex Physics
-function MinimalScene() {
+// Minimal Canvas Scene
+function MinimalCanvasScene() {
   return (
     <Canvas
       style={{
         width: '100%',
         height: '100%',
-        display: 'block',
       }}
       camera={{ position: [3, 3, 3], fov: 50 }}
-      gl={{
-        antialias: true,
-        preserveDrawingBuffer: true,
-        alpha: false,
-      }}
     >
-      {/* Simple Lighting */}
       <ambientLight intensity={0.5} />
-      <directionalLight position={[5, 10, 5]} intensity={1.5} castShadow />
-      <pointLight position={[-5, 5, 5]} intensity={0.8} color="#ff00ff" />
-
-      {/* Single Rotating Object */}
+      <directionalLight position={[5, 10, 5]} intensity={1.5} />
       <RotatingCube />
-
-      {/* Basic Controls - Simplified */}
-      <OrbitControls
-        enableZoom={true}
-        enablePan={true}
-        autoRotate={true}
-        autoRotateSpeed={2}
-        dampingFactor={0.05}
-        rotateSpeed={1}
-      />
-
-      {/* Minimal Post-Processing */}
-      <EffectComposer>
-        <Bloom luminanceThreshold={0.3} luminanceSmoothing={0.9} intensity={1.2} />
-      </EffectComposer>
-
-      {/* Background Color */}
       <color attach="background" args={['#0b0f19']} />
     </Canvas>
   )
 }
 
 export function AdvancedClothPhysicsSimulator() {
-  const [renderError, setRenderError] = useState(false)
-
-  if (renderError) {
-    return (
-      <div
-        style={{
-          width: '100%',
-          height: '100vh',
-          backgroundColor: '#0b0f19',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          color: '#ff4444',
-          fontFamily: "'Courier New', monospace",
-        }}
-      >
-        <div style={{ textAlign: 'center' }}>
-          <h2>Render Error Detected</h2>
-          <button
-            onClick={() => {
-              setRenderError(false)
-              window.location.reload()
-            }}
-            style={{
-              marginTop: '16px',
-              padding: '10px 20px',
-              backgroundColor: '#ff4444',
-              color: '#fff',
-              border: 'none',
-              cursor: 'pointer',
-            }}
-          >
-            Reload
-          </button>
-        </div>
-      </div>
-    )
-  }
-
   return (
     <ErrorBoundary>
       <div
@@ -217,7 +151,7 @@ export function AdvancedClothPhysicsSimulator() {
             </div>
           }
         >
-          <MinimalScene />
+          <MinimalCanvasScene />
         </Suspense>
 
         {/* Info Overlay */}
@@ -241,10 +175,10 @@ export function AdvancedClothPhysicsSimulator() {
             ✨ Neon Cube
           </h3>
           <p style={{ margin: '0 0 4px 0', fontSize: '12px', color: '#888' }}>
-            Rotating Glowing Cube • Bloom Effect
+            Rotating Glowing Cube
           </p>
           <p style={{ margin: '0', fontSize: '12px', color: '#aaa' }}>
-            Orbit with mouse • Scroll to zoom
+            Drag to rotate • Scroll to zoom
           </p>
         </div>
       </div>
