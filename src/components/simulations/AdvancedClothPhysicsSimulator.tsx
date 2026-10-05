@@ -236,6 +236,9 @@ function ClothMesh() {
           positions[i * 3 + 2] = p.position.z
         })
         posAttr.needsUpdate = true
+
+        // CRITICAL: Recalculate normals after vertex deformation
+        meshRef.current.geometry.computeVertexNormals()
       }
     }
   })
@@ -244,14 +247,15 @@ function ClothMesh() {
     <mesh ref={meshRef} castShadow receiveShadow>
       <meshPhysicalMaterial
         color="#00ffff"
-        emissive="#0088ff"
-        emissiveIntensity={1.5}
-        metalness={0.8}
-        roughness={0.15}
+        emissive="#00ccff"
+        emissiveIntensity={2.5}
+        metalness={0.6}
+        roughness={0.08}
         side={THREE.DoubleSide}
-        wireframe={false}
-        clearcoat={0.5}
-        clearcoatRoughness={0.2}
+        wireframe={true}
+        clearcoat={0.9}
+        clearcoatRoughness={0.05}
+        toneMapped={true}
       />
     </mesh>
   )
