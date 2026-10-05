@@ -1,6 +1,6 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, Suspense } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrthographicCamera, Text } from '@react-three/drei';
+import { OrthographicCamera, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 
 interface Platform {
@@ -13,150 +13,174 @@ interface Platform {
 interface PlayerState {
   position: THREE.Vector3;
   velocity: THREE.Vector3;
-  onPlatform: boolean;
+  onTrack: boolean;
   gameOver: boolean;
   score: number;
 }
 
-// Safe Pink Box Player - NO GLB file loading
-const PlayerBox = ({ position }: { position: THREE.Vector3 }) => {
-  return (
-    <mesh position={[position.x, position.y, position.z]} castShadow>
-      <boxGeometry args={[0.8, 1.2, 0.8]} />
-      <meshStandardMaterial
-        color="#ec4899"
-        metalness={0.8}
-        roughness={0.2}
-        emissive="#ff1493"
-        emissiveIntensity={0.3}
-      />
-    </mesh>
-  );
+// Character Model Loader
+const CharacterModel = ({
+  position,
+  modelScale = [1, 1, 1],
+}: {
+  position: THREE.Vector3;
+  modelScale?: [number, number, number];
+}) => {
+  try {
+    const { scene } = useGLTF('/3000charactors/1.glb') as any;
+    const clonedScene = scene.clone();
+
+    useEffect(() => {
+      clonedScene.traverse((child: THREE.Object3D) => {
+        if (child instanceof THREE.Mesh) {
+          child.castShadow = true;
+          child.receiveShadow = true;
+        }
+      });
+    }, [clonedScene]);
+
+    return (
+      <group position={[position.x, position.y, position.z]} scale={modelScale}>
+        <primitive object={clonedScene} />
+      </group>
+    );
+  } catch (error) {
+    // Fallback: Pink cube if GLB fails to load
+    console.warn('GLB load failed, using fallback cube');
+    return (
+      <mesh position={[position.x, position.y, position.z]} scale={modelScale} castShadow>
+        <boxGeometry args={[0.8, 1.2, 0.8]} />
+        <meshStandardMaterial color="#ec4899" emissive="#ff1493" emissiveIntensity={0.3} />
+      </mesh>
+    );
+  }
 };
 
-const DriftBossPlayer = ({
+// Game Logic Component
+const GameLogic = ({
   playerState,
   setPlayerState,
   platforms,
+  setPlatforms,
   isKeyPressed,
 }: {
   playerState: PlayerState;
   setPlayerState: React.Dispatch<React.SetStateAction<PlayerState>>;
   platforms: Platform[];
+  setPlatforms: React.Dispatch<React.SetStateAction<Platform[]>>;
   isKeyPressed: { space: boolean };
 }) => {
+  const platformIdRef = useRef(0);
+  const lastPlatformZRef = useRef(0);
   const targetXRef = useRef(0);
 
   useFrame(() => {
     if (playerState.gameOver) return;
 
-    const gravity = 0.12;
-    const fallThreshold = -15;
+    const moveSpeed = 0.1;
+    const gravity = 0.15;
+    const fallThreshold = -20;
 
-    const targetX = isKeyPressed.space ? 2 : -2;
-    targetXRef.current += (targetX - targetXRef.current) * 0.1;
+    // Movement: Space = right diagonal, no space = left diagonal
+    const targetX = isKeyPressed.space ? 2.5 : -2.5;
+    targetXRef.current += (targetX - targetXRef.current) * moveSpeed;
 
+    // Update position
     const newPosition = playerState.position.clone();
     newPosition.x = targetXRef.current;
-    newPosition.z += 0.35;
+    newPosition.z += 0.4; // Continuous forward movement
 
-    let onPlatform = false;
+    // Track collision detection
+    let onTrack = false;
     for (const platform of platforms) {
       if (
         Math.abs(newPosition.z - platform.z) < 1.2 &&
         Math.abs(newPosition.x) < platform.width / 2 + 0.5
       ) {
-        onPlatform = true;
+        onTrack = true;
         newPosition.y = platform.z + 1.5;
         break;
       }
     }
 
+    // Gravity & falling
     let newVelocity = playerState.velocity.clone();
-    if (!onPlatform) {
+    if (!onTrack) {
       newVelocity.y -= gravity;
       newPosition.y += newVelocity.y;
     } else {
       newVelocity.y = 0;
     }
 
+    // Game over conditions
     if (newPosition.y < fallThreshold || Math.abs(newPosition.x) > 5) {
       setPlayerState((prev) => ({ ...prev, gameOver: true }));
       return;
+    }
+
+    // Generate new track platforms
+    if (newPosition.z > lastPlatformZRef.current - 5) {
+      const newPlatform: Platform = {
+        id: platformIdRef.current++,
+        z: lastPlatformZRef.current + 4,
+        x: Math.random() > 0.5 ? 2.5 : -2.5,
+        width: 5,
+      };
+
+      setPlatforms((prev) => {
+        const updated = [...prev, newPlatform].filter((p) => p.z > newPosition.z - 15);
+        return updated;
+      });
+
+      lastPlatformZRef.current += 4;
     }
 
     setPlayerState((prev) => ({
       ...prev,
       position: newPosition,
       velocity: newVelocity,
-      onPlatform,
-      score: Math.max(prev.score, Math.floor(newPosition.z / 2)),
+      onTrack,
+      score: Math.max(prev.score, Math.floor(newPosition.z / 4)),
     }));
   });
 
-  return <PlayerBox position={playerState.position} />;
+  return null;
 };
 
-const PlatformGrid = ({
-  platforms,
-  setPlatforms,
-  playerZ,
-}: {
-  platforms: Platform[];
-  setPlatforms: React.Dispatch<React.SetStateAction<Platform[]>>;
-  playerZ: number;
-}) => {
-  const platformIdRef = useRef(0);
-  const lastPlatformZRef = useRef(0);
-
-  useEffect(() => {
-    if (playerZ > lastPlatformZRef.current - 5) {
-      const newPlatform: Platform = {
-        id: platformIdRef.current++,
-        z: lastPlatformZRef.current + 4,
-        x: Math.random() > 0.5 ? 2 : -2,
-        width: 4,
-      };
-
-      setPlatforms((prev) => {
-        const updated = [...prev, newPlatform].filter((p) => p.z > playerZ - 15);
-        return updated;
-      });
-
-      lastPlatformZRef.current += 4;
-    }
-  }, [playerZ, setPlatforms]);
-
+// Platform Renderer
+const PlatformRenderer = ({ platforms }: { platforms: Platform[] }) => {
   return (
     <>
       {platforms.map((platform) => (
-        <mesh key={platform.id} position={[platform.x, 0, platform.z]} castShadow>
-          <boxGeometry args={[platform.width, 0.5, 2]} />
-          <meshStandardMaterial color="#f97316" metalness={0.3} roughness={0.7} />
+        <mesh key={platform.id} position={[platform.x, 0, platform.z]} castShadow receiveShadow>
+          <boxGeometry args={[platform.width, 0.5, 2.5]} />
+          <meshStandardMaterial color="#f97316" metalness={0.4} roughness={0.6} />
         </mesh>
       ))}
     </>
   );
 };
 
-const GameScene = () => {
+// Main Game Scene
+const GameScene = ({ modelScale }: { modelScale: [number, number, number] }) => {
   const [playerState, setPlayerState] = useState<PlayerState>({
     position: new THREE.Vector3(0, 5, 0),
     velocity: new THREE.Vector3(0, 0, 0),
-    onPlatform: true,
+    onTrack: true,
     gameOver: false,
     score: 0,
   });
 
   const [platforms, setPlatforms] = useState<Platform[]>([
-    { id: -1, z: -2, x: 0, width: 4 },
-    { id: 0, z: 2, x: 2, width: 4 },
-    { id: 1, z: 6, x: -2, width: 4 },
+    { id: -1, z: -2, x: 0, width: 5 },
+    { id: 0, z: 2, x: 2.5, width: 5 },
+    { id: 1, z: 6, x: -2.5, width: 5 },
   ]);
 
   const [isKeyPressed, setIsKeyPressed] = useState({ space: false });
   const { camera } = useThree();
 
+  // Input handling
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Space') {
@@ -172,13 +196,8 @@ const GameScene = () => {
       }
     };
 
-    const handleTouchStart = () => {
-      setIsKeyPressed((prev) => ({ ...prev, space: true }));
-    };
-
-    const handleTouchEnd = () => {
-      setIsKeyPressed((prev) => ({ ...prev, space: false }));
-    };
+    const handleTouchStart = () => setIsKeyPressed((prev) => ({ ...prev, space: true }));
+    const handleTouchEnd = () => setIsKeyPressed((prev) => ({ ...prev, space: false }));
 
     window.addEventListener('keydown', handleKeyDown);
     window.addEventListener('keyup', handleKeyUp);
@@ -193,77 +212,75 @@ const GameScene = () => {
     };
   }, []);
 
+  // Camera follows player
   useFrame(() => {
     if (camera instanceof THREE.OrthographicCamera) {
-      camera.position.z = playerState.position.z + 15;
+      camera.position.z = playerState.position.z + 18;
       camera.updateProjectionMatrix();
     }
   });
+
+  const handleRestart = () => {
+    setPlayerState({
+      position: new THREE.Vector3(0, 5, 0),
+      velocity: new THREE.Vector3(0, 0, 0),
+      onTrack: true,
+      gameOver: false,
+      score: 0,
+    });
+    setPlatforms([
+      { id: -1, z: -2, x: 0, width: 5 },
+      { id: 0, z: 2, x: 2.5, width: 5 },
+      { id: 1, z: 6, x: -2.5, width: 5 },
+    ]);
+  };
 
   return (
     <>
       <OrthographicCamera
         makeDefault
         position={[5, 8, 15]}
-        zoom={25}
+        zoom={22}
         near={0.1}
         far={1000}
         onUpdate={(camera) => camera.lookAt(0, 5, 0)}
       />
 
-      <ambientLight intensity={0.8} />
-      <directionalLight position={[10, 15, 10]} intensity={1} castShadow />
-      <directionalLight position={[-10, -5, -10]} intensity={0.3} />
+      <ambientLight intensity={0.9} />
+      <directionalLight position={[12, 15, 12]} intensity={1.2} castShadow />
+      <directionalLight position={[-10, -5, -10]} intensity={0.4} />
 
+      {/* Ground */}
       <mesh position={[0, -3, 0]} receiveShadow>
-        <planeGeometry args={[30, 100]} />
-        <meshStandardMaterial color="#1a1a1a" />
+        <planeGeometry args={[40, 120]} />
+        <meshStandardMaterial color="#0f0f1a" />
       </mesh>
 
-      <DriftBossPlayer
+      {/* Player Character */}
+      <Suspense fallback={null}>
+        <CharacterModel position={playerState.position} modelScale={modelScale} />
+      </Suspense>
+
+      {/* Platforms */}
+      <PlatformRenderer platforms={platforms} />
+
+      {/* Game Logic */}
+      <GameLogic
         playerState={playerState}
         setPlayerState={setPlayerState}
         platforms={platforms}
+        setPlatforms={setPlatforms}
         isKeyPressed={isKeyPressed}
       />
 
-      <PlatformGrid platforms={platforms} setPlatforms={setPlatforms} playerZ={playerState.position.z} />
-
+      {/* Game Over Overlay */}
       {playerState.gameOver && (
-        <>
+        <group>
           <mesh position={[0, playerState.position.y, playerState.position.z]}>
             <planeGeometry args={[20, 20]} />
-            <meshBasicMaterial color="black" transparent opacity={0.6} />
+            <meshBasicMaterial color="black" transparent opacity={0.7} />
           </mesh>
-          <Text
-            position={[0, 3, playerState.position.z + 0.1]}
-            fontSize={2}
-            color="white"
-            anchorX="center"
-            anchorY="middle"
-          >
-            GAME OVER
-          </Text>
-          <Text
-            position={[0, 0, playerState.position.z + 0.1]}
-            fontSize={1.2}
-            color="#fbbf24"
-            anchorX="center"
-            anchorY="middle"
-          >
-            Score: {playerState.score}
-          </Text>
-        </>
-      )}
-
-      <Text position={[-8, playerState.position.y + 3, playerState.position.z + 5]} fontSize={0.8} color="white" anchorX="left">
-        Score: {playerState.score}
-      </Text>
-
-      {playerState.score < 5 && (
-        <Text position={[-8, playerState.position.y + 1.5, playerState.position.z + 5]} fontSize={0.4} color="#cbd5e1" anchorX="left">
-          Hold SPACE to move right
-        </Text>
+        </group>
       )}
     </>
   );
@@ -271,52 +288,53 @@ const GameScene = () => {
 
 export function DriftBossV2Safe() {
   const [gameStarted, setGameStarted] = useState(false);
+  const [gameOverScore, setGameOverScore] = useState(0);
 
   return (
-    <div
-      style={{
-        width: '100%',
-        height: '100vh',
-        background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-        display: 'flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'center',
-        fontFamily: 'Arial, sans-serif',
-        position: 'relative',
-        overflow: 'hidden',
-      }}
-    >
+    <div style={{ width: '100%', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+      <Canvas
+        style={{ width: '100%', height: '100%' }}
+        gl={{ antialias: true, pixelRatio: Math.min(window.devicePixelRatio, 2), alpha: true }}
+      >
+        {gameStarted && <GameScene modelScale={[1, 1, 1]} />}
+      </Canvas>
+
+      {/* UI Overlay */}
       {!gameStarted && (
         <div
           style={{
             position: 'absolute',
+            inset: 0,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
             zIndex: 10,
-            textAlign: 'center',
-            color: 'white',
           }}
         >
-          <h1 style={{ fontSize: '3em', marginBottom: '20px', fontWeight: 'bold' }}>
+          <h1 style={{ fontSize: '3.5em', color: 'white', marginBottom: '20px', fontWeight: 'bold' }}>
             🚗 DRIFT BOSS
           </h1>
-          <p style={{ fontSize: '1.1em', marginBottom: '30px', color: '#cbd5e1' }}>
-            Navigate the zigzag path and survive as long as you can!
+          <p style={{ fontSize: '1.2em', color: '#cbd5e1', marginBottom: '40px', maxWidth: '500px', textAlign: 'center' }}>
+            Navigate the zigzag track. Hold SPACE to turn right. Release to turn left. Survive as long as you can!
           </p>
           <button
             onClick={() => setGameStarted(true)}
             style={{
-              padding: '15px 40px',
-              fontSize: '1.2em',
+              padding: '18px 50px',
+              fontSize: '1.3em',
               backgroundColor: '#22c55e',
               color: 'white',
               border: 'none',
-              borderRadius: '8px',
+              borderRadius: '10px',
               cursor: 'pointer',
               fontWeight: 'bold',
+              transition: 'all 0.3s',
             }}
             onMouseEnter={(e) => {
               e.currentTarget.style.backgroundColor = '#16a34a';
-              e.currentTarget.style.transform = 'scale(1.05)';
+              e.currentTarget.style.transform = 'scale(1.08)';
             }}
             onMouseLeave={(e) => {
               e.currentTarget.style.backgroundColor = '#22c55e';
@@ -325,18 +343,8 @@ export function DriftBossV2Safe() {
           >
             START GAME
           </button>
-          <p style={{ marginTop: '30px', fontSize: '0.9em', color: '#94a3b8', maxWidth: '400px' }}>
-            💡 Tip: Hold SPACE (or touch) to move right, release to move left
-          </p>
         </div>
       )}
-
-      <Canvas
-        style={{ width: '100%', height: '100%', position: 'absolute' }}
-        gl={{ antialias: true, pixelRatio: Math.min(window.devicePixelRatio, 2), alpha: true }}
-      >
-        {gameStarted && <GameScene />}
-      </Canvas>
     </div>
   );
 }
