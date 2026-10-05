@@ -78,24 +78,26 @@ export function RoomConvectionSimulator() {
 }
 
 function RoomConvectionContent({ isRunning, acOn, heaterOn }: { isRunning: boolean; acOn: boolean; heaterOn: boolean }) {
-  const groupsRef = useRef<THREE.Group[]>([])
+  const meshesRef = useRef<THREE.Mesh[]>([])
   const particlesRef = useRef<Particle3D[]>([])
+  const [particles, setParticles] = useState<Particle3D[]>([])
 
-  // Initialize massive particle density
+  // Initialize massive particle density - CRITICAL FIX
   useEffect(() => {
-    const particles: Particle3D[] = []
+    const newParticles: Particle3D[] = []
     for (let i = 0; i < NUM_PARTICLES; i++) {
-      particles.push({
+      newParticles.push({
         position: new THREE.Vector3(
-          (Math.random() - 0.5) * (ROOM_WIDTH * 0.9),
-          (Math.random() - 0.5) * (ROOM_HEIGHT * 0.9),
-          (Math.random() - 0.5) * (ROOM_DEPTH * 0.9)
+          (Math.random() - 0.5) * (ROOM_WIDTH * 0.85),
+          (Math.random() - 0.5) * (ROOM_HEIGHT * 0.85),
+          (Math.random() - 0.5) * (ROOM_DEPTH * 0.85)
         ),
         velocity: new THREE.Vector3(0, 0, 0),
-        isHot: Math.random() > 0.5, // Random initial state
+        isHot: Math.random() > 0.5,
       })
     }
-    particlesRef.current = particles
+    particlesRef.current = newParticles
+    setParticles([...newParticles])
   }, [])
 
   useFrame((_state, deltaTime) => {
@@ -207,11 +209,14 @@ function RoomConvectionContent({ isRunning, acOn, heaterOn }: { isRunning: boole
         particle.velocity.z *= -0.8
       }
 
-      // Update group
-      if (groupsRef.current[idx]) {
-        groupsRef.current[idx].position.copy(particle.position)
+      // Update mesh position
+      if (meshesRef.current[idx]) {
+        meshesRef.current[idx].position.copy(particle.position)
       }
     })
+
+    // Update React state for re-render (batched update for performance)
+    setParticles([...particlesRef.current])
   })
 
   return (
@@ -259,25 +264,23 @@ function RoomConvectionContent({ isRunning, acOn, heaterOn }: { isRunning: boole
         ))}
       </group>
 
-      {/* Ultra-high-density particle system */}
-      {particlesRef.current.map((particle, idx) => (
-        <group
+      {/* Ultra-high-density particle system - FIXED RENDERING */}
+      {particles.map((particle, idx) => (
+        <mesh
           key={idx}
           ref={(el) => {
-            if (el) groupsRef.current[idx] = el
+            if (el) meshesRef.current[idx] = el
           }}
           position={[particle.position.x, particle.position.y, particle.position.z]}
         >
-          <mesh>
-            <sphereGeometry args={[PARTICLE_RADIUS, 5, 5]} />
-            <meshPhongMaterial
-              color={particle.isHot ? 0xff4444 : 0x4a9eff}
-              emissive={particle.isHot ? 0xff2222 : 0x2577ff}
-              emissiveIntensity={0.7}
-              shininess={100}
-            />
-          </mesh>
-        </group>
+          <sphereGeometry args={[PARTICLE_RADIUS, 4, 4]} />
+          <meshPhongMaterial
+            color={particle.isHot ? 0xff4444 : 0x4a9eff}
+            emissive={particle.isHot ? 0xff2222 : 0x2577ff}
+            emissiveIntensity={0.75}
+            shininess={80}
+          />
+        </mesh>
       ))}
 
       <OrbitControls enableZoom enablePan enableRotate autoRotate={false} minDistance={30} maxDistance={60} />
