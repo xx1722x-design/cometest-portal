@@ -104,6 +104,17 @@ export const SIMULATIONS_DATA: SimulationItem[] = [
     tags: ['physics', 'convection', 'thermodynamics', 'science'],
     play_count: 0,
   },
+  {
+    id: 'physics-3d-balls',
+    title: '3D Physics Balls',
+    description: 'Interactive 3D physics simulation with falling colorful balls - Drag to rotate, explore gravity and collisions',
+    category: 'physics_chemistry',
+    icon: '🎱',
+    path: '/simulation/physics-3d-balls',
+    component: 'Physics3DBallsSimulator',
+    tags: ['physics', '3d', 'interactive', 'gravity', 'simulation'],
+    play_count: 0,
+  },
 ]
 
 export const getSimulationById = (simulationId: string): SimulationItem | undefined => {

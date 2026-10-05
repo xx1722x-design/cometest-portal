@@ -38,6 +38,13 @@ const RoomConvectionSimulator = lazy(() =>
   }))
 )
 
+// R3F Canvas requires client-side rendering
+const Physics3DBallsSimulator = lazy(() =>
+  import('../components/simulations/Physics3DBallsSimulator').then((m) => ({
+    default: m.Physics3DBallsSimulator,
+  }))
+)
+
 export function Simulation() {
   const navigate = useNavigate()
   const { simulationId } = useParams<{ simulationId: string }>()
@@ -47,7 +54,7 @@ export function Simulation() {
 
   const handleBackClick = () => {
     if (simulation?.category === 'physics_chemistry') {
-      navigate('/chemistry')
+      navigate('/chemistry') // Physics & Chemistry simulations go back to chemistry page
     } else if (simulation?.category === 'optics_waves') {
       navigate('/optics')
     } else if (simulation?.category === 'puzzle') {
@@ -107,6 +114,12 @@ export function Simulation() {
         return (
           <Suspense fallback={<div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Loading Simulation...</div>}>
             <RoomConvectionSimulator />
+          </Suspense>
+        )
+      case 'physics-3d-balls':
+        return (
+          <Suspense fallback={<div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Loading 3D Physics...</div>}>
+            <Physics3DBallsSimulator />
           </Suspense>
         )
       default:

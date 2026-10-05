@@ -12,6 +12,7 @@
     "@react-three/fiber": "^8.15.0",
     "@use-gesture/react": "^10.3.1",
     "@vercel/analytics": "^2.0.1",
+    "cannon-es": "^0.20.0",
     "framer-motion": "^14.0.0",
     "i18next": "^23.7.0",
     "lucide-react": "^1.51.0",
@@ -21,6 +22,7 @@
     "react-i18next": "^13.5.0",
     "react-router-dom": "^6.20.0",
     "three": "^0.155.0",
+    "use-cannon": "^0.5.3",
     "zustand": "^4.4.1"
   },
   "devDependencies": {
