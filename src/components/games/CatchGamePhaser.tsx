@@ -4,11 +4,15 @@ import Phaser from 'phaser'
 export function CatchGamePhaser() {
   const gameContainerRef = useRef<HTMLDivElement>(null)
   const gameRef = useRef<Phaser.Game | null>(null)
+  const gameInitialized = useRef(false)
   const [score, setScore] = useState(0)
   const [gameOver, setGameOver] = useState(false)
 
   useEffect(() => {
-    if (gameContainerRef.current && !gameRef.current) {
+    // 🔥 React Strict Mode fix: only initialize once, even if useEffect runs twice
+    if (gameInitialized.current || !gameContainerRef.current) return
+
+    gameInitialized.current = true
       class CatchScene extends Phaser.Scene {
         basket!: Phaser.Physics.Arcade.Sprite
         fruits!: Phaser.Physics.Arcade.Group
@@ -21,8 +25,8 @@ export function CatchGamePhaser() {
         }
 
         create() {
-          // Background
-          this.add.rectangle(400, 300, 800, 600, 0x0a0a1a)
+          // Set background color explicitly
+          this.cameras.main.setBackgroundColor('#1e293b')
 
           // Create basket texture
           const basketCanvas = this.textures.createCanvas('basket', 80, 20)
@@ -114,10 +118,11 @@ export function CatchGamePhaser() {
 
       const config: Phaser.Types.Core.GameConfig = {
         type: Phaser.AUTO,
-        parent: gameContainerRef.current,
+        parent: gameContainerRef.current as HTMLElement,
         width: 800,
         height: 600,
-        backgroundColor: '#0a0a1a',
+        backgroundColor: '#1e293b',
+        transparent: false,
         physics: {
           default: 'arcade',
           arcade: { gravity: { x: 0, y: 300 }, debug: false },
@@ -130,27 +135,41 @@ export function CatchGamePhaser() {
 
     return () => {
       if (gameRef.current) {
-        gameRef.current.destroy(true)
+        try {
+          gameRef.current.destroy(true)
+        } catch (e) {
+          console.error('Error destroying Phaser game:', e)
+        }
         gameRef.current = null
       }
+      gameInitialized.current = false
     }
   }, [])
 
   const handleRestart = () => {
     if (gameRef.current) {
-      gameRef.current.scene.start('CatchScene')
-      setScore(0)
-      setGameOver(false)
+      try {
+        gameRef.current.scene.start('CatchScene')
+        setScore(0)
+        setGameOver(false)
+      } catch (e) {
+        console.error('Error restarting scene:', e)
+      }
     }
   }
 
   const handleQuit = () => {
+    if (gameRef.current) {
+      gameRef.current.destroy(true)
+      gameRef.current = null
+    }
+    gameInitialized.current = false
     window.location.href = '/game'
   }
 
   return (
     <div style={{ width: '100vw', height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#0a0a1a', fontFamily: "'Segoe UI', sans-serif", color: '#fff', position: 'relative' }}>
-      <div ref={gameContainerRef} />
+      <div id="catch-game-container" ref={gameContainerRef} style={{ width: '800px', height: '600px' }} />
 
       <div style={{ position: 'absolute', top: '20px', left: '20px', backgroundColor: 'rgba(10, 10, 26, 0.95)', border: '2px solid #ff8c42', borderRadius: '12px', padding: '16px 24px', backdropFilter: 'blur(10px)', boxShadow: '0 8px 32px rgba(255, 140, 66, 0.2)', zIndex: 100 }}>
         <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', color: '#ff8c42', fontWeight: '700' }}>🎮 Catch Game</h3>
