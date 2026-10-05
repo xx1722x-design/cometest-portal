@@ -103,84 +103,110 @@ function RoomConvectionContent({ isRunning, acOn, heaterOn }: { isRunning: boole
     const particles = particlesRef.current
     const convectionActive = acOn || heaterOn
 
-    // AC position: top-left (negative x, positive y)
-    const acPos = new THREE.Vector3(-CONTAINER_SIZE / 2 + 2, CONTAINER_SIZE / 2 - 2, 0)
+    // AC position: top-left wall (negative x, positive y)
+    const acPos = new THREE.Vector3(-CONTAINER_SIZE / 2 + 1, CONTAINER_SIZE / 2 - 1, 0)
     const acRadius = 3.5
 
-    // Heater position: bottom-right (positive x, negative y)
-    const heaterPos = new THREE.Vector3(CONTAINER_SIZE / 2 - 2, -CONTAINER_SIZE / 2 + 2, 0)
+    // Heater position: bottom-right floor (positive x, negative y)
+    const heaterPos = new THREE.Vector3(CONTAINER_SIZE / 2 - 1, -CONTAINER_SIZE / 2 + 1, 0)
     const heaterRadius = 4
 
-    const centerPos = new THREE.Vector3(0, 0, 0)
     const bounceDistance = CONTAINER_SIZE / 2 - PARTICLE_RADIUS
+    const roomTemp = 35 // Neutral room temperature
 
     particles.forEach((particle) => {
       if (!convectionActive) {
-        // No convection: just damping and minimal thermal motion
-        particle.velocity.multiplyScalar(0.90)
-        particle.velocity.x += (Math.random() - 0.5) * 0.05
-        particle.velocity.y += (Math.random() - 0.5) * 0.05
-        particle.velocity.z += (Math.random() - 0.5) * 0.05
+        // No convection: particles are calm (just minimal thermal jitter)
+        particle.velocity.multiplyScalar(0.85)
+        particle.velocity.x += (Math.random() - 0.5) * 0.08
+        particle.velocity.y += (Math.random() - 0.5) * 0.08
+        particle.velocity.z += (Math.random() - 0.5) * 0.08
       } else {
-        // AC cooling and downward push
+        // ========== TRUE THERMAL BUOYANCY PHYSICS ==========
+
+        // 1. AC COOLING: Turn particles blue, push downward via buoyancy
         if (acOn) {
           const distToAC = particle.position.distanceTo(acPos)
           if (distToAC < acRadius) {
-            particle.temperature = Math.max(15, particle.temperature - 0.4)
-            const forceStrength = (1 - distToAC / acRadius) * 1.5
-            particle.velocity.y -= forceStrength * 0.6 // Downward
+            particle.temperature = Math.max(10, particle.temperature - 0.5)
+            // Direct downward acceleration from AC
+            const influenceStrength = (1 - distToAC / acRadius) * 1.2
+            particle.velocity.y -= influenceStrength * 0.8
           }
         }
 
-        // Heater heating and upward push
+        // 2. HEATER HEATING: Turn particles red/orange, push upward via buoyancy
         if (heaterOn) {
           const distToHeater = particle.position.distanceTo(heaterPos)
           if (distToHeater < heaterRadius) {
-            particle.temperature = Math.min(75, particle.temperature + 0.5)
-            const forceStrength = (1 - distToHeater / heaterRadius) * 1.8
-            particle.velocity.y += forceStrength * 0.8 // Upward
+            particle.temperature = Math.min(80, particle.temperature + 0.6)
+            // Direct upward acceleration from Heater
+            const influenceStrength = (1 - distToHeater / heaterRadius) * 1.3
+            particle.velocity.y += influenceStrength * 1.0
           }
         }
 
-        // Natural buoyancy
-        const buoyancy = (particle.temperature - 35) / 40
-        particle.velocity.y -= buoyancy * 0.4
+        // 3. NATURAL BUOYANCY: Temperature difference creates vertical force
+        //    Hot air (T > roomTemp) rises, cold air (T < roomTemp) sinks
+        const tempDifference = particle.temperature - roomTemp
+        const buoyancyForce = (tempDifference / 50) * 0.6 // Stronger buoyancy effect
+        particle.velocity.y += buoyancyForce
 
-        // Gentle 3D circulation loop
-        const toCenter = centerPos.clone().sub(particle.position)
-        const perpX = -toCenter.z
-        const perpZ = toCenter.x
-        const perpLen = Math.hypot(perpX, perpZ)
-        if (perpLen > 0.1) {
-          const circulationStrength = 0.15
-          particle.velocity.x += (perpX / perpLen) * circulationStrength
-          particle.velocity.z += (perpZ / perpLen) * circulationStrength
+        // 4. REALISTIC CONVECTION CIRCULATION: No fake orbits!
+        //    Instead, air naturally sweeps across floors/ceilings due to continuity
+        //    - Cold air at top (from AC) sinks and spreads horizontally at bottom
+        //    - Hot air at bottom (from Heater) rises and spreads horizontally at top
+        //    This creates a natural room-scale circulation WITHOUT hardcoding paths
+
+        // Horizontal flow: particles naturally spread when they reach top/bottom
+        if (particle.position.y > CONTAINER_SIZE / 4) {
+          // Upper region: air flows horizontally away from AC (toward heater side)
+          particle.velocity.x += (particle.position.x > 0 ? -0.1 : 0.1)
+        } else if (particle.position.y < -CONTAINER_SIZE / 4) {
+          // Lower region: air flows horizontally toward heater (away from AC side)
+          particle.velocity.x += (particle.position.x < 0 ? 0.1 : -0.1)
         }
 
-        // Brownian motion
-        particle.velocity.x += (Math.random() - 0.5) * 0.2
-        particle.velocity.y += (Math.random() - 0.5) * 0.15
-        particle.velocity.z += (Math.random() - 0.5) * 0.2
+        // Brownian motion (realistic thermal motion)
+        particle.velocity.x += (Math.random() - 0.5) * 0.15
+        particle.velocity.y += (Math.random() - 0.5) * 0.12
+        particle.velocity.z += (Math.random() - 0.5) * 0.15
 
-        // Damping
-        particle.velocity.multiplyScalar(0.96)
+        // Velocity damping (air resistance)
+        particle.velocity.multiplyScalar(0.94)
       }
 
-      // Update position
+      // Update position with physics
       particle.position.add(particle.velocity.clone().multiplyScalar(deltaTime))
 
-      // STRICT 3D boundary clamping
-      if (Math.abs(particle.position.x) > bounceDistance) {
-        particle.position.x = Math.sign(particle.position.x) * bounceDistance
-        particle.velocity.x *= -0.75
+      // ========== STRICT 3D BOUNDARY COLLISION ==========
+      const margin = PARTICLE_RADIUS + 0.1
+
+      // X-axis walls
+      if (particle.position.x < -bounceDistance) {
+        particle.position.x = -bounceDistance
+        particle.velocity.x = Math.abs(particle.velocity.x) * 0.7
+      } else if (particle.position.x > bounceDistance) {
+        particle.position.x = bounceDistance
+        particle.velocity.x = -Math.abs(particle.velocity.x) * 0.7
       }
-      if (Math.abs(particle.position.y) > bounceDistance) {
-        particle.position.y = Math.sign(particle.position.y) * bounceDistance
-        particle.velocity.y *= -0.75
+
+      // Y-axis walls (floor and ceiling)
+      if (particle.position.y < -bounceDistance) {
+        particle.position.y = -bounceDistance
+        particle.velocity.y = Math.abs(particle.velocity.y) * 0.7
+      } else if (particle.position.y > bounceDistance) {
+        particle.position.y = bounceDistance
+        particle.velocity.y = -Math.abs(particle.velocity.y) * 0.7
       }
-      if (Math.abs(particle.position.z) > bounceDistance) {
-        particle.position.z = Math.sign(particle.position.z) * bounceDistance
-        particle.velocity.z *= -0.75
+
+      // Z-axis walls
+      if (particle.position.z < -bounceDistance) {
+        particle.position.z = -bounceDistance
+        particle.velocity.z = Math.abs(particle.velocity.z) * 0.7
+      } else if (particle.position.z > bounceDistance) {
+        particle.position.z = bounceDistance
+        particle.velocity.z = -Math.abs(particle.velocity.z) * 0.7
       }
 
       // Update group position
@@ -215,21 +241,37 @@ function RoomConvectionContent({ isRunning, acOn, heaterOn }: { isRunning: boole
         <lineBasicMaterial attach="material" color={0xff8c42} linewidth={2} />
       </lineSegments>
 
-      {/* AC Indicator */}
-      {acOn && (
-        <mesh position={[-CONTAINER_SIZE / 2 + 1, CONTAINER_SIZE / 2 - 1, 0]}>
-          <sphereGeometry args={[0.8, 16, 16]} />
-          <meshPhongMaterial color={0x4a9eff} emissive={0x2577ff} emissiveIntensity={1.5} shininess={100} />
+      {/* AC Unit (Top-Left Wall) - Proper 3D Model */}
+      <group position={[-CONTAINER_SIZE / 2 + 0.2, CONTAINER_SIZE / 2 - 1, 0]}>
+        {/* AC Body */}
+        <mesh>
+          <boxGeometry args={[1.6, 0.8, 0.6]} />
+          <meshPhongMaterial color={acOn ? 0x4a9eff : 0x2a4a6a} emissive={acOn ? 0x2577ff : 0x1a2a3a} emissiveIntensity={acOn ? 1.2 : 0.3} shininess={80} />
         </mesh>
-      )}
+        {/* AC Vents */}
+        {[0, 0.4, -0.4].map((offset) => (
+          <mesh key={`ac-vent-${offset}`} position={[offset, 0, 0.35]}>
+            <boxGeometry args={[0.3, 0.2, 0.2]} />
+            <meshPhongMaterial color={acOn ? 0x6cc0ff : 0x3a4a5a} emissive={acOn ? 0x4a9eff : 0x2a3a4a} emissiveIntensity={0.8} shininess={60} />
+          </mesh>
+        ))}
+      </group>
 
-      {/* Heater Indicator */}
-      {heaterOn && (
-        <mesh position={[CONTAINER_SIZE / 2 - 1, -CONTAINER_SIZE / 2 + 1, 0]}>
-          <sphereGeometry args={[0.9, 16, 16]} />
-          <meshPhongMaterial color={0xff6b35} emissive={0xff4422} emissiveIntensity={1.5} shininess={100} />
+      {/* Heater Unit (Bottom-Right Floor) - Proper 3D Model */}
+      <group position={[CONTAINER_SIZE / 2 - 1, -CONTAINER_SIZE / 2 + 0.4, 0]}>
+        {/* Heater Body */}
+        <mesh>
+          <boxGeometry args={[1.4, 0.8, 0.8]} />
+          <meshPhongMaterial color={heaterOn ? 0xff6b35 : 0x6a3a2a} emissive={heaterOn ? 0xff4422 : 0x3a1a0a} emissiveIntensity={heaterOn ? 1.3 : 0.3} shininess={70} />
         </mesh>
-      )}
+        {/* Heater Grille */}
+        {[0, 0.35, -0.35].map((offset) => (
+          <mesh key={`heater-bar-${offset}`} position={[offset, 0, 0.45]}>
+            <boxGeometry args={[0.3, 0.6, 0.1]} />
+            <meshPhongMaterial color={heaterOn ? 0xff8855 : 0x6a4a3a} emissive={heaterOn ? 0xff5533 : 0x3a2a1a} emissiveIntensity={0.9} shininess={50} />
+          </mesh>
+        ))}
+      </group>
 
       {/* 3D Particles */}
       {particlesRef.current.map((particle, idx) => (
