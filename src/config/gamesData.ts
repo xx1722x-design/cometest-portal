@@ -55,6 +55,17 @@ export const GAMES_DATA: GameItem[] = [
     tags: ['action', 'arcade', 'casual', 'hypercasual'],
     play_count: 0,
   },
+  {
+    id: 'catch-game',
+    title: 'Catch Game',
+    description: '떨어지는 과일을 잡으세요! 마우스를 움직여 바구니를 제어하는 클래식 아케이드 게임',
+    thumbnail: '🎮',
+    category: 'web_games',
+    icon: '🎮',
+    path: '/game/catch-game',
+    tags: ['action', 'arcade', 'casual', 'phaser'],
+    play_count: 0,
+  },
 ]
 
 export const getGameById = (gameId: string): GameItem | undefined => {

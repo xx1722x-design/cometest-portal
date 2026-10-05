@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { lazy, Suspense } from 'react'
 import { SpaceRacer } from '../components/games/SpaceRacer'
 import { DriftBossV2Safe } from '../components/games/DriftBoss/DriftBossV2Safe'
+import { CatchGamePhaser } from '../components/games/CatchGamePhaser'
 import { getGameById } from '../config/gamesData'
 
 // Dynamic import for AllYouCanTycoon (JSX file)
@@ -30,6 +31,8 @@ export function Game() {
         return <div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Prism Rush Coming Soon</div>
       case 'drift-boss':
         return <DriftBossV2Safe />
+      case 'catch-game':
+        return <CatchGamePhaser />
       default:
         return <div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>게임을 찾을 수 없습니다</div>
     }
