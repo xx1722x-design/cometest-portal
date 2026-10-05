@@ -3,6 +3,8 @@ import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { OrthographicCamera, useGLTF } from '@react-three/drei';
 import * as THREE from 'three';
 
+type GameState = 'IDLE' | 'PLAYING' | 'GAMEOVER';
+
 interface Platform {
   id: number;
   z: number;
@@ -14,11 +16,9 @@ interface PlayerState {
   position: THREE.Vector3;
   velocity: THREE.Vector3;
   onTrack: boolean;
-  gameOver: boolean;
   score: number;
 }
 
-// Character Model Loader
 const CharacterModel = ({
   position,
   modelScale = [1, 1, 1],
@@ -45,8 +45,6 @@ const CharacterModel = ({
       </group>
     );
   } catch (error) {
-    // Fallback: Pink cube if GLB fails to load
-    console.warn('GLB load failed, using fallback cube');
     return (
       <mesh position={[position.x, position.y, position.z]} scale={modelScale} castShadow>
         <boxGeometry args={[0.8, 1.2, 0.8]} />
@@ -56,41 +54,41 @@ const CharacterModel = ({
   }
 };
 
-// Game Logic Component
 const GameLogic = ({
+  gameState,
   playerState,
   setPlayerState,
   platforms,
   setPlatforms,
   isKeyPressed,
+  onGameOver,
 }: {
+  gameState: GameState;
   playerState: PlayerState;
   setPlayerState: React.Dispatch<React.SetStateAction<PlayerState>>;
   platforms: Platform[];
   setPlatforms: React.Dispatch<React.SetStateAction<Platform[]>>;
   isKeyPressed: { space: boolean };
+  onGameOver: (score: number) => void;
 }) => {
   const platformIdRef = useRef(0);
   const lastPlatformZRef = useRef(0);
   const targetXRef = useRef(0);
 
   useFrame(() => {
-    if (playerState.gameOver) return;
+    if (gameState !== 'PLAYING') return;
 
     const moveSpeed = 0.1;
     const gravity = 0.15;
     const fallThreshold = -20;
 
-    // Movement: Space = right diagonal, no space = left diagonal
     const targetX = isKeyPressed.space ? 2.5 : -2.5;
     targetXRef.current += (targetX - targetXRef.current) * moveSpeed;
 
-    // Update position
     const newPosition = playerState.position.clone();
     newPosition.x = targetXRef.current;
-    newPosition.z += 0.4; // Continuous forward movement
+    newPosition.z += 0.4;
 
-    // Track collision detection
     let onTrack = false;
     for (const platform of platforms) {
       if (
@@ -103,7 +101,6 @@ const GameLogic = ({
       }
     }
 
-    // Gravity & falling
     let newVelocity = playerState.velocity.clone();
     if (!onTrack) {
       newVelocity.y -= gravity;
@@ -112,13 +109,11 @@ const GameLogic = ({
       newVelocity.y = 0;
     }
 
-    // Game over conditions
     if (newPosition.y < fallThreshold || Math.abs(newPosition.x) > 5) {
-      setPlayerState((prev) => ({ ...prev, gameOver: true }));
+      onGameOver(Math.floor(playerState.position.z / 4));
       return;
     }
 
-    // Generate new track platforms
     if (newPosition.z > lastPlatformZRef.current - 5) {
       const newPlatform: Platform = {
         id: platformIdRef.current++,
@@ -147,7 +142,6 @@ const GameLogic = ({
   return null;
 };
 
-// Platform Renderer
 const PlatformRenderer = ({ platforms }: { platforms: Platform[] }) => {
   return (
     <>
@@ -161,26 +155,87 @@ const PlatformRenderer = ({ platforms }: { platforms: Platform[] }) => {
   );
 };
 
-// Main Game Scene
-const GameScene = ({ modelScale }: { modelScale: [number, number, number] }) => {
+const GameScene = ({
+  gameState,
+  playerState,
+  setPlayerState,
+  platforms,
+  setPlatforms,
+  isKeyPressed,
+  onGameOver,
+}: {
+  gameState: GameState;
+  playerState: PlayerState;
+  setPlayerState: React.Dispatch<React.SetStateAction<PlayerState>>;
+  platforms: Platform[];
+  setPlatforms: React.Dispatch<React.SetStateAction<Platform[]>>;
+  isKeyPressed: { space: boolean };
+  onGameOver: (score: number) => void;
+}) => {
+  const { camera } = useThree();
+
+  useFrame(() => {
+    if (camera instanceof THREE.OrthographicCamera && gameState === 'PLAYING') {
+      camera.position.z = playerState.position.z + 18;
+      camera.updateProjectionMatrix();
+    }
+  });
+
+  return (
+    <>
+      <OrthographicCamera
+        makeDefault
+        position={[5, 8, 15]}
+        zoom={22}
+        near={0.1}
+        far={1000}
+        onUpdate={(camera) => camera.lookAt(0, 5, 0)}
+      />
+
+      <ambientLight intensity={0.9} />
+      <directionalLight position={[12, 15, 12]} intensity={1.2} castShadow />
+      <directionalLight position={[-10, -5, -10]} intensity={0.4} />
+
+      <mesh position={[0, -3, 0]} receiveShadow>
+        <planeGeometry args={[40, 120]} />
+        <meshStandardMaterial color="#0f0f1a" />
+      </mesh>
+
+      <Suspense fallback={null}>
+        <CharacterModel position={playerState.position} modelScale={[1, 1, 1]} />
+      </Suspense>
+
+      <PlatformRenderer platforms={platforms} />
+
+      <GameLogic
+        gameState={gameState}
+        playerState={playerState}
+        setPlayerState={setPlayerState}
+        platforms={platforms}
+        setPlatforms={setPlatforms}
+        isKeyPressed={isKeyPressed}
+        onGameOver={onGameOver}
+      />
+    </>
+  );
+};
+
+export function DriftBossV2Safe() {
+  const [gameState, setGameState] = useState<GameState>('IDLE');
   const [playerState, setPlayerState] = useState<PlayerState>({
     position: new THREE.Vector3(0, 5, 0),
     velocity: new THREE.Vector3(0, 0, 0),
     onTrack: true,
-    gameOver: false,
     score: 0,
   });
-
   const [platforms, setPlatforms] = useState<Platform[]>([
     { id: -1, z: -2, x: 0, width: 5 },
     { id: 0, z: 2, x: 2.5, width: 5 },
     { id: 1, z: 6, x: -2.5, width: 5 },
   ]);
-
   const [isKeyPressed, setIsKeyPressed] = useState({ space: false });
-  const { camera } = useThree();
+  const [finalScore, setFinalScore] = useState(0);
 
-  // Input handling
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.code === 'Space') {
@@ -212,20 +267,20 @@ const GameScene = ({ modelScale }: { modelScale: [number, number, number] }) => 
     };
   }, []);
 
-  // Camera follows player
-  useFrame(() => {
-    if (camera instanceof THREE.OrthographicCamera) {
-      camera.position.z = playerState.position.z + 18;
-      camera.updateProjectionMatrix();
-    }
-  });
+  const handleStartGame = () => {
+    setGameState('PLAYING');
+  };
+
+  const handleGameOver = (score: number) => {
+    setFinalScore(score);
+    setGameState('GAMEOVER');
+  };
 
   const handleRestart = () => {
     setPlayerState({
       position: new THREE.Vector3(0, 5, 0),
       velocity: new THREE.Vector3(0, 0, 0),
       onTrack: true,
-      gameOver: false,
       score: 0,
     });
     setPlatforms([
@@ -233,116 +288,87 @@ const GameScene = ({ modelScale }: { modelScale: [number, number, number] }) => 
       { id: 0, z: 2, x: 2.5, width: 5 },
       { id: 1, z: 6, x: -2.5, width: 5 },
     ]);
+    setGameState('PLAYING');
   };
 
   return (
-    <>
-      <OrthographicCamera
-        makeDefault
-        position={[5, 8, 15]}
-        zoom={22}
-        near={0.1}
-        far={1000}
-        onUpdate={(camera) => camera.lookAt(0, 5, 0)}
-      />
-
-      <ambientLight intensity={0.9} />
-      <directionalLight position={[12, 15, 12]} intensity={1.2} castShadow />
-      <directionalLight position={[-10, -5, -10]} intensity={0.4} />
-
-      {/* Ground */}
-      <mesh position={[0, -3, 0]} receiveShadow>
-        <planeGeometry args={[40, 120]} />
-        <meshStandardMaterial color="#0f0f1a" />
-      </mesh>
-
-      {/* Player Character */}
-      <Suspense fallback={null}>
-        <CharacterModel position={playerState.position} modelScale={modelScale} />
-      </Suspense>
-
-      {/* Platforms */}
-      <PlatformRenderer platforms={platforms} />
-
-      {/* Game Logic */}
-      <GameLogic
-        playerState={playerState}
-        setPlayerState={setPlayerState}
-        platforms={platforms}
-        setPlatforms={setPlatforms}
-        isKeyPressed={isKeyPressed}
-      />
-
-      {/* Game Over Overlay */}
-      {playerState.gameOver && (
-        <group>
-          <mesh position={[0, playerState.position.y, playerState.position.z]}>
-            <planeGeometry args={[20, 20]} />
-            <meshBasicMaterial color="black" transparent opacity={0.7} />
-          </mesh>
-        </group>
-      )}
-    </>
-  );
-};
-
-export function DriftBossV2Safe() {
-  const [gameStarted, setGameStarted] = useState(false);
-  const [gameOverScore, setGameOverScore] = useState(0);
-
-  return (
-    <div style={{ width: '100%', height: '100vh', position: 'relative', overflow: 'hidden' }}>
+    <div className="relative w-full h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
       <Canvas
-        style={{ width: '100%', height: '100%' }}
+        className="w-full h-full"
         gl={{ antialias: true, pixelRatio: Math.min(window.devicePixelRatio, 2), alpha: true }}
       >
-        {gameStarted && <GameScene modelScale={[1, 1, 1]} />}
+        <GameScene
+          gameState={gameState}
+          playerState={playerState}
+          setPlayerState={setPlayerState}
+          platforms={platforms}
+          setPlatforms={setPlatforms}
+          isKeyPressed={isKeyPressed}
+          onGameOver={handleGameOver}
+        />
       </Canvas>
 
-      {/* UI Overlay */}
-      {!gameStarted && (
-        <div
-          style={{
-            position: 'absolute',
-            inset: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            background: 'linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)',
-            zIndex: 10,
-          }}
-        >
-          <h1 style={{ fontSize: '3.5em', color: 'white', marginBottom: '20px', fontWeight: 'bold' }}>
-            🚗 DRIFT BOSS
-          </h1>
-          <p style={{ fontSize: '1.2em', color: '#cbd5e1', marginBottom: '40px', maxWidth: '500px', textAlign: 'center' }}>
-            Navigate the zigzag track. Hold SPACE to turn right. Release to turn left. Survive as long as you can!
-          </p>
-          <button
-            onClick={() => setGameStarted(true)}
-            style={{
-              padding: '18px 50px',
-              fontSize: '1.3em',
-              backgroundColor: '#22c55e',
-              color: 'white',
-              border: 'none',
-              borderRadius: '10px',
-              cursor: 'pointer',
-              fontWeight: 'bold',
-              transition: 'all 0.3s',
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.backgroundColor = '#16a34a';
-              e.currentTarget.style.transform = 'scale(1.08)';
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.backgroundColor = '#22c55e';
-              e.currentTarget.style.transform = 'scale(1)';
-            }}
-          >
-            START GAME
-          </button>
+      {/* IDLE State - Start Screen */}
+      {gameState === 'IDLE' && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-black/60 via-black/40 to-black/60 backdrop-blur-sm z-50">
+          <div className="text-center">
+            <h1 className="text-7xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 drop-shadow-lg">
+              🚗 DRIFT BOSS
+            </h1>
+            <p className="text-2xl font-bold text-cyan-300 mb-4 drop-shadow-lg">
+              Navigate the infinite zigzag track!
+            </p>
+            <div className="space-y-3 mb-12 text-lg font-semibold">
+              <p className="text-white/90 drop-shadow-md">
+                <span className="text-yellow-300">🎮 SPACEBAR/TOUCH</span> to turn right
+              </p>
+              <p className="text-white/90 drop-shadow-md">
+                <span className="text-yellow-300">RELEASE</span> to turn left
+              </p>
+              <p className="text-white/90 drop-shadow-md">
+                Survive as long as you can!
+              </p>
+            </div>
+            <button
+              onClick={handleStartGame}
+              className="px-12 py-4 text-2xl font-black text-white bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl hover:from-cyan-400 hover:to-blue-500 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-2xl drop-shadow-lg"
+            >
+              ▶ START GAME
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* PLAYING State - Score Display */}
+      {gameState === 'PLAYING' && (
+        <div className="absolute top-8 right-8 z-40 backdrop-blur-md bg-black/50 rounded-2xl px-8 py-4 border-2 border-cyan-400/50">
+          <div className="text-center">
+            <p className="text-cyan-300 text-sm font-semibold tracking-widest uppercase">SCORE</p>
+            <p className="text-white text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+              {playerState.score}
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* GAMEOVER State - Game Over Screen */}
+      {gameState === 'GAMEOVER' && (
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-black/80 via-black/70 to-black/80 backdrop-blur-md z-50">
+          <div className="text-center">
+            <h2 className="text-6xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-500 to-red-600 drop-shadow-lg">
+              GAME OVER
+            </h2>
+            <p className="text-3xl font-bold text-white mb-3 drop-shadow-md">Final Score</p>
+            <p className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400 mb-12 drop-shadow-lg">
+              {finalScore}
+            </p>
+            <button
+              onClick={handleRestart}
+              className="px-12 py-4 text-2xl font-black text-white bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl hover:from-green-400 hover:to-emerald-500 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-2xl drop-shadow-lg"
+            >
+              🔄 TRY AGAIN
+            </button>
+          </div>
         </div>
       )}
     </div>
