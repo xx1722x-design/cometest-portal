@@ -10,24 +10,30 @@ interface Platform {
   z: number;
   x: number;
   width: number;
+  depth: number;
 }
 
-interface PlayerState {
+interface Character {
+  id: number;
   position: THREE.Vector3;
   velocity: THREE.Vector3;
   onTrack: boolean;
-  score: number;
+  isDead: boolean;
 }
 
 const CharacterModel = ({
   position,
-  modelScale = [1.5, 1.5, 1.5],
+  characterId = 1,
+  modelScale = [0.8, 0.8, 0.8],
+  isDead = false,
 }: {
   position: THREE.Vector3;
+  characterId?: number;
   modelScale?: [number, number, number];
+  isDead?: boolean;
 }) => {
   try {
-    const { scene } = useGLTF('/3000charactors/1.glb') as any;
+    const { scene } = useGLTF(`/3000charactors/${characterId}.glb`) as any;
     const clonedScene = scene.clone();
 
     useEffect(() => {
@@ -40,15 +46,19 @@ const CharacterModel = ({
     }, [clonedScene]);
 
     return (
-      <group position={[position.x, position.y, position.z]} scale={modelScale}>
+      <group position={[position.x, position.y, position.z]} scale={modelScale} opacity={isDead ? 0.3 : 1}>
         <primitive object={clonedScene} />
       </group>
     );
   } catch (error) {
     return (
-      <mesh position={[position.x, position.y, position.z]} scale={modelScale} castShadow>
-        <boxGeometry args={[0.8, 1.2, 0.8]} />
-        <meshStandardMaterial color="#ff6b35" emissive="#ff8c42" emissiveIntensity={0.5} />
+      <mesh position={[position.x, position.y, position.z]} scale={modelScale} castShadow opacity={isDead ? 0.3 : 1}>
+        <boxGeometry args={[0.6, 1.0, 0.6]} />
+        <meshStandardMaterial
+          color={`hsl(${(characterId - 1) * 36}, 100%, 50%)`}
+          emissive={`hsl(${(characterId - 1) * 36}, 100%, 30%)`}
+          emissiveIntensity={0.4}
+        />
       </mesh>
     );
   }
@@ -56,20 +66,22 @@ const CharacterModel = ({
 
 const GameLogic = ({
   gameState,
-  playerState,
-  setPlayerState,
+  characters,
+  setCharacters,
   platforms,
   setPlatforms,
   isKeyPressed,
   onGameOver,
+  setScore,
 }: {
   gameState: GameState;
-  playerState: PlayerState;
-  setPlayerState: React.Dispatch<React.SetStateAction<PlayerState>>;
+  characters: Character[];
+  setCharacters: React.Dispatch<React.SetStateAction<Character[]>>;
   platforms: Platform[];
   setPlatforms: React.Dispatch<React.SetStateAction<Platform[]>>;
   isKeyPressed: { space: boolean };
   onGameOver: (score: number) => void;
+  setScore: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   const platformIdRef = useRef(0);
   const lastPlatformZRef = useRef(0);
@@ -78,65 +90,87 @@ const GameLogic = ({
   useFrame(() => {
     if (gameState !== 'PLAYING') return;
 
-    const moveSpeed = 0.1;
-    const gravity = 0.15;
-    const fallThreshold = -20;
+    const moveSpeed = 0.12;
+    const gravity = 0.18;
+    const fallThreshold = -30;
 
-    const targetX = isKeyPressed.space ? 2.5 : -2.5;
+    const targetX = isKeyPressed.space ? 1.8 : -1.8;
     targetXRef.current += (targetX - targetXRef.current) * moveSpeed;
 
-    const newPosition = playerState.position.clone();
-    newPosition.x = targetXRef.current;
-    newPosition.z += 0.4;
+    let aliveCount = 0;
+    const maxZ = Math.max(...characters.map(c => c.position.z));
 
-    let onTrack = false;
-    for (const platform of platforms) {
-      if (
-        Math.abs(newPosition.z - platform.z) < 1.2 &&
-        Math.abs(newPosition.x) < platform.width / 2 + 0.5
-      ) {
-        onTrack = true;
-        newPosition.y = platform.z + 1.5;
-        break;
-      }
-    }
+    setCharacters((prevChars) =>
+      prevChars.map((char) => {
+        if (char.isDead) {
+          return char;
+        }
 
-    let newVelocity = playerState.velocity.clone();
-    if (!onTrack) {
-      newVelocity.y -= gravity;
-      newPosition.y += newVelocity.y;
-    } else {
-      newVelocity.y = 0;
-    }
+        const newPosition = char.position.clone();
+        newPosition.x = targetXRef.current + (char.id % 3) * 0.8 - 0.8;
+        newPosition.z += 0.35;
 
-    if (newPosition.y < fallThreshold || Math.abs(newPosition.x) > 5) {
-      onGameOver(Math.floor(playerState.position.z / 4));
+        let onTrack = false;
+        for (const platform of platforms) {
+          if (
+            Math.abs(newPosition.z - platform.z) < platform.depth / 2 + 0.5 &&
+            Math.abs(newPosition.x - platform.x) < platform.width / 2 + 0.5
+          ) {
+            onTrack = true;
+            newPosition.y = platform.z + 1.2;
+            break;
+          }
+        }
+
+        let newVelocity = char.velocity.clone();
+        if (!onTrack) {
+          newVelocity.y -= gravity;
+          newPosition.y += newVelocity.y;
+        } else {
+          newVelocity.y = 0;
+        }
+
+        const isDead = newPosition.y < fallThreshold || Math.abs(newPosition.x) > 6;
+
+        if (!isDead) {
+          aliveCount++;
+        }
+
+        return {
+          ...char,
+          position: newPosition,
+          velocity: newVelocity,
+          onTrack,
+          isDead,
+        };
+      })
+    );
+
+    const aliveChars = characters.filter((c) => !c.isDead);
+    if (aliveChars.length === 0) {
+      const finalScore = Math.floor(maxZ / 3);
+      onGameOver(finalScore);
       return;
     }
 
-    if (newPosition.z > lastPlatformZRef.current - 5) {
+    setScore(Math.floor(maxZ / 3));
+
+    if (maxZ > lastPlatformZRef.current - 8) {
       const newPlatform: Platform = {
         id: platformIdRef.current++,
-        z: lastPlatformZRef.current + 4,
-        x: Math.random() > 0.5 ? 2.5 : -2.5,
-        width: 5,
+        z: lastPlatformZRef.current + 3,
+        x: Math.random() > 0.5 ? 1.5 : -1.5,
+        width: 3,
+        depth: 3,
       };
 
       setPlatforms((prev) => {
-        const updated = [...prev, newPlatform].filter((p) => p.z > newPosition.z - 15);
+        const updated = [...prev, newPlatform].filter((p) => p.z > maxZ - 20);
         return updated;
       });
 
-      lastPlatformZRef.current += 4;
+      lastPlatformZRef.current += 3;
     }
-
-    setPlayerState((prev) => ({
-      ...prev,
-      position: newPosition,
-      velocity: newVelocity,
-      onTrack,
-      score: Math.max(prev.score, Math.floor(newPosition.z / 4)),
-    }));
   });
 
   return null;
@@ -146,8 +180,13 @@ const PlatformRenderer = ({ platforms }: { platforms: Platform[] }) => {
   return (
     <>
       {platforms.map((platform) => (
-        <mesh key={platform.id} position={[platform.x, 0, platform.z]} castShadow receiveShadow>
-          <boxGeometry args={[platform.width, 0.5, 2.5]} />
+        <mesh
+          key={platform.id}
+          position={[platform.x, -0.5, platform.z]}
+          castShadow
+          receiveShadow
+        >
+          <boxGeometry args={[platform.width, 1, platform.depth]} />
           <meshStandardMaterial color="#ff6b35" metalness={0.3} roughness={0.7} />
         </mesh>
       ))}
@@ -157,27 +196,33 @@ const PlatformRenderer = ({ platforms }: { platforms: Platform[] }) => {
 
 const GameScene = ({
   gameState,
-  playerState,
-  setPlayerState,
+  characters,
+  setCharacters,
   platforms,
   setPlatforms,
   isKeyPressed,
   onGameOver,
+  setScore,
 }: {
   gameState: GameState;
-  playerState: PlayerState;
-  setPlayerState: React.Dispatch<React.SetStateAction<PlayerState>>;
+  characters: Character[];
+  setCharacters: React.Dispatch<React.SetStateAction<Character[]>>;
   platforms: Platform[];
   setPlatforms: React.Dispatch<React.SetStateAction<Platform[]>>;
   isKeyPressed: { space: boolean };
   onGameOver: (score: number) => void;
+  setScore: React.Dispatch<React.SetStateAction<number>>;
 }) => {
   const { camera } = useThree();
 
   useFrame(() => {
-    if (camera instanceof THREE.OrthographicCamera && gameState === 'PLAYING') {
-      camera.position.z = playerState.position.z + 18;
-      camera.updateProjectionMatrix();
+    if (gameState === 'PLAYING' && camera instanceof THREE.OrthographicCamera) {
+      const aliveChars = characters.filter((c) => !c.isDead);
+      if (aliveChars.length > 0) {
+        const avgZ = aliveChars.reduce((sum, c) => sum + c.position.z, 0) / aliveChars.length;
+        camera.position.z = avgZ + 25;
+        camera.updateProjectionMatrix();
+      }
     }
   });
 
@@ -185,36 +230,45 @@ const GameScene = ({
     <>
       <OrthographicCamera
         makeDefault
-        position={[10, 10, 10]}
-        zoom={20}
+        position={[0, 12, 25]}
+        zoom={18}
         near={0.1}
         far={1000}
         onUpdate={(camera) => camera.lookAt(0, 0, 0)}
       />
 
       <ambientLight intensity={1.2} color="#ffffff" />
-      <directionalLight position={[15, 15, 15]} intensity={1.5} castShadow color="#fff9e6" />
-      <directionalLight position={[-10, -5, -10]} intensity={0.6} color="#ffcc99" />
+      <directionalLight position={[20, 20, 20]} intensity={1.5} castShadow color="#fff9e6" />
+      <directionalLight position={[-15, -8, -15]} intensity={0.7} color="#ffcc99" />
 
-      <mesh position={[0, -3, 0]} receiveShadow>
-        <planeGeometry args={[50, 150]} />
+      <mesh position={[0, -1.5, 0]} receiveShadow>
+        <planeGeometry args={[60, 200]} />
         <meshStandardMaterial color="#ffa366" />
       </mesh>
 
       <Suspense fallback={null}>
-        <CharacterModel position={playerState.position} modelScale={[1.5, 1.5, 1.5]} />
+        {characters.map((char) => (
+          <CharacterModel
+            key={char.id}
+            position={char.position}
+            characterId={char.id}
+            modelScale={[0.8, 0.8, 0.8]}
+            isDead={char.isDead}
+          />
+        ))}
       </Suspense>
 
       <PlatformRenderer platforms={platforms} />
 
       <GameLogic
         gameState={gameState}
-        playerState={playerState}
-        setPlayerState={setPlayerState}
+        characters={characters}
+        setCharacters={setCharacters}
         platforms={platforms}
         setPlatforms={setPlatforms}
         isKeyPressed={isKeyPressed}
         onGameOver={onGameOver}
+        setScore={setScore}
       />
     </>
   );
@@ -222,19 +276,24 @@ const GameScene = ({
 
 export function DriftBossV2Safe() {
   const [gameState, setGameState] = useState<GameState>('IDLE');
-  const [playerState, setPlayerState] = useState<PlayerState>({
-    position: new THREE.Vector3(0, 5, 0),
-    velocity: new THREE.Vector3(0, 0, 0),
-    onTrack: true,
-    score: 0,
-  });
+  const [characters, setCharacters] = useState<Character[]>(
+    Array.from({ length: 10 }, (_, i) => ({
+      id: i + 1,
+      position: new THREE.Vector3((i % 3) * 0.8 - 0.8, 3, 0),
+      velocity: new THREE.Vector3(0, 0, 0),
+      onTrack: true,
+      isDead: false,
+    }))
+  );
   const [platforms, setPlatforms] = useState<Platform[]>([
-    { id: -1, z: -2, x: 0, width: 5 },
-    { id: 0, z: 2, x: 2.5, width: 5 },
-    { id: 1, z: 6, x: -2.5, width: 5 },
+    { id: -1, z: -3, x: 0, width: 5, depth: 5 },
+    { id: 0, z: 0, x: 1.5, width: 3, depth: 3 },
+    { id: 1, z: 3, x: -1.5, width: 3, depth: 3 },
   ]);
   const [isKeyPressed, setIsKeyPressed] = useState({ space: false });
+  const [score, setScore] = useState(0);
   const [finalScore, setFinalScore] = useState(0);
+  const aliveCount = characters.filter((c) => !c.isDead).length;
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -277,17 +336,21 @@ export function DriftBossV2Safe() {
   };
 
   const handleRestart = () => {
-    setPlayerState({
-      position: new THREE.Vector3(0, 5, 0),
-      velocity: new THREE.Vector3(0, 0, 0),
-      onTrack: true,
-      score: 0,
-    });
+    setCharacters(
+      Array.from({ length: 10 }, (_, i) => ({
+        id: i + 1,
+        position: new THREE.Vector3((i % 3) * 0.8 - 0.8, 3, 0),
+        velocity: new THREE.Vector3(0, 0, 0),
+        onTrack: true,
+        isDead: false,
+      }))
+    );
     setPlatforms([
-      { id: -1, z: -2, x: 0, width: 5 },
-      { id: 0, z: 2, x: 2.5, width: 5 },
-      { id: 1, z: 6, x: -2.5, width: 5 },
+      { id: -1, z: -3, x: 0, width: 5, depth: 5 },
+      { id: 0, z: 0, x: 1.5, width: 3, depth: 3 },
+      { id: 1, z: 3, x: -1.5, width: 3, depth: 3 },
     ]);
+    setScore(0);
     setGameState('PLAYING');
   };
 
@@ -299,12 +362,13 @@ export function DriftBossV2Safe() {
       >
         <GameScene
           gameState={gameState}
-          playerState={playerState}
-          setPlayerState={setPlayerState}
+          characters={characters}
+          setCharacters={setCharacters}
           platforms={platforms}
           setPlatforms={setPlatforms}
           isKeyPressed={isKeyPressed}
           onGameOver={handleGameOver}
+          setScore={setScore}
         />
       </Canvas>
 
@@ -312,58 +376,72 @@ export function DriftBossV2Safe() {
       {gameState === 'IDLE' && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-sm z-50">
           <div className="text-center">
-            <h1 className="text-8xl font-black mb-6 text-orange-600 drop-shadow-2xl" style={{ textShadow: '3px 3px 0px #fff, 6px 6px 0px rgba(0,0,0,0.2)' }}>
-              🚗 DRIFT BOSS
+            <h1
+              className="text-8xl font-black mb-6 text-orange-600 drop-shadow-2xl"
+              style={{ textShadow: '3px 3px 0px #fff, 6px 6px 0px rgba(0,0,0,0.2)' }}
+            >
+              🚗 SQUAD SURVIVOR
             </h1>
-            <p className="text-3xl font-bold text-orange-700 mb-4 drop-shadow-lg">
-              Navigate the infinite zigzag track!
+            <p className="text-3xl font-bold text-orange-700 mb-8 drop-shadow-lg">
+              Lead Your 10-Character Squad Through The Zigzag!
             </p>
             <div className="space-y-3 mb-12 text-lg font-bold">
               <p className="text-orange-900 drop-shadow-md">
-                <span className="text-red-600">🎮 SPACEBAR/TOUCH</span> to turn right
+                <span className="text-red-600">🎮 SPACEBAR/TOUCH</span> to dodge right
               </p>
               <p className="text-orange-900 drop-shadow-md">
-                <span className="text-red-600">RELEASE</span> to turn left
+                <span className="text-red-600">RELEASE</span> to dodge left
+              </p>
+              <p className="text-orange-900 drop-shadow-md">
+                Last squad member standing wins!
               </p>
             </div>
             <button
               onClick={handleStartGame}
               className="px-16 py-5 text-3xl font-black text-white bg-gradient-to-b from-red-500 to-red-600 rounded-2xl hover:from-red-400 hover:to-red-500 transition-all duration-200 transform hover:scale-110 active:scale-95 shadow-2xl drop-shadow-lg border-4 border-red-700"
             >
-              ▶ START GAME
+              ▶ START SQUAD CHALLENGE
             </button>
           </div>
         </div>
       )}
 
-      {/* PLAYING State - Score Display */}
+      {/* PLAYING State - Score & Squad Status */}
       {gameState === 'PLAYING' && (
-        <div className="absolute top-8 right-8 z-40 backdrop-blur-sm bg-white/80 rounded-3xl px-8 py-6 border-4 border-orange-500 shadow-lg">
-          <div className="text-center">
-            <p className="text-orange-600 text-sm font-black tracking-widest uppercase">SCORE</p>
-            <p className="text-orange-700 text-6xl font-black">
-              {playerState.score}
-            </p>
+        <>
+          <div className="absolute top-8 right-8 z-40 backdrop-blur-sm bg-white/80 rounded-3xl px-8 py-6 border-4 border-orange-500 shadow-lg">
+            <div className="text-center">
+              <p className="text-orange-600 text-sm font-black tracking-widest uppercase">Score</p>
+              <p className="text-orange-700 text-6xl font-black">{score}</p>
+            </div>
           </div>
-        </div>
+
+          <div className="absolute top-8 left-8 z-40 backdrop-blur-sm bg-white/80 rounded-3xl px-8 py-6 border-4 border-green-500 shadow-lg">
+            <div className="text-center">
+              <p className="text-green-600 text-sm font-black tracking-widest uppercase">Survivors</p>
+              <p className="text-green-700 text-5xl font-black">{aliveCount}/10</p>
+            </div>
+          </div>
+        </>
       )}
 
       {/* GAMEOVER State - Game Over Screen */}
       {gameState === 'GAMEOVER' && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-md z-50">
           <div className="text-center">
-            <h2 className="text-7xl font-black mb-6 text-red-600 drop-shadow-2xl" style={{ textShadow: '3px 3px 0px #fff, 6px 6px 0px rgba(0,0,0,0.3)' }}>
-              GAME OVER
+            <h2
+              className="text-7xl font-black mb-6 text-red-600 drop-shadow-2xl"
+              style={{ textShadow: '3px 3px 0px #fff, 6px 6px 0px rgba(0,0,0,0.3)' }}
+            >
+              SQUAD ELIMINATED
             </h2>
             <p className="text-2xl font-black text-orange-800 mb-4 drop-shadow-md">Final Score</p>
-            <p className="text-8xl font-black text-orange-600 mb-12 drop-shadow-lg">
-              {finalScore}
-            </p>
+            <p className="text-8xl font-black text-orange-600 mb-12 drop-shadow-lg">{finalScore}</p>
             <button
               onClick={handleRestart}
               className="px-16 py-5 text-3xl font-black text-white bg-gradient-to-b from-green-500 to-green-600 rounded-2xl hover:from-green-400 hover:to-green-500 transition-all duration-200 transform hover:scale-110 active:scale-95 shadow-2xl drop-shadow-lg border-4 border-green-700"
             >
-              🔄 TRY AGAIN
+              🔄 RESTART CHALLENGE
             </button>
           </div>
         </div>
