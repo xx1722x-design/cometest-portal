@@ -46,13 +46,13 @@ const CharacterModel = ({
     }, [clonedScene]);
 
     return (
-      <group position={[position.x, position.y, position.z]} scale={modelScale} opacity={isDead ? 0.3 : 1}>
+      <group position={[position.x, position.y, position.z]} scale={modelScale}>
         <primitive object={clonedScene} />
       </group>
     );
   } catch (error) {
     return (
-      <mesh position={[position.x, position.y, position.z]} scale={modelScale} castShadow opacity={isDead ? 0.3 : 1}>
+      <mesh position={[position.x, position.y, position.z]} scale={modelScale} castShadow>
         <boxGeometry args={[0.6, 1.0, 0.6]} />
         <meshStandardMaterial
           color={`hsl(${(characterId - 1) * 36}, 100%, 50%)`}
