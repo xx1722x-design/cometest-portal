@@ -242,14 +242,16 @@ function ClothMesh() {
 
   return (
     <mesh ref={meshRef} castShadow receiveShadow>
-      <meshStandardMaterial
+      <meshPhysicalMaterial
         color="#00ffff"
-        emissive="#0099ff"
-        emissiveIntensity={0.8}
-        metalness={0.6}
-        roughness={0.2}
+        emissive="#0088ff"
+        emissiveIntensity={1.5}
+        metalness={0.8}
+        roughness={0.15}
         side={THREE.DoubleSide}
         wireframe={false}
+        clearcoat={0.5}
+        clearcoatRoughness={0.2}
       />
     </mesh>
   )
@@ -283,18 +285,18 @@ function ClothPhysicsScene() {
       camera={{ position: [0, 5, 12], fov: 45 }}
       gl={{ antialias: true, alpha: false }}
     >
-      <ambientLight intensity={0.8} />
-      <directionalLight position={[15, 25, 15]} intensity={2.5} castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} />
-      <pointLight position={[10, 8, 10]} intensity={1.5} color="#00ffff" />
-      <pointLight position={[-10, 8, -10]} intensity={1.5} color="#ff00ff" />
-      <pointLight position={[0, 8, 15]} intensity={1.2} color="#00ff88" />
+      <ambientLight intensity={1.0} />
+      <directionalLight position={[-8, 15, 10]} intensity={3.0} castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} />
+      <pointLight position={[-6, 6, 8]} intensity={2.0} color="#00ffff" />
+      <pointLight position={[6, 6, 8]} intensity={2.0} color="#ff00ff" />
+      <pointLight position={[0, 4, 12]} intensity={1.8} color="#00ff88" />
 
       <ClothMesh />
       <Sphere />
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, -5, 0]} receiveShadow>
         <planeGeometry args={[30, 30]} />
-        <meshStandardMaterial color="#0f172a" metalness={0.1} roughness={0.9} />
+        <meshStandardMaterial color="#1a2a4a" metalness={0.3} roughness={0.6} emissive="#001a33" emissiveIntensity={0.2} />
       </mesh>
 
       <OrbitControls autoRotate autoRotateSpeed={0.5} enableZoom enablePan />
