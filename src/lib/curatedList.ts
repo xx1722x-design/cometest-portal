@@ -76,7 +76,21 @@ export function calculateCuratedScore(item: ContentItemUnion, userTagWeights: Ma
 export function curateItems(items: ContentItemUnion[]): ContentItemUnion[] {
   const userTagWeights = getUserTagPreferences()
 
+  // Sort by: user preferences (tag bonus) → play_count (popularity)
+  // Items in array position 0-4 get priority boost (newly added items)
   return [...items].sort((a, b) => {
+    const aIndex = items.indexOf(a)
+    const bIndex = items.indexOf(b)
+
+    // Priority boost for top items (newly added)
+    const aIsTopItem = aIndex < 5
+    const bIsTopItem = bIndex < 5
+
+    if (aIsTopItem !== bIsTopItem) {
+      return aIsTopItem ? -1 : 1
+    }
+
+    // Then sort by tag preferences + play count
     const scoreA = calculateCuratedScore(a, userTagWeights)
     const scoreB = calculateCuratedScore(b, userTagWeights)
     return scoreB - scoreA
