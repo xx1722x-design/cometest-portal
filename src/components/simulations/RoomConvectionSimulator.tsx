@@ -1,26 +1,218 @@
 import { useEffect, useRef, useState } from 'react'
-import { Canvas, useFrame } from '@react-three/fiber'
-import { OrthographicCamera } from '@react-three/drei'
 import { useTranslation } from 'react-i18next'
-import * as THREE from 'three'
 
-const NUM_PARTICLES = 180
-const ROOM_WIDTH = 14
-const ROOM_HEIGHT = 10
-const ROOM_DEPTH = 10
-const PARTICLE_RADIUS = 0.3
+interface Particle {
+  x: number
+  y: number
+  vx: number
+  vy: number
+  temperature: number
+  radius: number
+}
 
 export function RoomConvectionSimulator() {
   const { t } = useTranslation()
+  const canvasRef = useRef<HTMLCanvasElement>(null)
   const [isRunning, setIsRunning] = useState(true)
   const [acOn, setAcOn] = useState(false)
   const [heaterOn, setHeaterOn] = useState(false)
+  const particlesRef = useRef<Particle[]>([])
+  const animationRef = useRef<number | null>(null)
+
+  // Initialize particles
+  useEffect(() => {
+    const particles: Particle[] = []
+    for (let i = 0; i < 150; i++) {
+      particles.push({
+        x: Math.random() * 800 + 100,
+        y: Math.random() * 600 + 50,
+        vx: (Math.random() - 0.5) * 2,
+        vy: (Math.random() - 0.5) * 2,
+        temperature: 20 + Math.random() * 30,
+        radius: 8,
+      })
+    }
+    particlesRef.current = particles
+  }, [])
+
+  // Animation loop
+  useEffect(() => {
+    const canvas = canvasRef.current
+    if (!canvas) return
+
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    const acX = 150
+    const acY = 100
+    const acRadius = 80
+
+    const heaterX = 850
+    const heaterY = 650
+    const heaterRadius = 100
+
+    const animate = () => {
+      // Clear canvas
+      ctx.fillStyle = '#0a0a1a'
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+      // Draw room border
+      ctx.strokeStyle = '#ff8c42'
+      ctx.lineWidth = 3
+      ctx.strokeRect(80, 50, 800, 600)
+
+      // Draw back wall (warm peach)
+      ctx.fillStyle = '#ffdb99'
+      ctx.fillRect(80, 50, 800, 30)
+      ctx.fillStyle = '#ffcc77'
+      ctx.font = '12px Arial'
+      ctx.fillText('Back Wall', 400, 70)
+
+      // Draw floor (darker tone)
+      ctx.fillStyle = '#dd9966'
+      ctx.fillRect(80, 620, 800, 30)
+
+      // Draw AC (top-left)
+      if (acOn) {
+        ctx.fillStyle = '#4a9eff'
+        ctx.shadowColor = '#2577ff'
+        ctx.shadowBlur = 15
+        ctx.fillRect(130, 40, 60, 30)
+        ctx.shadowBlur = 0
+        ctx.fillStyle = '#fff'
+        ctx.font = 'bold 12px Arial'
+        ctx.fillText('AC', 155, 58)
+      } else {
+        ctx.fillStyle = '#3a4a5a'
+        ctx.fillRect(130, 40, 60, 30)
+        ctx.fillStyle = '#666'
+        ctx.font = 'bold 12px Arial'
+        ctx.fillText('AC', 155, 58)
+      }
+
+      // Draw Heater (bottom-right)
+      if (heaterOn) {
+        ctx.fillStyle = '#ff6b35'
+        ctx.shadowColor = '#ff4422'
+        ctx.shadowBlur = 15
+        ctx.fillRect(810, 640, 60, 30)
+        ctx.shadowBlur = 0
+        ctx.fillStyle = '#fff'
+        ctx.font = 'bold 12px Arial'
+        ctx.fillText('Heat', 825, 658)
+      } else {
+        ctx.fillStyle = '#6a3a2a'
+        ctx.fillRect(810, 640, 60, 30)
+        ctx.fillStyle = '#666'
+        ctx.font = 'bold 12px Arial'
+        ctx.fillText('Heat', 825, 658)
+      }
+
+      if (isRunning) {
+        const particles = particlesRef.current
+
+        particles.forEach((particle) => {
+          // AC cooling effect
+          if (acOn) {
+            const distToAC = Math.hypot(particle.x - acX, particle.y - acY)
+            if (distToAC < acRadius) {
+              particle.temperature = Math.max(10, particle.temperature - 0.3)
+              particle.vy += 1.5 // Push down
+            }
+          }
+
+          // Heater heating effect
+          if (heaterOn) {
+            const distToHeater = Math.hypot(particle.x - heaterX, particle.y - heaterY)
+            if (distToHeater < heaterRadius) {
+              particle.temperature = Math.min(80, particle.temperature + 0.4)
+              particle.vy -= 2 // Push up
+            }
+          }
+
+          // Convection: hot particles rise, cold particles sink
+          const tempInfluence = (particle.temperature - 30) / 50
+          particle.vy -= tempInfluence * 0.5
+
+          // Add slight random motion
+          particle.vx += (Math.random() - 0.5) * 0.4
+          particle.vy += (Math.random() - 0.5) * 0.2
+
+          // Damping
+          particle.vx *= 0.98
+          particle.vy *= 0.98
+
+          // Update position
+          particle.x += particle.vx
+          particle.y += particle.vy
+
+          // Boundary collision
+          if (particle.x - particle.radius < 80) {
+            particle.x = 80 + particle.radius
+            particle.vx *= -0.8
+          }
+          if (particle.x + particle.radius > 880) {
+            particle.x = 880 - particle.radius
+            particle.vx *= -0.8
+          }
+          if (particle.y - particle.radius < 50) {
+            particle.y = 50 + particle.radius
+            particle.vy *= -0.8
+          }
+          if (particle.y + particle.radius > 650) {
+            particle.y = 650 - particle.radius
+            particle.vy *= -0.8
+          }
+        })
+
+        // Draw particles
+        particles.forEach((particle) => {
+          let color: string
+          if (particle.temperature < 20) {
+            color = '#4a9eff' // Blue (cold)
+          } else if (particle.temperature > 50) {
+            color = '#ff4444' // Red (hot)
+          } else {
+            color = '#9966ff' // Purple (room temp)
+          }
+
+          ctx.fillStyle = color
+          ctx.shadowColor = color
+          ctx.shadowBlur = 8
+          ctx.beginPath()
+          ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2)
+          ctx.fill()
+          ctx.shadowBlur = 0
+        })
+      }
+
+      animationRef.current = requestAnimationFrame(animate)
+    }
+
+    animate()
+
+    return () => {
+      if (animationRef.current) cancelAnimationFrame(animationRef.current)
+    }
+  }, [isRunning, acOn, heaterOn])
 
   return (
-    <div style={{ width: '100vw', height: '100vh', position: 'fixed', top: 0, left: 0, backgroundColor: '#0a0a1a', overflow: 'hidden' }}>
-      <Canvas camera={{ position: [0, 0, 0], zoom: 1 }} orthographic={false} style={{ width: '100%', height: '100%', display: 'block' }}>
-        <RoomConvectionContent isRunning={isRunning} acOn={acOn} heaterOn={heaterOn} />
-      </Canvas>
+    <div style={{ width: '100vw', height: '100vh', position: 'relative', backgroundColor: '#0a0a1a', overflow: 'hidden' }}>
+      <canvas
+        ref={canvasRef}
+        width={1000}
+        height={750}
+        style={{
+          display: 'block',
+          position: 'absolute',
+          top: '50%',
+          left: '50%',
+          transform: 'translate(-50%, -50%)',
+          border: '2px solid #ff8c42',
+          borderRadius: '8px',
+          boxShadow: '0 0 30px rgba(255, 140, 66, 0.3)',
+        }}
+      />
 
       {/* Top-Left Info Panel */}
       <div
@@ -191,216 +383,5 @@ export function RoomConvectionSimulator() {
         ← Back
       </button>
     </div>
-  )
-}
-
-function RoomConvectionContent({
-  isRunning,
-  acOn,
-  heaterOn,
-}: {
-  isRunning: boolean
-  acOn: boolean
-  heaterOn: boolean
-}) {
-  const particlesRef = useRef<any[]>([])
-  const groupsRef = useRef<THREE.Group[]>([])
-  const timeRef = useRef(0)
-
-  // Initialize particles
-  useEffect(() => {
-    const particles: any[] = []
-    for (let i = 0; i < NUM_PARTICLES; i++) {
-      particles.push({
-        position: new THREE.Vector3(
-          (Math.random() - 0.5) * (ROOM_WIDTH * 0.95),
-          (Math.random() - 0.5) * (ROOM_HEIGHT * 0.95),
-          (Math.random() - 0.5) * (ROOM_DEPTH * 0.95)
-        ),
-        velocity: new THREE.Vector3(
-          (Math.random() - 0.5) * 0.5,
-          (Math.random() - 0.5) * 0.5,
-          (Math.random() - 0.5) * 0.5
-        ),
-        temperature: 20 + Math.random() * 20,
-        isAffectedByAC: false,
-        isAffectedByHeater: false,
-      })
-    }
-    particlesRef.current = particles
-  }, [])
-
-  useFrame((_state, deltaTime) => {
-    if (!isRunning) return
-
-    const particles = particlesRef.current
-    const acPos = new THREE.Vector3(-ROOM_WIDTH / 2 + 0.5, ROOM_HEIGHT / 2 - 0.5, 0)
-    const heaterPos = new THREE.Vector3(ROOM_WIDTH / 2 - 1, -ROOM_HEIGHT / 2 + 0.5, 0)
-    const acRadius = 2
-    const heaterRadius = 2.5
-
-    timeRef.current += deltaTime
-
-    particles.forEach((particle) => {
-      // AC cooling effect
-      if (acOn) {
-        const distToAC = particle.position.distanceTo(acPos)
-        if (distToAC < acRadius) {
-          particle.temperature = Math.max(10, particle.temperature - deltaTime * 15)
-          particle.isAffectedByAC = true
-          // Push particles downward
-          particle.velocity.y -= deltaTime * 0.8
-        } else {
-          particle.isAffectedByAC = false
-        }
-      }
-
-      // Heater heating effect
-      if (heaterOn) {
-        const distToHeater = particle.position.distanceTo(heaterPos)
-        if (distToHeater < heaterRadius) {
-          particle.temperature = Math.min(80, particle.temperature + deltaTime * 20)
-          particle.isAffectedByHeater = true
-          // Push particles upward
-          particle.velocity.y += deltaTime * 1.0
-        } else {
-          particle.isAffectedByHeater = false
-        }
-      }
-
-      // Convection: hot particles rise, cold particles sink
-      const tempInfluence = (particle.temperature - 30) / 50
-      particle.velocity.y += tempInfluence * deltaTime * 0.3
-
-      // Random motion (Brownian motion)
-      particle.velocity.x += (Math.random() - 0.5) * deltaTime * 0.2
-      particle.velocity.y += (Math.random() - 0.5) * deltaTime * 0.1
-      particle.velocity.z += (Math.random() - 0.5) * deltaTime * 0.2
-
-      // Damping
-      particle.velocity.x *= 0.99
-      particle.velocity.y *= 0.99
-      particle.velocity.z *= 0.99
-
-      // Update position
-      particle.position.add(particle.velocity.clone().multiplyScalar(deltaTime))
-
-      // Boundary checks with bounce
-      const bounceDistance = {
-        x: ROOM_WIDTH / 2 - PARTICLE_RADIUS,
-        y: ROOM_HEIGHT / 2 - PARTICLE_RADIUS,
-        z: ROOM_DEPTH / 2 - PARTICLE_RADIUS,
-      }
-
-      if (Math.abs(particle.position.x) > bounceDistance.x) {
-        particle.position.x = Math.sign(particle.position.x) * bounceDistance.x
-        particle.velocity.x *= -0.8
-      }
-      if (Math.abs(particle.position.y) > bounceDistance.y) {
-        particle.position.y = Math.sign(particle.position.y) * bounceDistance.y
-        particle.velocity.y *= -0.8
-      }
-      if (Math.abs(particle.position.z) > bounceDistance.z) {
-        particle.position.z = Math.sign(particle.position.z) * bounceDistance.z
-        particle.velocity.z *= -0.8
-      }
-
-      // Update group position
-      const groupIdx = particlesRef.current.indexOf(particle)
-      if (groupsRef.current[groupIdx]) {
-        groupsRef.current[groupIdx].position.copy(particle.position)
-      }
-    })
-  })
-
-  const getParticleColor = (temperature: number) => {
-    if (temperature < 15) return 0x4a9eff // Blue (cold)
-    if (temperature > 50) return 0xff4444 // Red (hot)
-    return 0x9966ff // Purple (room temp)
-  }
-
-  return (
-    <>
-      {/* Lighting */}
-      <ambientLight intensity={0.8} />
-      <pointLight position={[15, 15, 15]} intensity={1.2} color={0xffffff} />
-      <pointLight position={[-12, -10, -8]} intensity={0.8} color={0x4a9eff} />
-
-      {/* Orthographic Camera for 2.9D isometric view */}
-      <OrthographicCamera makeDefault position={[20, 12, 20]} zoom={85} near={0.1} far={1000} onUpdate={(cam) => cam.lookAt(0, 0, 0)} />
-
-      {/* Room Container (wireframe box) */}
-      <mesh>
-        <boxGeometry args={[ROOM_WIDTH, ROOM_HEIGHT, ROOM_DEPTH]} />
-        <meshPhysicalMaterial transparent opacity={0.06} color={0xff8c42} metalness={0.1} roughness={0.8} />
-      </mesh>
-
-      {/* Room edges */}
-      <lineSegments>
-        <edgesGeometry attach="geometry" args={[new THREE.BoxGeometry(ROOM_WIDTH, ROOM_HEIGHT, ROOM_DEPTH)]} />
-        <lineBasicMaterial attach="material" color={0xff8c42} linewidth={1.5} />
-      </lineSegments>
-
-      {/* Back Wall (warm peach/cream) */}
-      <mesh position={[0, 0, -ROOM_DEPTH / 2]} scale={[ROOM_WIDTH, ROOM_HEIGHT, 0.1]}>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshPhongMaterial color={0xffdb99} emissive={0xffcc77} emissiveIntensity={0.2} />
-      </mesh>
-
-      {/* Floor (darker tone) */}
-      <mesh position={[0, -ROOM_HEIGHT / 2, 0]} scale={[ROOM_WIDTH, 0.1, ROOM_DEPTH]} rotation={[0, 0, 0]}>
-        <boxGeometry args={[1, 1, 1]} />
-        <meshPhongMaterial color={0xdd9966} emissive={0xcc8855} emissiveIntensity={0.15} />
-      </mesh>
-
-      {/* Air Conditioner (top-left wall) */}
-      {acOn && (
-        <mesh position={[-ROOM_WIDTH / 2 + 0.3, ROOM_HEIGHT / 2 - 1, 0]}>
-          <boxGeometry args={[1.2, 0.6, 0.3]} />
-          <meshPhongMaterial color={0x4a9eff} emissive={0x2577ff} emissiveIntensity={1} />
-        </mesh>
-      )}
-      {!acOn && (
-        <mesh position={[-ROOM_WIDTH / 2 + 0.3, ROOM_HEIGHT / 2 - 1, 0]}>
-          <boxGeometry args={[1.2, 0.6, 0.3]} />
-          <meshPhongMaterial color={0x3a4a5a} />
-        </mesh>
-      )}
-
-      {/* Heater (bottom-right floor) */}
-      {heaterOn && (
-        <mesh position={[ROOM_WIDTH / 2 - 1, -ROOM_HEIGHT / 2 + 0.5, 0]}>
-          <boxGeometry args={[1, 0.8, 1]} />
-          <meshPhongMaterial color={0xff6b35} emissive={0xff4422} emissiveIntensity={1.2} />
-        </mesh>
-      )}
-      {!heaterOn && (
-        <mesh position={[ROOM_WIDTH / 2 - 1, -ROOM_HEIGHT / 2 + 0.5, 0]}>
-          <boxGeometry args={[1, 0.8, 1]} />
-          <meshPhongMaterial color={0x6a3a2a} />
-        </mesh>
-      )}
-
-      {/* Particles */}
-      {particlesRef.current.map((particle, idx) => (
-        <group
-          key={idx}
-          ref={(el) => {
-            if (el) groupsRef.current[idx] = el
-          }}
-          position={[particle.position.x, particle.position.y, particle.position.z]}
-        >
-          <mesh>
-            <sphereGeometry args={[PARTICLE_RADIUS, 8, 8]} />
-            <meshPhongMaterial
-              color={getParticleColor(particle.temperature)}
-              emissive={getParticleColor(particle.temperature)}
-              emissiveIntensity={0.4}
-              shininess={100}
-            />
-          </mesh>
-        </group>
-      ))}
-    </>
   )
 }
