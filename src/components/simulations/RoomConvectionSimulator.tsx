@@ -5,10 +5,10 @@ import { useTranslation } from 'react-i18next'
 import * as THREE from 'three'
 
 const NUM_PARTICLES = 180
-const ROOM_WIDTH = 16
-const ROOM_HEIGHT = 12
+const ROOM_WIDTH = 14
+const ROOM_HEIGHT = 10
 const ROOM_DEPTH = 10
-const PARTICLE_RADIUS = 0.25
+const PARTICLE_RADIUS = 0.3
 
 export function RoomConvectionSimulator() {
   const { t } = useTranslation()
@@ -213,9 +213,9 @@ function RoomConvectionContent({
     for (let i = 0; i < NUM_PARTICLES; i++) {
       particles.push({
         position: new THREE.Vector3(
-          (Math.random() - 0.5) * ROOM_WIDTH,
-          (Math.random() - 0.5) * ROOM_HEIGHT,
-          (Math.random() - 0.5) * ROOM_DEPTH
+          (Math.random() - 0.5) * (ROOM_WIDTH * 0.95),
+          (Math.random() - 0.5) * (ROOM_HEIGHT * 0.95),
+          (Math.random() - 0.5) * (ROOM_DEPTH * 0.95)
         ),
         velocity: new THREE.Vector3(
           (Math.random() - 0.5) * 0.5,
@@ -327,7 +327,7 @@ function RoomConvectionContent({
       <pointLight position={[-12, -10, -8]} intensity={0.8} color={0x4a9eff} />
 
       {/* Orthographic Camera for 2.9D isometric view */}
-      <OrthographicCamera makeDefault position={[20, 12, 20]} zoom={2} near={0.1} far={1000} onUpdate={(cam) => cam.lookAt(0, 0, 0)} />
+      <OrthographicCamera makeDefault position={[20, 12, 20]} zoom={85} near={0.1} far={1000} onUpdate={(cam) => cam.lookAt(0, 0, 0)} />
 
       {/* Room Container (wireframe box) */}
       <mesh>
