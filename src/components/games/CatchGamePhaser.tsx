@@ -77,28 +77,32 @@ export function CatchGamePhaser() {
         })
       }
 
-      spawnFruit() {
+      spawnFruit = () => {
         if (this.gameOverFlag) return
 
-        const x = Phaser.Math.Between(50, 750)
-        const colors = ['#ef4444', '#f59e0b', '#10b981', '#60a5fa', '#a855f7']
-        const color = Phaser.Utils.Array.GetRandom(colors)
-        const textureKey = `fruit_${Date.now()}_${Math.random()}`
+        try {
+          const x = Phaser.Math.Between(50, 750)
+          const colors = ['#ef4444', '#f59e0b', '#10b981', '#60a5fa', '#a855f7']
+          const color = Phaser.Utils.Array.GetRandom(colors)
+          const textureKey = `fruit_${Date.now()}_${Math.random()}`
 
-        // Create fruit texture
-        const fruitCanvas = this.textures.createCanvas(textureKey, 16, 16)
-        const ctx = fruitCanvas?.getContext()
-        if (ctx) {
-          ctx.fillStyle = color
-          ctx.beginPath()
-          ctx.arc(8, 8, 8, 0, Math.PI * 2)
-          ctx.fill()
+          // Create fruit texture
+          const fruitCanvas = this.textures.createCanvas(textureKey, 16, 16)
+          const ctx = fruitCanvas?.getContext()
+          if (ctx) {
+            ctx.fillStyle = color
+            ctx.beginPath()
+            ctx.arc(8, 8, 8, 0, Math.PI * 2)
+            ctx.fill()
+          }
+          fruitCanvas?.refresh()
+
+          const fruit = this.fruits.create(x, -20, textureKey) as Phaser.Physics.Arcade.Sprite
+          fruit.setVelocityY(Phaser.Math.Between(150, 250))
+          fruit.setVelocityX(Phaser.Math.Between(-50, 50))
+        } catch (e) {
+          console.error('Error spawning fruit:', e)
         }
-        fruitCanvas?.refresh()
-
-        const fruit = this.fruits.create(x, -20, textureKey) as Phaser.Physics.Arcade.Sprite
-        fruit.setVelocityY(Phaser.Math.Between(150, 250))
-        fruit.setVelocityX(Phaser.Math.Between(-50, 50))
       }
 
       collectFruit(basket: any, fruit: any) {
