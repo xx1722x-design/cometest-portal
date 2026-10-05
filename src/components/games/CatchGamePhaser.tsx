@@ -66,10 +66,10 @@ export function CatchGamePhaser() {
       update() {
         if (this.gameOverFlag) return
 
-        // Check for fallen fruits
-        const entries = (this.fruits.children as any).entries || []
-        entries.forEach((fruit: any) => {
-          if (fruit.y > 650) {
+        // Check for fallen fruits - safely iterate through children
+        const childrenArray = Array.from(this.fruits.children)
+        childrenArray.forEach((fruit: any) => {
+          if (fruit?.y > 650) {
             this.gameOverFlag = true
             this.physics.pause()
             setGameOver(true)
