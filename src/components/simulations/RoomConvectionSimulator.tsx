@@ -19,23 +19,23 @@ export function RoomConvectionSimulator() {
   const particlesRef = useRef<Particle[]>([])
   const animationRef = useRef<number | null>(null)
 
-  // Initialize particles
+  // Initialize particles with high density
   useEffect(() => {
     const particles: Particle[] = []
-    for (let i = 0; i < 150; i++) {
+    for (let i = 0; i < 200; i++) {
       particles.push({
-        x: Math.random() * 800 + 100,
-        y: Math.random() * 600 + 50,
-        vx: (Math.random() - 0.5) * 2,
-        vy: (Math.random() - 0.5) * 2,
-        temperature: 20 + Math.random() * 30,
-        radius: 8,
+        x: Math.random() * 600 + 200,
+        y: Math.random() * 450 + 125,
+        vx: (Math.random() - 0.5) * 1,
+        vy: (Math.random() - 0.5) * 1,
+        temperature: 30 + Math.random() * 20,
+        radius: 5,
       })
     }
     particlesRef.current = particles
   }, [])
 
-  // Animation loop
+  // Animation loop with proper convection circulation
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -43,147 +43,178 @@ export function RoomConvectionSimulator() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const acX = 150
-    const acY = 100
-    const acRadius = 80
+    const roomLeft = 200
+    const roomRight = 800
+    const roomTop = 125
+    const roomBottom = 575
+    const roomWidth = roomRight - roomLeft
+    const roomHeight = roomBottom - roomTop
+    const centerX = (roomLeft + roomRight) / 2
+    const centerY = (roomTop + roomBottom) / 2
 
-    const heaterX = 850
-    const heaterY = 650
-    const heaterRadius = 100
+    // AC position: top-left
+    const acX = roomLeft + 60
+    const acY = roomTop + 40
+    const acRadius = 70
+
+    // Heater position: bottom-right
+    const heaterX = roomRight - 60
+    const heaterY = roomBottom - 40
+    const heaterRadius = 80
 
     const animate = () => {
-      // Clear canvas
+      // Clear canvas with dark background
       ctx.fillStyle = '#0a0a1a'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
-
-      // Draw room border
-      ctx.strokeStyle = '#ff8c42'
-      ctx.lineWidth = 3
-      ctx.strokeRect(80, 50, 800, 600)
-
-      // Draw back wall (warm peach)
-      ctx.fillStyle = '#ffdb99'
-      ctx.fillRect(80, 50, 800, 30)
-      ctx.fillStyle = '#ffcc77'
-      ctx.font = '12px Arial'
-      ctx.fillText('Back Wall', 400, 70)
-
-      // Draw floor (darker tone)
-      ctx.fillStyle = '#dd9966'
-      ctx.fillRect(80, 620, 800, 30)
-
-      // Draw AC (top-left)
-      if (acOn) {
-        ctx.fillStyle = '#4a9eff'
-        ctx.shadowColor = '#2577ff'
-        ctx.shadowBlur = 15
-        ctx.fillRect(130, 40, 60, 30)
-        ctx.shadowBlur = 0
-        ctx.fillStyle = '#fff'
-        ctx.font = 'bold 12px Arial'
-        ctx.fillText('AC', 155, 58)
-      } else {
-        ctx.fillStyle = '#3a4a5a'
-        ctx.fillRect(130, 40, 60, 30)
-        ctx.fillStyle = '#666'
-        ctx.font = 'bold 12px Arial'
-        ctx.fillText('AC', 155, 58)
-      }
-
-      // Draw Heater (bottom-right)
-      if (heaterOn) {
-        ctx.fillStyle = '#ff6b35'
-        ctx.shadowColor = '#ff4422'
-        ctx.shadowBlur = 15
-        ctx.fillRect(810, 640, 60, 30)
-        ctx.shadowBlur = 0
-        ctx.fillStyle = '#fff'
-        ctx.font = 'bold 12px Arial'
-        ctx.fillText('Heat', 825, 658)
-      } else {
-        ctx.fillStyle = '#6a3a2a'
-        ctx.fillRect(810, 640, 60, 30)
-        ctx.fillStyle = '#666'
-        ctx.font = 'bold 12px Arial'
-        ctx.fillText('Heat', 825, 658)
-      }
 
       if (isRunning) {
         const particles = particlesRef.current
 
         particles.forEach((particle) => {
-          // AC cooling effect
-          if (acOn) {
-            const distToAC = Math.hypot(particle.x - acX, particle.y - acY)
-            if (distToAC < acRadius) {
-              particle.temperature = Math.max(10, particle.temperature - 0.3)
-              particle.vy += 1.5 // Push down
-            }
+          // Calculate distance from AC and Heater
+          const distToAC = Math.hypot(particle.x - acX, particle.y - acY)
+          const distToHeater = Math.hypot(particle.x - heaterX, particle.y - heaterY)
+
+          // AC cooling and downward push
+          if (acOn && distToAC < acRadius) {
+            particle.temperature = Math.max(15, particle.temperature - 0.5)
+            const forceStrength = (1 - distToAC / acRadius) * 2
+            particle.vy += forceStrength * 1.5 // Push DOWN
           }
 
-          // Heater heating effect
-          if (heaterOn) {
-            const distToHeater = Math.hypot(particle.x - heaterX, particle.y - heaterY)
-            if (distToHeater < heaterRadius) {
-              particle.temperature = Math.min(80, particle.temperature + 0.4)
-              particle.vy -= 2 // Push up
-            }
+          // Heater heating and upward push
+          if (heaterOn && distToHeater < heaterRadius) {
+            particle.temperature = Math.min(75, particle.temperature + 0.6)
+            const forceStrength = (1 - distToHeater / heaterRadius) * 2.5
+            particle.vy -= forceStrength * 2 // Push UP
           }
 
-          // Convection: hot particles rise, cold particles sink
-          const tempInfluence = (particle.temperature - 30) / 50
-          particle.vy -= tempInfluence * 0.5
+          // Natural convection: hot air rises, cold air sinks
+          const naturalConvection = (particle.temperature - 35) / 40
+          particle.vy -= naturalConvection * 0.8
 
-          // Add slight random motion
-          particle.vx += (Math.random() - 0.5) * 0.4
+          // Circulation loop: create a circular vector field
+          const dx = particle.x - centerX
+          const dy = particle.y - centerY
+          const dist = Math.hypot(dx, dy)
+          if (dist > 0) {
+            // Perpendicular vector (for circular motion)
+            const perpX = -dy / dist
+            const perpY = dx / dist
+
+            // Clockwise circulation (from user perspective)
+            const circulationStrength = 0.3
+            particle.vx += perpX * circulationStrength
+            particle.vy += perpY * circulationStrength * 0.5
+          }
+
+          // Temperature-based color creates natural buoyancy zones
+          if (particle.temperature < 25) {
+            particle.vy += 0.2 // Cold sink naturally
+          } else if (particle.temperature > 50) {
+            particle.vy -= 0.3 // Hot rise naturally
+          }
+
+          // Brownian motion for realism
+          particle.vx += (Math.random() - 0.5) * 0.3
           particle.vy += (Math.random() - 0.5) * 0.2
 
           // Damping
-          particle.vx *= 0.98
-          particle.vy *= 0.98
+          particle.vx *= 0.97
+          particle.vy *= 0.97
 
           // Update position
           particle.x += particle.vx
           particle.y += particle.vy
 
-          // Boundary collision
-          if (particle.x - particle.radius < 80) {
-            particle.x = 80 + particle.radius
-            particle.vx *= -0.8
+          // Boundary collision with damping
+          const margin = particle.radius + 5
+          if (particle.x - margin < roomLeft) {
+            particle.x = roomLeft + margin
+            particle.vx *= -0.85
           }
-          if (particle.x + particle.radius > 880) {
-            particle.x = 880 - particle.radius
-            particle.vx *= -0.8
+          if (particle.x + margin > roomRight) {
+            particle.x = roomRight - margin
+            particle.vx *= -0.85
           }
-          if (particle.y - particle.radius < 50) {
-            particle.y = 50 + particle.radius
-            particle.vy *= -0.8
+          if (particle.y - margin < roomTop) {
+            particle.y = roomTop + margin
+            particle.vy *= -0.85
           }
-          if (particle.y + particle.radius > 650) {
-            particle.y = 650 - particle.radius
-            particle.vy *= -0.8
+          if (particle.y + margin > roomBottom) {
+            particle.y = roomBottom - margin
+            particle.vy *= -0.85
           }
         })
 
-        // Draw particles
+        // Draw particles with proper temperature colors
         particles.forEach((particle) => {
           let color: string
           if (particle.temperature < 20) {
-            color = '#4a9eff' // Blue (cold)
-          } else if (particle.temperature > 50) {
-            color = '#ff4444' // Red (hot)
+            color = '#4a9eff' // Cold blue
+          } else if (particle.temperature < 35) {
+            color = '#9966ff' // Cool purple
+          } else if (particle.temperature < 50) {
+            color = '#ffcc66' // Warm yellow
           } else {
-            color = '#9966ff' // Purple (room temp)
+            color = '#ff4444' // Hot red
           }
 
           ctx.fillStyle = color
-          ctx.shadowColor = color
-          ctx.shadowBlur = 8
+          ctx.globalAlpha = 0.85
           ctx.beginPath()
           ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2)
           ctx.fill()
-          ctx.shadowBlur = 0
+          ctx.globalAlpha = 1
         })
+      }
+
+      // Draw room wireframe (non-overlapping clean frame)
+      ctx.strokeStyle = '#ff8c42'
+      ctx.lineWidth = 2.5
+      ctx.strokeRect(roomLeft, roomTop, roomWidth, roomHeight)
+
+      // Draw back wall gradient
+      const backWallGrad = ctx.createLinearGradient(roomLeft, roomTop, roomLeft, roomTop + 20)
+      backWallGrad.addColorStop(0, '#ffdb99')
+      backWallGrad.addColorStop(1, '#ffcc77')
+      ctx.fillStyle = backWallGrad
+      ctx.fillRect(roomLeft, roomTop, roomWidth, 20)
+
+      // Draw floor
+      ctx.fillStyle = '#dd9966'
+      ctx.fillRect(roomLeft, roomBottom - 15, roomWidth, 15)
+
+      // Draw AC indicator (top-left corner)
+      if (acOn) {
+        ctx.fillStyle = '#4a9eff'
+        ctx.shadowColor = '#2577ff'
+        ctx.shadowBlur = 20
+        ctx.beginPath()
+        ctx.arc(acX, acY, 25, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.shadowBlur = 0
+        ctx.fillStyle = '#fff'
+        ctx.font = 'bold 14px Arial'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.fillText('❄️', acX, acY)
+      }
+
+      // Draw Heater indicator (bottom-right corner)
+      if (heaterOn) {
+        ctx.fillStyle = '#ff6b35'
+        ctx.shadowColor = '#ff4422'
+        ctx.shadowBlur = 20
+        ctx.beginPath()
+        ctx.arc(heaterX, heaterY, 28, 0, Math.PI * 2)
+        ctx.fill()
+        ctx.shadowBlur = 0
+        ctx.fillStyle = '#fff'
+        ctx.font = 'bold 14px Arial'
+        ctx.textAlign = 'center'
+        ctx.textBaseline = 'middle'
+        ctx.fillText('🔥', heaterX, heaterY)
       }
 
       animationRef.current = requestAnimationFrame(animate)
@@ -197,167 +228,161 @@ export function RoomConvectionSimulator() {
   }, [isRunning, acOn, heaterOn])
 
   return (
-    <div style={{ width: '100vw', height: '100vh', position: 'relative', backgroundColor: '#0a0a1a', overflow: 'hidden' }}>
+    <div style={{ width: '100vw', height: '100vh', position: 'relative', backgroundColor: '#0a0a1a', overflow: 'hidden', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+      {/* Centered Canvas */}
       <canvas
         ref={canvasRef}
         width={1000}
-        height={750}
+        height={700}
         style={{
           display: 'block',
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          border: '2px solid #ff8c42',
+          border: '3px solid #ff8c42',
           borderRadius: '8px',
-          boxShadow: '0 0 30px rgba(255, 140, 66, 0.3)',
+          boxShadow: '0 0 40px rgba(255, 140, 66, 0.4)',
         }}
       />
 
-      {/* Top-Left Info Panel */}
+      {/* Top-Left Info Panel - Floating without overlap */}
       <div
         style={{
-          position: 'absolute',
+          position: 'fixed',
           top: '20px',
           left: '20px',
-          backgroundColor: 'rgba(10, 10, 26, 0.95)',
+          backgroundColor: 'rgba(10, 10, 26, 0.92)',
           border: '2px solid #ff8c42',
           borderRadius: '12px',
-          padding: '20px',
+          padding: '16px',
           color: '#fff',
           fontFamily: "'Segoe UI', sans-serif",
-          maxWidth: '380px',
-          fontSize: '13px',
-          lineHeight: '1.6',
+          width: '280px',
+          fontSize: '12px',
+          lineHeight: '1.5',
           backdropFilter: 'blur(10px)',
           boxShadow: '0 8px 32px rgba(255, 140, 66, 0.2)',
           zIndex: 100,
         }}
       >
-        <h2 style={{ margin: '0 0 12px 0', fontSize: '18px', color: '#ff8c42', fontWeight: '700' }}>
+        <h2 style={{ margin: '0 0 10px 0', fontSize: '16px', color: '#ff8c42', fontWeight: '700' }}>
           🌬️ Room Convection
         </h2>
-        <p style={{ margin: '8px 0', fontSize: '12px', color: '#aaa' }}>
-          ❄️ Blue particles (cold) sink downward
+        <p style={{ margin: '6px 0', fontSize: '11px', color: '#aaa' }}>
+          ❄️ Colder air sinks
         </p>
-        <p style={{ margin: '8px 0', fontSize: '12px', color: '#aaa' }}>
-          🔴 Red particles (hot) rise upward
+        <p style={{ margin: '6px 0', fontSize: '11px', color: '#aaa' }}>
+          🔥 Hotter air rises
         </p>
-        <p style={{ margin: '0', fontSize: '12px', color: '#888', lineHeight: '1.6' }}>
-          Watch how air circulates in the room when the AC and Heater are turned on!
+        <p style={{ margin: '6px 0', fontSize: '11px', color: '#aaa' }}>
+          💨 Room-scale circulation loop
         </p>
       </div>
 
-      {/* Bottom Control Panel */}
+      {/* Bottom-Left Control Panel */}
       <div
         style={{
-          position: 'absolute',
+          position: 'fixed',
           left: '20px',
           bottom: '30px',
-          width: '360px',
-          backgroundColor: 'rgba(10, 10, 26, 0.95)',
+          width: '310px',
+          backgroundColor: 'rgba(10, 10, 26, 0.92)',
           border: '2px solid #ff8c42',
           borderRadius: '12px',
-          padding: '20px',
+          padding: '16px',
           fontFamily: "'Segoe UI', sans-serif",
           zIndex: 100,
           backdropFilter: 'blur(10px)',
           boxShadow: '0 8px 32px rgba(255, 140, 66, 0.2)',
         }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
           {/* Run Button */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <label
+          <label
+            style={{
+              color: '#fff',
+              fontWeight: 'bold',
+              fontSize: '13px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}
+          >
+            <input
+              type="checkbox"
+              checked={isRunning}
+              onChange={(e) => setIsRunning(e.target.checked)}
               style={{
-                color: '#fff',
-                fontWeight: 'bold',
-                fontSize: '14px',
+                width: '18px',
+                height: '18px',
                 cursor: 'pointer',
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
+                accentColor: '#4a9eff',
               }}
-            >
-              <input
-                type="checkbox"
-                checked={isRunning}
-                onChange={(e) => setIsRunning(e.target.checked)}
-                style={{
-                  width: '20px',
-                  height: '20px',
-                  cursor: 'pointer',
-                  accentColor: '#4a9eff',
-                }}
-              />
-              ⏵ Run Simulation
-            </label>
-          </div>
+            />
+            ⏵ Run Simulation
+          </label>
 
           {/* AC Toggle */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <label
-              style={{
-                color: '#fff',
-                fontWeight: 'bold',
-                fontSize: '14px',
-                cursor: 'pointer',
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-              }}
-            >
+          <label
+            style={{
+              color: '#fff',
+              fontWeight: 'bold',
+              fontSize: '13px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              justifyContent: 'space-between',
+            }}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <input
                 type="checkbox"
                 checked={acOn}
                 onChange={(e) => setAcOn(e.target.checked)}
                 style={{
-                  width: '20px',
-                  height: '20px',
+                  width: '18px',
+                  height: '18px',
                   cursor: 'pointer',
                   accentColor: '#4a9eff',
                 }}
               />
               ❄️ 에어컨 (AC)
-            </label>
-            <span style={{ fontSize: '12px', color: acOn ? '#4a9eff' : '#888' }}>
+            </span>
+            <span style={{ fontSize: '11px', color: acOn ? '#4a9eff' : '#666' }}>
               {acOn ? 'ON' : 'OFF'}
             </span>
-          </div>
+          </label>
 
           {/* Heater Toggle */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-            <label
-              style={{
-                color: '#fff',
-                fontWeight: 'bold',
-                fontSize: '14px',
-                cursor: 'pointer',
-                flex: 1,
-                display: 'flex',
-                alignItems: 'center',
-                gap: '8px',
-              }}
-            >
+          <label
+            style={{
+              color: '#fff',
+              fontWeight: 'bold',
+              fontSize: '13px',
+              cursor: 'pointer',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+              justifyContent: 'space-between',
+            }}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
               <input
                 type="checkbox"
                 checked={heaterOn}
                 onChange={(e) => setHeaterOn(e.target.checked)}
                 style={{
-                  width: '20px',
-                  height: '20px',
+                  width: '18px',
+                  height: '18px',
                   cursor: 'pointer',
                   accentColor: '#ff6b35',
                 }}
               />
               🔥 난로 (Heater)
-            </label>
-            <span style={{ fontSize: '12px', color: heaterOn ? '#ff6b35' : '#888' }}>
+            </span>
+            <span style={{ fontSize: '11px', color: heaterOn ? '#ff6b35' : '#666' }}>
               {heaterOn ? 'ON' : 'OFF'}
             </span>
-          </div>
+          </label>
         </div>
       </div>
 
@@ -365,7 +390,7 @@ export function RoomConvectionSimulator() {
       <button
         onClick={() => (window.location.href = '/chemistry')}
         style={{
-          position: 'absolute',
+          position: 'fixed',
           top: '1rem',
           right: '1rem',
           zIndex: 100,
@@ -378,6 +403,16 @@ export function RoomConvectionSimulator() {
           fontWeight: '600',
           boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
           transition: 'all 0.3s ease',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.backgroundColor = '#ffffff'
+          e.currentTarget.style.transform = 'translateY(-2px)'
+          e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.4)'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.9)'
+          e.currentTarget.style.transform = 'translateY(0)'
+          e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)'
         }}
       >
         ← Back
