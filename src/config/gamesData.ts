@@ -20,7 +20,7 @@ export const GAMES_DATA: GameItem[] = [
     icon: '🎮',
     path: '/game/catch-game',
     tags: ['action', 'arcade', 'casual', 'phaser'],
-    play_count: 0,
+    play_count: 5000,
   },
   {
     id: 'space-racer',
