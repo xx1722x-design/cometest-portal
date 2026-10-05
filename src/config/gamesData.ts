@@ -12,6 +12,17 @@ export interface GameItem {
 
 export const GAMES_DATA: GameItem[] = [
   {
+    id: 'match3-puzzle',
+    title: 'Match-3 Puzzle',
+    description: '💎 Classical Match-3 puzzle gameplay - Click to select, swap adjacent tiles, match 3+ candies for big scores!',
+    thumbnail: '💎',
+    category: 'web_games',
+    icon: '💎',
+    path: '/game/match3-puzzle',
+    tags: ['puzzle', 'match3', 'arcade', 'phaser', 'casual'],
+    play_count: 0,
+  },
+  {
     id: 'snake-game',
     title: 'Snake Game',
     description: '클래식 뱀 게임 - 화살표 키로 방향을 조종하고 음식을 먹으세요! Arrow keys or WASD to control',

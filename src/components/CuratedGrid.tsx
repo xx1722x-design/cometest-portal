@@ -103,7 +103,7 @@ export function CuratedGrid({ items, columns = 6 }: CuratedGridProps) {
       } as React.CSSProperties}
     >
       {visibleItems.map((item, idx) => {
-        const { col, row } = item.id === 'store-hero' ? { col: 2, row: 2 } : getGridSpan(idx - 1, items.length)
+        const { col, row } = item.id === 'store-hero' ? { col: 2, row: 2 } : getGridSpan(idx, visibleItems.length)
 
         return (
           <div
