@@ -20,7 +20,7 @@ export function Index() {
   const { t } = useTranslation()
   const [activeCategory, setActiveCategory] = useState('all')
 
-  // 게임과 시뮬레이션 통합 - 게임을 맨 앞에 강제 배치
+  // 게임과 시뮬레이션 통합 - 최신 항목이 맨 앞에 오도록 배치
   const allItems: ContentItemUnion[] = useMemo(() => {
     const games = GAMES_DATA.map(g => ({
       ...g,
@@ -28,8 +28,8 @@ export function Index() {
     })) as any
     const sims = SIMULATIONS_DATA
 
-    // 🔥 CRITICAL: games를 항상 맨 앞에 배치해서 catch-game이 항상 보이도록 강제
-    return [...games, ...sims]
+    // 🔥 CRITICAL: simulations은 최신 항목을 index 0에 배치하므로, sims[0]이 맨 앞에 와야 함
+    return [sims[0], ...games, ...sims.slice(1)]
   }, [])
 
   // 필터링된 아이템 - raw data를 필터링 없이 직접 렌더링
