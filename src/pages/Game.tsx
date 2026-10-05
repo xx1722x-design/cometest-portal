@@ -2,6 +2,7 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { lazy, Suspense } from 'react'
 import { SpaceRacer } from '../components/games/SpaceRacer'
+import { DriftBossV2Safe } from '../components/games/DriftBoss/DriftBossV2Safe'
 import { getGameById } from '../config/gamesData'
 
 // Dynamic import for AllYouCanTycoon (JSX file)
@@ -27,6 +28,8 @@ export function Game() {
         )
       case 'prism-rush':
         return <div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Prism Rush Coming Soon</div>
+      case 'drift-boss':
+        return <DriftBossV2Safe />
       default:
         return <div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>게임을 찾을 수 없습니다</div>
     }

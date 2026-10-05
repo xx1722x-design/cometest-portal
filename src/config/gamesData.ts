@@ -44,6 +44,17 @@ export const GAMES_DATA: GameItem[] = [
     tags: ['action', 'puzzle', 'arcade'],
     play_count: 3200,
   },
+  {
+    id: 'drift-boss',
+    title: 'Drift Boss',
+    description: '지그재그 길을 따라 계속 나아가는 하이퍼 캐주얼 게임 - 스페이스바를 눌러 우회전!',
+    thumbnail: '🚗',
+    category: 'web_games',
+    icon: '🚗',
+    path: '/game/drift-boss',
+    tags: ['action', 'arcade', 'casual', 'hypercasual'],
+    play_count: 0,
+  },
 ]
 
 export const getGameById = (gameId: string): GameItem | undefined => {
