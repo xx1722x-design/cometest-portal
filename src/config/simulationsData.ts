@@ -13,6 +13,17 @@ export interface SimulationItem {
 
 export const SIMULATIONS_DATA: SimulationItem[] = [
   {
+    id: 'advanced-cloth-physics',
+    title: 'Advanced Cloth Physics',
+    description: 'Premium 3D cloth simulation with Verlet integration, post-processing effects, and interactive physics objects',
+    category: 'physics_chemistry',
+    icon: '🧵',
+    path: '/simulation/advanced-cloth-physics',
+    component: 'AdvancedClothPhysicsSimulator',
+    tags: ['physics', '3d', 'cloth', 'advanced', 'premium', 'interactive'],
+    play_count: 0,
+  },
+  {
     id: 'solar-system',
     title: 'Solar System Explorer',
     description: '3D Solar System with zoom interaction - Learn about planets and their orbits',

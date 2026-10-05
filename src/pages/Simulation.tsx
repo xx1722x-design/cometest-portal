@@ -45,6 +45,13 @@ const Physics3DBallsSimulator = lazy(() =>
   }))
 )
 
+// Premium Advanced Cloth Physics
+const AdvancedClothPhysicsSimulator = lazy(() =>
+  import('../components/simulations/AdvancedClothPhysicsSimulator').then((m) => ({
+    default: m.AdvancedClothPhysicsSimulator,
+  }))
+)
+
 export function Simulation() {
   const navigate = useNavigate()
   const { simulationId } = useParams<{ simulationId: string }>()
@@ -68,6 +75,12 @@ export function Simulation() {
 
   const renderSimulation = () => {
     switch (simulationId) {
+      case 'advanced-cloth-physics':
+        return (
+          <Suspense fallback={<div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Loading Advanced Physics...</div>}>
+            <AdvancedClothPhysicsSimulator />
+          </Suspense>
+        )
       case 'solar-system':
         return (
           <Suspense fallback={<div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Loading Simulation...</div>}>
