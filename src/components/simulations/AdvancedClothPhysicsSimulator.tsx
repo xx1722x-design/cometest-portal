@@ -158,6 +158,7 @@ function InteractiveSphere() {
   const [isDragging, setIsDragging] = useState(false)
   const dragPlane = useRef(new THREE.Plane(new THREE.Vector3(0, 0, 1), 0))
   const dragPoint = useRef(new THREE.Vector3())
+  const { camera } = useThree()
 
   useFrame((state) => {
     if (sphereRef.current && !isDragging) {
@@ -175,7 +176,7 @@ function InteractiveSphere() {
       const raycaster = new THREE.Raycaster()
       raycaster.setFromCamera(
         new THREE.Vector2((e.clientX / window.innerWidth) * 2 - 1, -(e.clientY / window.innerHeight) * 2 + 1),
-        e.camera
+        camera
       )
 
       raycaster.ray.intersectPlane(dragPlane.current, dragPoint.current)
@@ -214,7 +215,7 @@ function AdvancedClothScene() {
   const clothRef = useRef(new Cloth(8, 6, 25))
 
   return (
-    <Canvas shadows camera={{ position: [0, 5, 12], fov: 45 }}>
+    <Canvas shadows style={{ width: '100%', height: '100%' }} camera={{ position: [0, 5, 12], fov: 45 }}>
       <PerspectiveCamera makeDefault position={[0, 5, 12]} fov={45} />
       <OrbitControls autoRotate autoRotateSpeed={0.5} enableZoom enablePan />
 
