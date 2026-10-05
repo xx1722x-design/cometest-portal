@@ -21,7 +21,7 @@ interface PlayerState {
 
 const CharacterModel = ({
   position,
-  modelScale = [1, 1, 1],
+  modelScale = [1.5, 1.5, 1.5],
 }: {
   position: THREE.Vector3;
   modelScale?: [number, number, number];
@@ -48,7 +48,7 @@ const CharacterModel = ({
     return (
       <mesh position={[position.x, position.y, position.z]} scale={modelScale} castShadow>
         <boxGeometry args={[0.8, 1.2, 0.8]} />
-        <meshStandardMaterial color="#ec4899" emissive="#ff1493" emissiveIntensity={0.3} />
+        <meshStandardMaterial color="#ff6b35" emissive="#ff8c42" emissiveIntensity={0.5} />
       </mesh>
     );
   }
@@ -148,7 +148,7 @@ const PlatformRenderer = ({ platforms }: { platforms: Platform[] }) => {
       {platforms.map((platform) => (
         <mesh key={platform.id} position={[platform.x, 0, platform.z]} castShadow receiveShadow>
           <boxGeometry args={[platform.width, 0.5, 2.5]} />
-          <meshStandardMaterial color="#f97316" metalness={0.4} roughness={0.6} />
+          <meshStandardMaterial color="#ff6b35" metalness={0.3} roughness={0.7} />
         </mesh>
       ))}
     </>
@@ -185,24 +185,24 @@ const GameScene = ({
     <>
       <OrthographicCamera
         makeDefault
-        position={[5, 8, 15]}
-        zoom={22}
+        position={[10, 10, 10]}
+        zoom={20}
         near={0.1}
         far={1000}
-        onUpdate={(camera) => camera.lookAt(0, 5, 0)}
+        onUpdate={(camera) => camera.lookAt(0, 0, 0)}
       />
 
-      <ambientLight intensity={0.9} />
-      <directionalLight position={[12, 15, 12]} intensity={1.2} castShadow />
-      <directionalLight position={[-10, -5, -10]} intensity={0.4} />
+      <ambientLight intensity={1.2} color="#ffffff" />
+      <directionalLight position={[15, 15, 15]} intensity={1.5} castShadow color="#fff9e6" />
+      <directionalLight position={[-10, -5, -10]} intensity={0.6} color="#ffcc99" />
 
       <mesh position={[0, -3, 0]} receiveShadow>
-        <planeGeometry args={[40, 120]} />
-        <meshStandardMaterial color="#0f0f1a" />
+        <planeGeometry args={[50, 150]} />
+        <meshStandardMaterial color="#ffa366" />
       </mesh>
 
       <Suspense fallback={null}>
-        <CharacterModel position={playerState.position} modelScale={[1, 1, 1]} />
+        <CharacterModel position={playerState.position} modelScale={[1.5, 1.5, 1.5]} />
       </Suspense>
 
       <PlatformRenderer platforms={platforms} />
@@ -292,7 +292,7 @@ export function DriftBossV2Safe() {
   };
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
+    <div className="relative w-full h-screen overflow-hidden bg-gradient-to-b from-orange-300 via-orange-200 to-amber-100">
       <Canvas
         className="w-full h-full"
         gl={{ antialias: true, pixelRatio: Math.min(window.devicePixelRatio, 2), alpha: true }}
@@ -310,28 +310,25 @@ export function DriftBossV2Safe() {
 
       {/* IDLE State - Start Screen */}
       {gameState === 'IDLE' && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-black/60 via-black/40 to-black/60 backdrop-blur-sm z-50">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/20 backdrop-blur-sm z-50">
           <div className="text-center">
-            <h1 className="text-7xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-blue-500 to-purple-600 drop-shadow-lg">
+            <h1 className="text-8xl font-black mb-6 text-orange-600 drop-shadow-2xl" style={{ textShadow: '3px 3px 0px #fff, 6px 6px 0px rgba(0,0,0,0.2)' }}>
               🚗 DRIFT BOSS
             </h1>
-            <p className="text-2xl font-bold text-cyan-300 mb-4 drop-shadow-lg">
+            <p className="text-3xl font-bold text-orange-700 mb-4 drop-shadow-lg">
               Navigate the infinite zigzag track!
             </p>
-            <div className="space-y-3 mb-12 text-lg font-semibold">
-              <p className="text-white/90 drop-shadow-md">
-                <span className="text-yellow-300">🎮 SPACEBAR/TOUCH</span> to turn right
+            <div className="space-y-3 mb-12 text-lg font-bold">
+              <p className="text-orange-900 drop-shadow-md">
+                <span className="text-red-600">🎮 SPACEBAR/TOUCH</span> to turn right
               </p>
-              <p className="text-white/90 drop-shadow-md">
-                <span className="text-yellow-300">RELEASE</span> to turn left
-              </p>
-              <p className="text-white/90 drop-shadow-md">
-                Survive as long as you can!
+              <p className="text-orange-900 drop-shadow-md">
+                <span className="text-red-600">RELEASE</span> to turn left
               </p>
             </div>
             <button
               onClick={handleStartGame}
-              className="px-12 py-4 text-2xl font-black text-white bg-gradient-to-r from-cyan-500 to-blue-600 rounded-xl hover:from-cyan-400 hover:to-blue-500 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-2xl drop-shadow-lg"
+              className="px-16 py-5 text-3xl font-black text-white bg-gradient-to-b from-red-500 to-red-600 rounded-2xl hover:from-red-400 hover:to-red-500 transition-all duration-200 transform hover:scale-110 active:scale-95 shadow-2xl drop-shadow-lg border-4 border-red-700"
             >
               ▶ START GAME
             </button>
@@ -341,10 +338,10 @@ export function DriftBossV2Safe() {
 
       {/* PLAYING State - Score Display */}
       {gameState === 'PLAYING' && (
-        <div className="absolute top-8 right-8 z-40 backdrop-blur-md bg-black/50 rounded-2xl px-8 py-4 border-2 border-cyan-400/50">
+        <div className="absolute top-8 right-8 z-40 backdrop-blur-sm bg-white/80 rounded-3xl px-8 py-6 border-4 border-orange-500 shadow-lg">
           <div className="text-center">
-            <p className="text-cyan-300 text-sm font-semibold tracking-widest uppercase">SCORE</p>
-            <p className="text-white text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500">
+            <p className="text-orange-600 text-sm font-black tracking-widest uppercase">SCORE</p>
+            <p className="text-orange-700 text-6xl font-black">
               {playerState.score}
             </p>
           </div>
@@ -353,18 +350,18 @@ export function DriftBossV2Safe() {
 
       {/* GAMEOVER State - Game Over Screen */}
       {gameState === 'GAMEOVER' && (
-        <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-b from-black/80 via-black/70 to-black/80 backdrop-blur-md z-50">
+        <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/40 backdrop-blur-md z-50">
           <div className="text-center">
-            <h2 className="text-6xl font-black mb-6 text-transparent bg-clip-text bg-gradient-to-r from-red-500 via-orange-500 to-red-600 drop-shadow-lg">
+            <h2 className="text-7xl font-black mb-6 text-red-600 drop-shadow-2xl" style={{ textShadow: '3px 3px 0px #fff, 6px 6px 0px rgba(0,0,0,0.3)' }}>
               GAME OVER
             </h2>
-            <p className="text-3xl font-bold text-white mb-3 drop-shadow-md">Final Score</p>
-            <p className="text-7xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-orange-400 mb-12 drop-shadow-lg">
+            <p className="text-2xl font-black text-orange-800 mb-4 drop-shadow-md">Final Score</p>
+            <p className="text-8xl font-black text-orange-600 mb-12 drop-shadow-lg">
               {finalScore}
             </p>
             <button
               onClick={handleRestart}
-              className="px-12 py-4 text-2xl font-black text-white bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl hover:from-green-400 hover:to-emerald-500 transition-all duration-300 transform hover:scale-105 active:scale-95 shadow-2xl drop-shadow-lg"
+              className="px-16 py-5 text-3xl font-black text-white bg-gradient-to-b from-green-500 to-green-600 rounded-2xl hover:from-green-400 hover:to-green-500 transition-all duration-200 transform hover:scale-110 active:scale-95 shadow-2xl drop-shadow-lg border-4 border-green-700"
             >
               🔄 TRY AGAIN
             </button>
