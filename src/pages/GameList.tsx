@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Header } from '../components/Header'
@@ -18,6 +18,20 @@ export function GameList() {
   const { t } = useTranslation()
   const [activeTab, setActiveTab] = useState<'games' | 'labs'>('games')
   const [activeCategory, setActiveCategory] = useState('space_universe')
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
+
+  // Responsive grid columns: mobile 2, tablet 3, desktop 4+
+  const getGridColumns = (width: number): string => {
+    if (width < 640) return 'repeat(2, 1fr)'
+    if (width < 1024) return 'repeat(3, 1fr)'
+    return 'repeat(auto-fill, minmax(200px, 1fr))'
+  }
 
   const getSimulationsByCategory = (category: string) => SIMULATIONS_DATA.filter((sim) => sim.category === category)
 
@@ -25,9 +39,9 @@ export function GameList() {
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: 'repeat(auto-fill, minmax(240px, 1fr))',
-        gap: '20px',
-        padding: '20px',
+        gridTemplateColumns: getGridColumns(windowWidth),
+        gap: windowWidth < 640 ? '12px' : '20px',
+        padding: windowWidth < 640 ? '12px' : '20px',
         marginBottom: '40px',
       }}
     >
@@ -38,13 +52,15 @@ export function GameList() {
           style={{
             cursor: 'pointer',
             backgroundColor: 'var(--card-bg)',
-            borderRadius: '12px',
+            borderRadius: '8px',
             overflow: 'hidden',
             boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
             transition: 'all 0.3s ease',
             display: 'flex',
             flexDirection: 'column',
             height: '100%',
+            width: '100%',
+            minHeight: '200px',
           }}
           onMouseEnter={(e) => {
             e.currentTarget.style.boxShadow = '0 8px 16px rgba(0,0,0,0.2)'
@@ -89,10 +105,16 @@ export function GameList() {
             <h3
               style={{
                 margin: '0 0 8px 0',
-                fontSize: '16px',
+                fontSize: windowWidth < 640 ? '14px' : '16px',
                 fontWeight: 'bold',
                 color: 'var(--text-primary)',
                 lineHeight: 1.3,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                wordBreak: 'break-word',
               }}
             >
               {item.title}
@@ -100,10 +122,16 @@ export function GameList() {
             <p
               style={{
                 margin: '0',
-                fontSize: '13px',
+                fontSize: windowWidth < 640 ? '12px' : '13px',
                 color: 'var(--text-secondary)',
                 lineHeight: 1.4,
                 flex: 1,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                wordBreak: 'break-word',
               }}
             >
               {item.description}
@@ -111,13 +139,13 @@ export function GameList() {
             <button
               style={{
                 marginTop: '12px',
-                padding: '8px 12px',
+                padding: windowWidth < 640 ? '6px 10px' : '8px 12px',
                 backgroundColor: '#667eea',
                 color: '#fff',
                 border: 'none',
                 borderRadius: '6px',
                 cursor: 'pointer',
-                fontSize: '12px',
+                fontSize: windowWidth < 640 ? '11px' : '12px',
                 fontWeight: '600',
                 transition: 'background-color 0.2s',
               }}

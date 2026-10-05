@@ -10,7 +10,7 @@ const COUNTRY_CODES: Record<string, string> = {
 
 export function FreshLangMenu() {
   const [isOpen, setIsOpen] = useState(false);
-  const [pos, setPos] = useState({ top: 0, right: 0, left: 0 });
+  const [pos, setPos] = useState({ top: 0, right: 0 });
   const [isDark, setIsDark] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const { i18n } = useTranslation();
@@ -45,20 +45,7 @@ export function FreshLangMenu() {
     e.stopPropagation();
     if (!isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
-      const RTL_LANGUAGES = ['ar', 'he', 'ur', 'fa'];
-      const isRTL = RTL_LANGUAGES.includes(i18n.language);
-      const isButtonOnLeft = rect.left < window.innerWidth / 2;
-
-      // For RTL or buttons on left side, use left positioning instead of right
-      const pos = { top: rect.bottom + 8, right: 0, left: 0 };
-      if (isRTL && isButtonOnLeft) {
-        pos.left = Math.max(8, rect.left);
-        pos.right = 0;
-      } else {
-        pos.right = Math.max(8, window.innerWidth - rect.right);
-        pos.left = 0;
-      }
-      setPos(pos as any);
+      setPos({ top: rect.bottom + 8, right: window.innerWidth - rect.right });
       // Force re-check theme exactly when opening
       setIsDark(detectTheme());
     }
@@ -124,11 +111,9 @@ export function FreshLangMenu() {
             style={{
               position: 'fixed',
               top: `${pos.top}px`,
-              right: pos.right > 0 ? `${pos.right}px` : 'auto',
-              left: pos.left > 0 ? `${pos.left}px` : 'auto',
+              right: `${pos.right}px`,
               zIndex: 9999999,
               width: '256px',
-              maxWidth: 'calc(100vw - 16px)',
               borderRadius: '0.5rem',
               border: `1px solid ${isDark ? '#334155' : '#d1d5db'}`,
               backgroundColor: isDark ? '#0f172a' : '#ffffff',

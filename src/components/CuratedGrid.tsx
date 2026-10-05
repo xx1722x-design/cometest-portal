@@ -24,7 +24,24 @@ const STORE_CARD: ContentItemUnion = {
 export function CuratedGrid({ items, columns = 6 }: CuratedGridProps) {
   const navigate = useNavigate()
   const [visibleCount, setVisibleCount] = useState(20)
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
   const observerTarget = useRef<HTMLDivElement>(null)
+
+  // Responsive column calculation
+  const getResponsiveColumns = (width: number): number => {
+    if (width < 640) return 2;    // Mobile: 2 columns
+    if (width < 1024) return 3;   // Tablet: 3 columns
+    if (width < 1280) return 4;   // Small desktop: 4 columns
+    return columns;                // Desktop: use prop value
+  }
+
+  const responsiveColumns = getResponsiveColumns(windowWidth)
+
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // Intersection Observer로 무한 스크롤 구현
   useEffect(() => {
@@ -77,9 +94,9 @@ export function CuratedGrid({ items, columns = 6 }: CuratedGridProps) {
     <div
       style={{
         display: 'grid',
-        gridTemplateColumns: `repeat(${columns}, 1fr)`,
-        gap: '16px',
-        padding: '20px',
+        gridTemplateColumns: `repeat(${responsiveColumns}, 1fr)`,
+        gap: windowWidth < 640 ? '8px' : '16px',
+        padding: windowWidth < 640 ? '12px' : '20px',
         maxWidth: '1600px',
         margin: '0 auto',
         gridAutoFlow: 'dense',
@@ -180,6 +197,12 @@ export function CuratedGrid({ items, columns = 6 }: CuratedGridProps) {
                   color: item.id === 'store-hero' ? '#ffffff' : 'var(--text-primary)',
                   lineHeight: 1.2,
                   textShadow: item.id === 'store-hero' ? '0 2px 8px rgba(0, 0, 0, 0.3)' : 'none',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  display: '-webkit-box',
+                  WebkitLineClamp: windowWidth < 640 ? 1 : 2,
+                  WebkitBoxOrient: 'vertical',
+                  wordBreak: 'break-word',
                 }}
               >
                 {item.title}
@@ -193,6 +216,12 @@ export function CuratedGrid({ items, columns = 6 }: CuratedGridProps) {
                   opacity: item.id === 'store-hero' ? 1 : 0.8,
                   lineHeight: 1.3,
                   textShadow: item.id === 'store-hero' ? '0 1px 4px rgba(0, 0, 0, 0.2)' : 'none',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
+                  display: '-webkit-box',
+                  WebkitLineClamp: windowWidth < 640 ? 1 : 2,
+                  WebkitBoxOrient: 'vertical',
+                  wordBreak: 'break-word',
                 }}
               >
                 {item.description}
