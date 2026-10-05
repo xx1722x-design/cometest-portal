@@ -126,8 +126,15 @@ function MinimalScene() {
       {/* Single Rotating Object */}
       <RotatingCube />
 
-      {/* Basic Controls */}
-      <OrbitControls autoRotate autoRotateSpeed={2} />
+      {/* Basic Controls - Simplified */}
+      <OrbitControls
+        enableZoom={true}
+        enablePan={true}
+        autoRotate={true}
+        autoRotateSpeed={2}
+        dampingFactor={0.05}
+        rotateSpeed={1}
+      />
 
       {/* Minimal Post-Processing */}
       <EffectComposer>
