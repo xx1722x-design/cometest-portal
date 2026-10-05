@@ -114,10 +114,13 @@ export function RoomConvectionSimulator() {
 
     const roomCenterX = 500
     const roomCenterY = 350
-    const roomBoundsLeft = 250
-    const roomBoundsRight = 750
-    const roomBoundsTop = 160
-    const roomBoundsBottom = 540
+    // Strict 3D room bounds (inside the wireframe cube)
+    const roomHalfWidth = 250
+    const roomHalfHeight = 190
+    const roomBoundsLeft = roomCenterX - roomHalfWidth + 8
+    const roomBoundsRight = roomCenterX + roomHalfWidth - 8
+    const roomBoundsTop = roomCenterY - roomHalfHeight + 8
+    const roomBoundsBottom = roomCenterY + roomHalfHeight - 8
 
     // AC position: top-left
     const acX = 320
@@ -198,24 +201,33 @@ export function RoomConvectionSimulator() {
           particle.x += particle.vx
           particle.y += particle.vy
 
-          // Soft boundary collision
-          const margin = particle.radius + 3
+          // STRICT boundary clamping - particles MUST stay inside box
+          const margin = particle.radius + 2
+
+          // Left wall
           if (particle.x - margin < roomBoundsLeft) {
             particle.x = roomBoundsLeft + margin
-            particle.vx *= -0.7
+            particle.vx = Math.abs(particle.vx) * 0.5 // Force rightward bounce
           }
+          // Right wall
           if (particle.x + margin > roomBoundsRight) {
             particle.x = roomBoundsRight - margin
-            particle.vx *= -0.7
+            particle.vx = -Math.abs(particle.vx) * 0.5 // Force leftward bounce
           }
+          // Top wall
           if (particle.y - margin < roomBoundsTop) {
             particle.y = roomBoundsTop + margin
-            particle.vy *= -0.7
+            particle.vy = Math.abs(particle.vy) * 0.5 // Force downward bounce
           }
+          // Bottom wall
           if (particle.y + margin > roomBoundsBottom) {
             particle.y = roomBoundsBottom - margin
-            particle.vy *= -0.7
+            particle.vy = -Math.abs(particle.vy) * 0.5 // Force upward bounce
           }
+
+          // Extra safety clamp (mathematical hard limit)
+          particle.x = Math.max(roomBoundsLeft + margin, Math.min(roomBoundsRight - margin, particle.x))
+          particle.y = Math.max(roomBoundsTop + margin, Math.min(roomBoundsBottom - margin, particle.y))
         })
 
         // Draw particles with smooth colors
