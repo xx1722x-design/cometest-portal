@@ -1,4 +1,4 @@
-import React, { Suspense, useRef, useEffect, ReactNode } from 'react'
+import React, { Suspense, useRef, useEffect, useState, ReactNode } from 'react'
 import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import * as THREE from 'three'
@@ -242,7 +242,15 @@ function ClothMesh() {
 
   return (
     <mesh ref={meshRef} castShadow receiveShadow>
-      <meshPhongMaterial color="#60a5fa" emissive="#1e40af" emissiveIntensity={0.3} side={THREE.DoubleSide} />
+      <meshStandardMaterial
+        color="#00ffff"
+        emissive="#0099ff"
+        emissiveIntensity={0.8}
+        metalness={0.6}
+        roughness={0.2}
+        side={THREE.DoubleSide}
+        wireframe={false}
+      />
     </mesh>
   )
 }
@@ -275,9 +283,11 @@ function ClothPhysicsScene() {
       camera={{ position: [0, 5, 12], fov: 45 }}
       gl={{ antialias: true, alpha: false }}
     >
-      <ambientLight intensity={0.5} />
-      <directionalLight position={[10, 20, 10]} intensity={1.5} castShadow />
-      <pointLight position={[-10, 5, -10]} intensity={0.8} />
+      <ambientLight intensity={0.8} />
+      <directionalLight position={[15, 25, 15]} intensity={2.5} castShadow shadow-mapSize-width={2048} shadow-mapSize-height={2048} />
+      <pointLight position={[10, 8, 10]} intensity={1.5} color="#00ffff" />
+      <pointLight position={[-10, 8, -10]} intensity={1.5} color="#ff00ff" />
+      <pointLight position={[0, 8, 15]} intensity={1.2} color="#00ff88" />
 
       <ClothMesh />
       <Sphere />
@@ -295,6 +305,12 @@ function ClothPhysicsScene() {
 }
 
 export function AdvancedClothPhysicsSimulator() {
+  const [resetKey, setResetKey] = useState(0)
+
+  const handleReset = () => {
+    setResetKey(prev => prev + 1)
+  }
+
   return (
     <ErrorBoundary>
       <div style={{
@@ -318,24 +334,101 @@ export function AdvancedClothPhysicsSimulator() {
             Loading Cloth Physics...
           </div>
         }>
-          <ClothPhysicsScene />
+          <ClothPhysicsScene key={resetKey} />
         </Suspense>
 
+        {/* Top-Left Info Panel */}
         <div style={{
           position: 'absolute',
           top: '20px',
           left: '20px',
-          backgroundColor: 'rgba(10, 10, 26, 0.95)',
-          border: '2px solid #60a5fa',
-          borderRadius: '12px',
-          padding: '16px 24px',
+          backgroundColor: 'rgba(10, 10, 26, 0.85)',
+          backdropFilter: 'blur(12px)',
+          border: '2px solid #00ffff',
+          borderRadius: '16px',
+          padding: '20px 28px',
           color: '#fff',
           fontSize: '14px',
+          fontFamily: "'Segoe UI', 'Helvetica Neue', sans-serif",
           zIndex: 100,
+          boxShadow: '0 8px 32px rgba(0, 255, 255, 0.2)',
+          maxWidth: '320px',
         }}>
-          <h3 style={{ margin: '0 0 8px 0', color: '#60a5fa' }}>🧵 Cloth Physics</h3>
-          <p style={{ margin: '0 0 4px 0', fontSize: '12px', color: '#888' }}>Verlet Integration • Wind Forces</p>
-          <p style={{ margin: '0', fontSize: '12px', color: '#aaa' }}>Orbit • Zoom • Interactive</p>
+          <h3 style={{
+            margin: '0 0 12px 0',
+            color: '#00ffff',
+            fontSize: '18px',
+            fontWeight: '700',
+            textShadow: '0 0 10px rgba(0, 255, 255, 0.5)',
+          }}>
+            🧵 Cloth Physics Simulator
+          </h3>
+          <p style={{ margin: '0 0 8px 0', fontSize: '13px', color: '#aaa', lineHeight: '1.5' }}>
+            Interactive 3D cloth dynamics with Verlet integration, wind forces, and gravity.
+          </p>
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: '1fr 1fr',
+            gap: '8px',
+            marginTop: '12px',
+            fontSize: '12px',
+            color: '#888',
+          }}>
+            <div>🖱️ <strong style={{ color: '#00ffff' }}>Drag</strong> to rotate</div>
+            <div>🔍 <strong style={{ color: '#00ffff' }}>Scroll</strong> to zoom</div>
+            <div>💨 Watch wind dynamics</div>
+            <div>⬇️ Gravity pulls cloth</div>
+          </div>
+        </div>
+
+        {/* Bottom-Right Control Panel */}
+        <div style={{
+          position: 'absolute',
+          bottom: '20px',
+          right: '20px',
+          backgroundColor: 'rgba(10, 10, 26, 0.85)',
+          backdropFilter: 'blur(12px)',
+          border: '2px solid #ff00ff',
+          borderRadius: '16px',
+          padding: '16px 24px',
+          color: '#fff',
+          fontSize: '13px',
+          fontFamily: "'Segoe UI', 'Helvetica Neue', sans-serif",
+          zIndex: 100,
+          boxShadow: '0 8px 32px rgba(255, 0, 255, 0.2)',
+        }}>
+          <button
+            onClick={handleReset}
+            style={{
+              backgroundColor: '#ff00ff',
+              color: '#0a0a1a',
+              border: 'none',
+              borderRadius: '10px',
+              padding: '12px 24px',
+              fontSize: '14px',
+              fontWeight: '700',
+              cursor: 'pointer',
+              transition: 'all 0.3s ease',
+              boxShadow: '0 0 20px rgba(255, 0, 255, 0.5)',
+              textTransform: 'uppercase',
+              letterSpacing: '0.5px',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = '#ff33ff'
+              e.currentTarget.style.transform = 'scale(1.05)'
+              e.currentTarget.style.boxShadow = '0 0 30px rgba(255, 0, 255, 0.8)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = '#ff00ff'
+              e.currentTarget.style.transform = 'scale(1)'
+              e.currentTarget.style.boxShadow = '0 0 20px rgba(255, 0, 255, 0.5)'
+            }}
+          >
+            🔄 Reset Cloth
+          </button>
+          <p style={{ margin: '12px 0 0 0', fontSize: '11px', color: '#666' }}>
+            Press to restart the simulation
+          </p>
         </div>
       </div>
     </ErrorBoundary>
