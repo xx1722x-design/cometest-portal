@@ -19,23 +19,92 @@ export function RoomConvectionSimulator() {
   const particlesRef = useRef<Particle[]>([])
   const animationRef = useRef<number | null>(null)
 
-  // Initialize particles with high density
+  // Initialize particles
   useEffect(() => {
     const particles: Particle[] = []
     for (let i = 0; i < 200; i++) {
       particles.push({
-        x: Math.random() * 600 + 200,
-        y: Math.random() * 450 + 125,
-        vx: (Math.random() - 0.5) * 1,
-        vy: (Math.random() - 0.5) * 1,
+        x: Math.random() * 500 + 250,
+        y: Math.random() * 380 + 160,
+        vx: (Math.random() - 0.5) * 0.3,
+        vy: (Math.random() - 0.5) * 0.3,
         temperature: 30 + Math.random() * 20,
-        radius: 5,
+        radius: 4,
       })
     }
     particlesRef.current = particles
   }, [])
 
-  // Animation loop with proper convection circulation
+  // Draw 3D wireframe cube in isometric view
+  const drawIsometricBox = (ctx: CanvasRenderingContext2D) => {
+    const centerX = 500
+    const centerY = 350
+    const width = 500
+    const height = 380
+    const depth = 300
+
+    // Isometric projection
+    const scale = 0.707 // cos(45°)
+    const dx = width * scale / 2
+    const dy = height / 2
+    const dz = depth * scale / 2
+
+    // 8 vertices of the cube
+    const vertices = [
+      // Front face
+      [centerX - dx, centerY + dy, 0], // 0: bottom-left-front
+      [centerX + dx, centerY + dy, 0], // 1: bottom-right-front
+      [centerX + dx, centerY - dy, 0], // 2: top-right-front
+      [centerX - dx, centerY - dy, 0], // 3: top-left-front
+      // Back face
+      [centerX - dx + dz, centerY + dy, 0], // 4: bottom-left-back
+      [centerX + dx + dz, centerY + dy, 0], // 5: bottom-right-back
+      [centerX + dx + dz, centerY - dy, 0], // 6: top-right-back
+      [centerX - dx + dz, centerY - dy, 0], // 7: top-left-back
+    ]
+
+    // Draw edges
+    ctx.strokeStyle = '#ff8c42'
+    ctx.lineWidth = 2.5
+    ctx.globalAlpha = 0.8
+
+    const edges = [
+      // Front face
+      [0, 1],
+      [1, 2],
+      [2, 3],
+      [3, 0],
+      // Back face
+      [4, 5],
+      [5, 6],
+      [6, 7],
+      [7, 4],
+      // Connecting edges
+      [0, 4],
+      [1, 5],
+      [2, 6],
+      [3, 7],
+    ]
+
+    edges.forEach(([start, end]) => {
+      const [x1, y1] = vertices[start]
+      const [x2, y2] = vertices[end]
+      ctx.beginPath()
+      ctx.moveTo(x1, y1)
+      ctx.lineTo(x2, y2)
+      ctx.stroke()
+    })
+
+    ctx.globalAlpha = 1
+
+    // Draw semi-transparent interior
+    ctx.fillStyle = '#ff8c42'
+    ctx.globalAlpha = 0.04
+    ctx.fillRect(centerX - dx, centerY - dy, width, height)
+    ctx.globalAlpha = 1
+  }
+
+  // Animation loop
   useEffect(() => {
     const canvas = canvasRef.current
     if (!canvas) return
@@ -43,125 +112,127 @@ export function RoomConvectionSimulator() {
     const ctx = canvas.getContext('2d')
     if (!ctx) return
 
-    const roomLeft = 200
-    const roomRight = 800
-    const roomTop = 125
-    const roomBottom = 575
-    const roomWidth = roomRight - roomLeft
-    const roomHeight = roomBottom - roomTop
-    const centerX = (roomLeft + roomRight) / 2
-    const centerY = (roomTop + roomBottom) / 2
+    const roomCenterX = 500
+    const roomCenterY = 350
+    const roomBoundsLeft = 250
+    const roomBoundsRight = 750
+    const roomBoundsTop = 160
+    const roomBoundsBottom = 540
 
     // AC position: top-left
-    const acX = roomLeft + 60
-    const acY = roomTop + 40
-    const acRadius = 70
+    const acX = 320
+    const acY = 190
+    const acRadius = 60
 
     // Heater position: bottom-right
-    const heaterX = roomRight - 60
-    const heaterY = roomBottom - 40
-    const heaterRadius = 80
+    const heaterX = 680
+    const heaterY = 490
+    const heaterRadius = 70
+
+    // Only activate convection if AC or Heater is ON
+    const convectionActive = acOn || heaterOn
 
     const animate = () => {
-      // Clear canvas with dark background
+      // Clear canvas
       ctx.fillStyle = '#0a0a1a'
       ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+      // Draw 3D wireframe box
+      drawIsometricBox(ctx)
 
       if (isRunning) {
         const particles = particlesRef.current
 
         particles.forEach((particle) => {
-          // Calculate distance from AC and Heater
           const distToAC = Math.hypot(particle.x - acX, particle.y - acY)
           const distToHeater = Math.hypot(particle.x - heaterX, particle.y - heaterY)
 
-          // AC cooling and downward push
-          if (acOn && distToAC < acRadius) {
-            particle.temperature = Math.max(15, particle.temperature - 0.5)
-            const forceStrength = (1 - distToAC / acRadius) * 2
-            particle.vy += forceStrength * 1.5 // Push DOWN
+          // Reset velocities if convection is not active
+          if (!convectionActive) {
+            particle.vx *= 0.92
+            particle.vy *= 0.92
+            // Only minimal thermal motion (Brownian)
+            particle.vx += (Math.random() - 0.5) * 0.1
+            particle.vy += (Math.random() - 0.5) * 0.1
+          } else {
+            // AC cooling and gentle downward push (REDUCED SPEED)
+            if (acOn && distToAC < acRadius) {
+              particle.temperature = Math.max(15, particle.temperature - 0.3)
+              const forceStrength = (1 - distToAC / acRadius) * 0.8
+              particle.vy += forceStrength * 0.4 // Much gentler
+            }
+
+            // Heater heating and gentle upward push (REDUCED SPEED)
+            if (heaterOn && distToHeater < heaterRadius) {
+              particle.temperature = Math.min(75, particle.temperature + 0.4)
+              const forceStrength = (1 - distToHeater / heaterRadius) * 0.9
+              particle.vy -= forceStrength * 0.5 // Much gentler
+            }
+
+            // Natural convection (REDUCED)
+            const naturalConvection = (particle.temperature - 35) / 50
+            particle.vy -= naturalConvection * 0.25 // Reduced from 0.8
+
+            // Gentle circular vector field (REDUCED)
+            const dx = particle.x - roomCenterX
+            const dy = particle.y - roomCenterY
+            const dist = Math.hypot(dx, dy)
+            if (dist > 0) {
+              const perpX = -dy / dist
+              const perpY = dx / dist
+              const circulationStrength = 0.12 // Reduced from 0.3
+              particle.vx += perpX * circulationStrength
+              particle.vy += perpY * circulationStrength * 0.25
+            }
+
+            // Brownian motion
+            particle.vx += (Math.random() - 0.5) * 0.15
+            particle.vy += (Math.random() - 0.5) * 0.1
+
+            // Gentle damping
+            particle.vx *= 0.98
+            particle.vy *= 0.98
           }
-
-          // Heater heating and upward push
-          if (heaterOn && distToHeater < heaterRadius) {
-            particle.temperature = Math.min(75, particle.temperature + 0.6)
-            const forceStrength = (1 - distToHeater / heaterRadius) * 2.5
-            particle.vy -= forceStrength * 2 // Push UP
-          }
-
-          // Natural convection: hot air rises, cold air sinks
-          const naturalConvection = (particle.temperature - 35) / 40
-          particle.vy -= naturalConvection * 0.8
-
-          // Circulation loop: create a circular vector field
-          const dx = particle.x - centerX
-          const dy = particle.y - centerY
-          const dist = Math.hypot(dx, dy)
-          if (dist > 0) {
-            // Perpendicular vector (for circular motion)
-            const perpX = -dy / dist
-            const perpY = dx / dist
-
-            // Clockwise circulation (from user perspective)
-            const circulationStrength = 0.3
-            particle.vx += perpX * circulationStrength
-            particle.vy += perpY * circulationStrength * 0.5
-          }
-
-          // Temperature-based color creates natural buoyancy zones
-          if (particle.temperature < 25) {
-            particle.vy += 0.2 // Cold sink naturally
-          } else if (particle.temperature > 50) {
-            particle.vy -= 0.3 // Hot rise naturally
-          }
-
-          // Brownian motion for realism
-          particle.vx += (Math.random() - 0.5) * 0.3
-          particle.vy += (Math.random() - 0.5) * 0.2
-
-          // Damping
-          particle.vx *= 0.97
-          particle.vy *= 0.97
 
           // Update position
           particle.x += particle.vx
           particle.y += particle.vy
 
-          // Boundary collision with damping
-          const margin = particle.radius + 5
-          if (particle.x - margin < roomLeft) {
-            particle.x = roomLeft + margin
-            particle.vx *= -0.85
+          // Soft boundary collision
+          const margin = particle.radius + 3
+          if (particle.x - margin < roomBoundsLeft) {
+            particle.x = roomBoundsLeft + margin
+            particle.vx *= -0.7
           }
-          if (particle.x + margin > roomRight) {
-            particle.x = roomRight - margin
-            particle.vx *= -0.85
+          if (particle.x + margin > roomBoundsRight) {
+            particle.x = roomBoundsRight - margin
+            particle.vx *= -0.7
           }
-          if (particle.y - margin < roomTop) {
-            particle.y = roomTop + margin
-            particle.vy *= -0.85
+          if (particle.y - margin < roomBoundsTop) {
+            particle.y = roomBoundsTop + margin
+            particle.vy *= -0.7
           }
-          if (particle.y + margin > roomBottom) {
-            particle.y = roomBottom - margin
-            particle.vy *= -0.85
+          if (particle.y + margin > roomBoundsBottom) {
+            particle.y = roomBoundsBottom - margin
+            particle.vy *= -0.7
           }
         })
 
-        // Draw particles with proper temperature colors
+        // Draw particles with smooth colors
         particles.forEach((particle) => {
           let color: string
           if (particle.temperature < 20) {
-            color = '#4a9eff' // Cold blue
+            color = '#4a9eff'
           } else if (particle.temperature < 35) {
-            color = '#9966ff' // Cool purple
+            color = '#9966ff'
           } else if (particle.temperature < 50) {
-            color = '#ffcc66' // Warm yellow
+            color = '#ffcc66'
           } else {
-            color = '#ff4444' // Hot red
+            color = '#ff4444'
           }
 
           ctx.fillStyle = color
-          ctx.globalAlpha = 0.85
+          ctx.globalAlpha = 0.8
           ctx.beginPath()
           ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2)
           ctx.fill()
@@ -169,52 +240,36 @@ export function RoomConvectionSimulator() {
         })
       }
 
-      // Draw room wireframe (non-overlapping clean frame)
-      ctx.strokeStyle = '#ff8c42'
-      ctx.lineWidth = 2.5
-      ctx.strokeRect(roomLeft, roomTop, roomWidth, roomHeight)
-
-      // Draw back wall gradient
-      const backWallGrad = ctx.createLinearGradient(roomLeft, roomTop, roomLeft, roomTop + 20)
-      backWallGrad.addColorStop(0, '#ffdb99')
-      backWallGrad.addColorStop(1, '#ffcc77')
-      ctx.fillStyle = backWallGrad
-      ctx.fillRect(roomLeft, roomTop, roomWidth, 20)
-
-      // Draw floor
-      ctx.fillStyle = '#dd9966'
-      ctx.fillRect(roomLeft, roomBottom - 15, roomWidth, 15)
-
-      // Draw AC indicator (top-left corner)
+      // Draw AC indicator (only if in active zone)
       if (acOn) {
         ctx.fillStyle = '#4a9eff'
         ctx.shadowColor = '#2577ff'
-        ctx.shadowBlur = 20
+        ctx.shadowBlur = 15
         ctx.beginPath()
-        ctx.arc(acX, acY, 25, 0, Math.PI * 2)
+        ctx.arc(acX, acY, 22, 0, Math.PI * 2)
         ctx.fill()
         ctx.shadowBlur = 0
-        ctx.fillStyle = '#fff'
-        ctx.font = 'bold 14px Arial'
-        ctx.textAlign = 'center'
-        ctx.textBaseline = 'middle'
-        ctx.fillText('❄️', acX, acY)
+      } else {
+        ctx.fillStyle = '#2a3a4a'
+        ctx.beginPath()
+        ctx.arc(acX, acY, 22, 0, Math.PI * 2)
+        ctx.fill()
       }
 
-      // Draw Heater indicator (bottom-right corner)
+      // Draw Heater indicator (only if in active zone)
       if (heaterOn) {
         ctx.fillStyle = '#ff6b35'
         ctx.shadowColor = '#ff4422'
-        ctx.shadowBlur = 20
+        ctx.shadowBlur = 15
         ctx.beginPath()
-        ctx.arc(heaterX, heaterY, 28, 0, Math.PI * 2)
+        ctx.arc(heaterX, heaterY, 24, 0, Math.PI * 2)
         ctx.fill()
         ctx.shadowBlur = 0
-        ctx.fillStyle = '#fff'
-        ctx.font = 'bold 14px Arial'
-        ctx.textAlign = 'center'
-        ctx.textBaseline = 'middle'
-        ctx.fillText('🔥', heaterX, heaterY)
+      } else {
+        ctx.fillStyle = '#4a2a1a'
+        ctx.beginPath()
+        ctx.arc(heaterX, heaterY, 24, 0, Math.PI * 2)
+        ctx.fill()
       }
 
       animationRef.current = requestAnimationFrame(animate)
@@ -242,7 +297,7 @@ export function RoomConvectionSimulator() {
         }}
       />
 
-      {/* Top-Left Info Panel - Floating without overlap */}
+      {/* Top-Left Info Panel */}
       <div
         style={{
           position: 'fixed',
@@ -266,13 +321,13 @@ export function RoomConvectionSimulator() {
           🌬️ Room Convection
         </h2>
         <p style={{ margin: '6px 0', fontSize: '11px', color: '#aaa' }}>
-          ❄️ Colder air sinks
+          Turn AC ON: Cold air sinks
         </p>
         <p style={{ margin: '6px 0', fontSize: '11px', color: '#aaa' }}>
-          🔥 Hotter air rises
+          Turn Heater ON: Hot air rises
         </p>
-        <p style={{ margin: '6px 0', fontSize: '11px', color: '#aaa' }}>
-          💨 Room-scale circulation loop
+        <p style={{ margin: '6px 0', fontSize: '11px', color: '#888' }}>
+          Both OFF = No convection
         </p>
       </div>
 
@@ -294,7 +349,6 @@ export function RoomConvectionSimulator() {
         }}
       >
         <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-          {/* Run Button */}
           <label
             style={{
               color: '#fff',
@@ -320,7 +374,6 @@ export function RoomConvectionSimulator() {
             ⏵ Run Simulation
           </label>
 
-          {/* AC Toggle */}
           <label
             style={{
               color: '#fff',
@@ -352,7 +405,6 @@ export function RoomConvectionSimulator() {
             </span>
           </label>
 
-          {/* Heater Toggle */}
           <label
             style={{
               color: '#fff',
