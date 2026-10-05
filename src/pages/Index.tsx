@@ -5,7 +5,7 @@ import { SiteFooter } from '../components/SiteFooter'
 import { CuratedGrid } from '../components/CuratedGrid'
 import { GAMES_DATA } from '../config/gamesData'
 import { SIMULATIONS_DATA } from '../config/simulationsData'
-import { curateItems, type ContentItemUnion } from '../lib/curatedList'
+import { type ContentItemUnion } from '../lib/curatedList'
 
 const CATEGORY_FILTERS = [
   { id: 'all', icon: '🎮' },
@@ -31,12 +31,12 @@ export function Index() {
     return [...games, ...sims]
   }, [])
 
-  // 필터링된 아이템
+  // 필터링된 아이템 - raw data를 필터링 없이 직접 렌더링
   const filteredItems = useMemo(() => {
     if (activeCategory === 'all') {
-      return curateItems(allItems)
+      return allItems
     }
-    return curateItems(allItems.filter(item => item.category === activeCategory))
+    return allItems.filter(item => item.category === activeCategory)
   }, [activeCategory, allItems])
 
   return (
