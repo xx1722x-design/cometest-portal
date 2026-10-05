@@ -12,6 +12,17 @@ export interface GameItem {
 
 export const GAMES_DATA: GameItem[] = [
   {
+    id: 'snake-game',
+    title: 'Snake Game',
+    description: '클래식 뱀 게임 - 화살표 키로 방향을 조종하고 음식을 먹으세요! Arrow keys or WASD to control',
+    thumbnail: '🐍',
+    category: 'web_games',
+    icon: '🐍',
+    path: '/game/snake-game',
+    tags: ['puzzle', 'arcade', 'classic', 'phaser'],
+    play_count: 0,
+  },
+  {
     id: 'catch-game',
     title: 'Catch Game',
     description: '떨어지는 과일을 잡으세요! 마우스를 움직여 바구니를 제어하는 클래식 아케이드 게임',
