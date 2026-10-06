@@ -13,6 +13,17 @@ export interface SimulationItem {
 
 export const SIMULATIONS_DATA: SimulationItem[] = [
   {
+    id: 'fluid-particle-system',
+    title: 'Interactive Fluid Particle System',
+    description: '✨ Premium 3D particle fluid with 5000+ glowing particles reacting to mouse movement. Features dynamic Bloom post-processing and interactive orbit controls.',
+    category: 'physics_chemistry',
+    icon: '✨',
+    path: '/simulation/fluid-particle-system',
+    component: 'FluidParticleSystem',
+    tags: ['3d', 'particles', 'fluid', 'physics', 'interactive', 'premium'],
+    play_count: 0,
+  },
+  {
     id: 'advanced-cloth-physics',
     title: 'Advanced Cloth Physics',
     description: 'Premium 3D cloth simulation with Verlet integration, post-processing effects, and interactive physics objects',

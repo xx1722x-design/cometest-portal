@@ -52,6 +52,13 @@ const AdvancedClothPhysicsSimulator = lazy(() =>
   }))
 )
 
+// Premium Fluid Particle System
+const FluidParticleSystem = lazy(() =>
+  import('../components/simulations/FluidParticleSystem').then((m) => ({
+    default: m.FluidParticleSystem,
+  }))
+)
+
 export function Simulation() {
   const navigate = useNavigate()
   const { simulationId } = useParams<{ simulationId: string }>()
@@ -75,6 +82,12 @@ export function Simulation() {
 
   const renderSimulation = () => {
     switch (simulationId) {
+      case 'fluid-particle-system':
+        return (
+          <Suspense fallback={<div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Loading Fluid Simulation...</div>}>
+            <FluidParticleSystem />
+          </Suspense>
+        )
       case 'advanced-cloth-physics':
         return (
           <Suspense fallback={<div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Loading Advanced Physics...</div>}>
