@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 
 interface PortedGameWrapperProps {
-  gameName: '2048' | 'hextris'
+  gameName: '2048' | 'hextris' | 'tetris' | 'pacman' | 'snake'
 }
 
 export const PortedGameWrapper: React.FC<PortedGameWrapperProps> = ({ gameName }) => {

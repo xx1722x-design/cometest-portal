@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Pac-Man</title>
+    <style>
+        html, body {
+            margin: 0; padding: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            font-family: Arial, sans-serif;
+            width: 100%; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .container {
+            text-align: center;
+            color: #fff;
+        }
+        h1 {
+            font-size: 48px;
+            margin: 20px;
+            background: linear-gradient(45deg, #ffff00, #ff6600);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        canvas {
+            border: 3px solid #ffff00;
+            background: #000;
+            display: block;
+            margin: 20px auto;
+            box-shadow: 0 0 30px rgba(255, 255, 0, 0.5);
+        }
+        .info {
+            margin-top: 20px;
+            font-size: 20px;
+        }
+        .score { color: #ffff00; font-weight: bold; }
+        .controls {
+            margin-top: 20px;
+            font-size: 14px;
+            color: #aaa;
+        }
+        button {
+            background: #ffff00;
+            border: none;
+            padding: 10px 20px;
+            margin: 10px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            border-radius: 5px;
+            color: #000;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>PAC-MAN</h1>
+        <canvas id="gameCanvas" width="448" height="496"></canvas>
+        <div class="info">
+            Score: <span class="score" id="score">0</span>
+        </div>
+        <button onclick="location.reload()">New Game</button>
+        <div class="controls">
+            <p>⬅️ ➡️ ⬆️ ⬇️ Arrow Keys to Move | Eat Dots to Score!</p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('2d');
+
+        const TILE_SIZE = 16;
+        const COLS = 28;
+        const ROWS = 31;
+
+        const maze = [
+            "############################",
+            "#............#............#",
+            "#.##.#####.##.##.#####.##.#",
+            "#.##.#...#.##.##.#...#.##.#",
+            "#....#.#.#....#....#.#....#",
+            "#.##.###.#####.#####.###.##",
+            "#................#........#",
+            "###.###.####.#.#.####.###.##",
+            "###.###.#..#.#.#.#..#.###.##",
+            "#.......#..#...#.#..#.....#",
+            "#.######.##.###.##.######.#",
+            "#........#.#...#.#........#",
+            "#.######.#.#.###.#.######.#",
+            "#.#....#...#.....#....#.#.#",
+            "#.#.##.#########.########.#",
+            "#...##...#.....#...##....##",
+            "###.###.#.#####.#.###.####.#",
+            "###.###.#.#.....#.###.####.#",
+            "#.......#.......#.........#",
+            "#.##.#.#####.#####.#.##.##.#",
+            "#.##.#...#...#...#.#.##.##.#",
+            "#....###.#.###.###.#....#.#",
+            "####.###.#.....#...###.#.#.#",
+            "####.###.#.#####.#.###.#.#.#",
+            "#.......#.......#.........#",
+            "#.#####.#.#.###.#.#####.###",
+            "#.#...#.#.#.#...#.#...#...#",
+            "#.#.#.#.#.#.#.#.#.#.#.###.#",
+            "#...#.#...#...#...#.#.....#",
+            "############################"
+        ];
+
+        let pacman = { x: 13, y: 15, vx: 0, vy: 0 };
+        let ghosts = [
+            { x: 13, y: 7, color: '#ff0000', vx: 1, vy: 0 },
+            { x: 12, y: 9, color: '#ffb8ff', vx: -1, vy: 0 },
+            { x: 13, y: 9, color: '#00ffff', vx: 1, vy: 0 },
+            { x: 14, y: 9, color: '#ffb847', vx: -1, vy: 0 }
+        ];
+
+        let score = 0;
+        let pelletsRemaining = 0;
+        let gameRunning = true;
+
+        function initPellets() {
+            pelletsRemaining = 0;
+            for (let r = 0; r < maze.length; r++) {
+                for (let c = 0; c < maze[r].length; c++) {
+                    if (maze[r][c] === '.') pelletsRemaining++;
+                }
+            }
+        }
+
+        function canMove(x, y) {
+            if (x < 0 || x >= COLS || y < 0 || y >= ROWS) return false;
+            return maze[y][x] !== '#';
+        }
+
+        function update() {
+            pacman.x += pacman.vx;
+            pacman.y += pacman.vy;
+
+            if (pacman.x < 0) pacman.x = COLS - 1;
+            if (pacman.x >= COLS) pacman.x = 0;
+            if (!canMove(pacman.x, pacman.y)) {
+                pacman.x -= pacman.vx;
+                pacman.y -= pacman.vy;
+            }
+
+            if (maze[pacman.y][pacman.x] === '.') {
+                score += 10;
+                pelletsRemaining--;
+                maze[pacman.y] = maze[pacman.y].substring(0, pacman.x) + ' ' + maze[pacman.y].substring(pacman.x + 1);
+                if (pelletsRemaining === 0) {
+                    gameRunning = false;
+                }
+            }
+
+            ghosts.forEach(ghost => {
+                ghost.x += ghost.vx;
+                ghost.y += ghost.vy;
+
+                if (!canMove(ghost.x, ghost.y)) {
+                    ghost.vx *= -1;
+                    ghost.vy *= -1;
+                }
+
+                if (Math.abs(ghost.x - pacman.x) < 0.5 && Math.abs(ghost.y - pacman.y) < 0.5) {
+                    gameRunning = false;
+                }
+            });
+
+            document.getElementById('score').textContent = score;
+        }
+
+        function draw() {
+            ctx.fillStyle = '#000';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.strokeStyle = '#0066ff';
+            for (let r = 0; r < maze.length; r++) {
+                for (let c = 0; c < maze[r].length; c++) {
+                    if (maze[r][c] === '#') {
+                        ctx.fillStyle = '#2626ff';
+                        ctx.fillRect(c * TILE_SIZE, r * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                        ctx.strokeStyle = '#0066ff';
+                        ctx.strokeRect(c * TILE_SIZE, r * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                    } else if (maze[r][c] === '.') {
+                        ctx.fillStyle = '#ffb8db';
+                        ctx.beginPath();
+                        ctx.arc(c * TILE_SIZE + TILE_SIZE / 2, r * TILE_SIZE + TILE_SIZE / 2, 2, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+
+            ctx.fillStyle = '#ffff00';
+            ctx.beginPath();
+            ctx.arc(pacman.x * TILE_SIZE + TILE_SIZE / 2, pacman.y * TILE_SIZE + TILE_SIZE / 2, TILE_SIZE / 2 - 2, 0, Math.PI * 2);
+            ctx.fill();
+
+            ghosts.forEach(ghost => {
+                ctx.fillStyle = ghost.color;
+                ctx.fillRect(ghost.x * TILE_SIZE, ghost.y * TILE_SIZE, TILE_SIZE, TILE_SIZE);
+                ctx.fillStyle = '#fff';
+                ctx.fillRect(ghost.x * TILE_SIZE + 3, ghost.y * TILE_SIZE + 3, 3, 3);
+                ctx.fillRect(ghost.x * TILE_SIZE + 10, ghost.y * TILE_SIZE + 3, 3, 3);
+            });
+        }
+
+        document.addEventListener('keydown', e => {
+            if (e.key === 'ArrowLeft') { pacman.vx = -1; pacman.vy = 0; e.preventDefault(); }
+            if (e.key === 'ArrowRight') { pacman.vx = 1; pacman.vy = 0; e.preventDefault(); }
+            if (e.key === 'ArrowUp') { pacman.vx = 0; pacman.vy = -1; e.preventDefault(); }
+            if (e.key === 'ArrowDown') { pacman.vx = 0; pacman.vy = 1; e.preventDefault(); }
+        });
+
+        function gameLoop() {
+            if (gameRunning) {
+                update();
+            }
+            draw();
+
+            if (!gameRunning) {
+                ctx.fillStyle = 'rgba(0,0,0,0.7)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = pelletsRemaining === 0 ? '#00ff00' : '#ff0000';
+                ctx.font = 'bold 30px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(pelletsRemaining === 0 ? 'YOU WIN!' : 'GAME OVER', canvas.width / 2, canvas.height / 2);
+                return;
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        initPellets();
+        requestAnimationFrame(gameLoop);
+    </script>
+</body>
+</html>
