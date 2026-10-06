@@ -1,6 +1,6 @@
 import React, { Suspense, useRef, useEffect, useState, ReactNode } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { OrbitControls, Sky, Water } from '@react-three/drei'
+import { OrbitControls, Sky } from '@react-three/drei'
 import * as THREE from 'three'
 
 // Error Boundary
@@ -37,7 +37,60 @@ class ErrorBoundary extends React.Component<
   }
 }
 
-// Ocean water scene with realistic shader-based waves
+// Custom water shader with gerstner waves
+const WaterShader = {
+  vertexShader: `
+    uniform float time;
+    varying vec2 vUv;
+    varying float vWave;
+
+    vec3 gerstnerWave(vec4 wave, vec3 p) {
+      float steepness = wave.z;
+      float wavelength = wave.w;
+      float k = 2.0 * 3.14159 / wavelength;
+      float c = sqrt(9.8 / k);
+      vec2 d = normalize(wave.xy);
+      float f = k * (dot(d, p.xz) - c * time);
+      float a = steepness / k;
+      return vec3(
+        d.x * (a * cos(f)),
+        a * sin(f),
+        d.y * (a * cos(f))
+      );
+    }
+
+    void main() {
+      vec4 worldPos = modelMatrix * vec4(position, 1.0);
+      vec3 p = worldPos.xyz;
+
+      vec3 waveSum = vec3(0.0);
+      waveSum += gerstnerWave(vec4(1.0, 0.0, 0.25, 60.0), p);
+      waveSum += gerstnerWave(vec4(0.2, 0.4, 0.15, 31.0), p);
+      waveSum += gerstnerWave(vec4(0.2, 0.6, 0.1, 18.0), p);
+
+      p += waveSum;
+
+      vWave = waveSum.y;
+      vUv = uv;
+
+      gl_Position = projectionMatrix * viewMatrix * vec4(p, 1.0);
+    }
+  `,
+  fragmentShader: `
+    uniform vec3 waterColor;
+    varying vec2 vUv;
+    varying float vWave;
+
+    void main() {
+      vec3 color = mix(waterColor, vec3(0.1, 0.6, 1.0), vWave * 0.5 + 0.5);
+      float fresnel = pow(1.0 - dot(normalize(vec3(0, 1, 0)), normalize(vec3(vUv, 1))), 5.0);
+      color = mix(color, vec3(1.0), fresnel * 0.3);
+      gl_FragColor = vec4(color, 0.9);
+    }
+  `
+}
+
+// Ocean water scene with custom shader waves
 function OceanScene() {
   const waterRef = useRef<THREE.Mesh>(null)
 
@@ -45,7 +98,7 @@ function OceanScene() {
     if (waterRef.current) {
       const material = waterRef.current.material as THREE.ShaderMaterial
       if (material.uniforms.time) {
-        material.uniforms.time.value += state.delta * 0.5
+        material.uniforms.time.value += 0.01
       }
     }
   })
@@ -65,46 +118,32 @@ function OceanScene() {
 
       {/* Ambient + directional lighting */}
       <ambientLight intensity={0.6} />
-      <directionalLight position={[100, 30, 100]} intensity={2} castShadow />
+      <directionalLight position={[100, 30, 100]} intensity={2} />
 
-      {/* Water plane with shader */}
-      <Water
-        ref={waterRef}
-        args={[new THREE.PlaneGeometry(500, 500), {}]}
-        waterNormals={
-          new THREE.TextureLoader().load('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==')
-        }
-        sunDirection={new THREE.Vector3(100, 30, 100).normalize()}
-        sunColor={0xffd700}
-        waterColor={0x001e3d}
-        distance={500}
-        fog={false}
-        scale={1}
-        flowX={0.1}
-        flowY={0.1}
-      />
-
-      {/* Environment reflection sphere (fake reflections) */}
-      <mesh position={[0, 50, 0]}>
-        <sphereGeometry args={[100, 32, 32]} />
-        <meshStandardMaterial
-          color="#87ceeb"
-          metalness={0.3}
-          roughness={0.7}
-          emissive="#c0e0ff"
-          emissiveIntensity={0.1}
+      {/* Water plane with custom shader */}
+      <mesh ref={waterRef} rotation={[-Math.PI / 2, 0, 0]}>
+        <planeGeometry args={[300, 300, 256, 256]} />
+        <shaderMaterial
+          vertexShader={WaterShader.vertexShader}
+          fragmentShader={WaterShader.fragmentShader}
+          uniforms={{
+            time: { value: 0 },
+            waterColor: { value: new THREE.Color(0x001e3d) },
+          }}
+          transparent
+          depthWrite={false}
         />
       </mesh>
 
-      {/* Underwater volumetric effect */}
-      <mesh position={[0, -50, 0]}>
-        <planeGeometry args={[500, 500]} />
+      {/* Environment reflection sphere */}
+      <mesh position={[0, 60, 0]}>
+        <sphereGeometry args={[120, 32, 32]} />
         <meshStandardMaterial
-          color="#001a33"
-          metalness={0}
-          roughness={1}
-          transparent
-          opacity={0.15}
+          color="#87ceeb"
+          metalness={0.2}
+          roughness={0.8}
+          emissive="#c0e0ff"
+          emissiveIntensity={0.05}
         />
       </mesh>
 
@@ -115,7 +154,7 @@ function OceanScene() {
         enableZoom
         enablePan
         minDistance={20}
-        maxDistance={100}
+        maxDistance={150}
       />
 
       <color attach="background" args={['#87ceeb']} />
