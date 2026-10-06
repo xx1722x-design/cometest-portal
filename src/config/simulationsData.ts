@@ -13,9 +13,20 @@ export interface SimulationItem {
 
 export const SIMULATIONS_DATA: SimulationItem[] = [
   {
+    id: 'ocean-water-simulation',
+    title: 'Premium Ocean Water Simulation',
+    description: '🌊 Realistic shader-based ocean with dynamic waves, sky environment, and advanced lighting. Pure Three.js water physics rendering.',
+    category: 'physics_chemistry',
+    icon: '🌊',
+    path: '/simulation/ocean-water-simulation',
+    component: 'OceanWaterSimulation',
+    tags: ['3d', 'water', 'physics', 'shaders', 'interactive', 'premium', 'ocean'],
+    play_count: 0,
+  },
+  {
     id: 'fluid-particle-system',
     title: 'Interactive Fluid Particle System',
-    description: '✨ Premium 3D particle fluid with 5000+ glowing particles reacting to mouse movement. Features dynamic Bloom post-processing and interactive orbit controls.',
+    description: '✨ Premium 3D particle fluid with 5000+ glowing particles reacting to mouse movement. Features additive blending for native glow effect.',
     category: 'physics_chemistry',
     icon: '✨',
     path: '/simulation/fluid-particle-system',

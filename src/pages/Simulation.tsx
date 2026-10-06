@@ -59,6 +59,13 @@ const FluidParticleSystem = lazy(() =>
   }))
 )
 
+// Premium Ocean Water Simulation
+const OceanWaterSimulation = lazy(() =>
+  import('../components/simulations/OceanWaterSimulation').then((m) => ({
+    default: m.OceanWaterSimulation,
+  }))
+)
+
 export function Simulation() {
   const navigate = useNavigate()
   const { simulationId } = useParams<{ simulationId: string }>()
@@ -82,6 +89,12 @@ export function Simulation() {
 
   const renderSimulation = () => {
     switch (simulationId) {
+      case 'ocean-water-simulation':
+        return (
+          <Suspense fallback={<div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Loading Ocean Simulation...</div>}>
+            <OceanWaterSimulation />
+          </Suspense>
+        )
       case 'fluid-particle-system':
         return (
           <Suspense fallback={<div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Loading Fluid Simulation...</div>}>

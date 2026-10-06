@@ -28,8 +28,14 @@ export function Index() {
     })) as any
     const sims = SIMULATIONS_DATA
 
-    // 🔥 CRITICAL: simulations은 최신 항목을 index 0에 배치하므로, sims[0]이 맨 앞에 와야 함
-    return [sims[0], ...games, ...sims.slice(1)]
+    // 🔥 CRITICAL: Keep top simulations visible at top, not buried under all games
+    // Order: top 3 sims → top 6 games → remaining items
+    return [
+      ...sims.slice(0, 3),
+      ...games.slice(0, 6),
+      ...sims.slice(3),
+      ...games.slice(6),
+    ]
   }, [])
 
   // 필터링된 아이템 - raw data를 필터링 없이 직접 렌더링
