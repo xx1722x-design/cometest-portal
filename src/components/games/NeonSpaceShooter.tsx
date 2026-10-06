@@ -139,15 +139,17 @@ export function NeonSpaceShooter() {
         graphics.fillCircle(25, 20, 3)
 
         // Tentacle-like protrusions
-        graphics.strokeStyle(0xff88ff, 2, 1)
+        graphics.lineStyle(2, 0xff88ff, 1)
         graphics.beginPath()
         graphics.moveTo(10, 15)
-        graphics.quadraticCurveTo(5, 25, 8, 35)
+        graphics.lineTo(5, 25)
+        graphics.lineTo(8, 35)
         graphics.strokePath()
 
         graphics.beginPath()
         graphics.moveTo(40, 15)
-        graphics.quadraticCurveTo(45, 25, 42, 35)
+        graphics.lineTo(45, 25)
+        graphics.lineTo(42, 35)
         graphics.strokePath()
 
         graphics.generateTexture('enemyShip', 50, 50)
@@ -175,8 +177,8 @@ export function NeonSpaceShooter() {
         const bulletGraphics = this.make.graphics({ x: 0, y: 0 }, false)
         bulletGraphics.fillStyle(0x00ff88, 1)
         bulletGraphics.fillCircle(5, 5, 5)
-        bulletGraphics.strokeStyle(0x00ffff, 1, 1)
-        bulletGraphics.strokeCircleShape(new Phaser.Geom.Circle(5, 5, 5))
+        bulletGraphics.lineStyle(1, 0x00ffff, 1)
+        bulletGraphics.strokeCircle(5, 5, 5)
         bulletGraphics.generateTexture('bullet', 10, 10)
         bulletGraphics.destroy()
 
@@ -230,7 +232,9 @@ export function NeonSpaceShooter() {
         }
 
         // Update exhaust emitter position
-        this.exhaustEmitter.emitZoneData.source.setPosition(this.player.x - 25, this.player.y + 20)
+        if (this.exhaustEmitter && this.exhaustEmitter.emitZone) {
+          ;(this.exhaustEmitter.emitZone as any).source?.setPosition?.(this.player.x - 25, this.player.y + 20)
+        }
 
         // Shoot on space
         if (spaceKey?.isDown) {
