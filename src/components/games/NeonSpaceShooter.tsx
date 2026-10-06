@@ -197,7 +197,7 @@ export function NeonSpaceShooter() {
       }
 
       update() {
-        if (!this.player || !this.exhaustEmitter) return
+        if (!this.player) return
 
         const cursors = this.input.keyboard?.createCursorKeys()
         const aKey = this.input.keyboard?.addKey('A')
