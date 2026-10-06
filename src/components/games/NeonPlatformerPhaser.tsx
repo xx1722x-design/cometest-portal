@@ -17,11 +17,12 @@ export function NeonPlatformerPhaser() {
       platforms: Phaser.Physics.Arcade.StaticGroup | null = null
       enemies: Phaser.Physics.Arcade.Group | null = null
       coins: Phaser.Physics.Arcade.Group | null = null
+      portal: Phaser.Physics.Arcade.Sprite | null = null
       score = 0
       level = 1
       cursors: any = null
-      canJump = true
-      spacePressed = false
+      isJumping = false
+      coinsCollected = 0
 
       constructor() {
         super({ key: 'NeonPlatformerScene' })
@@ -29,6 +30,9 @@ export function NeonPlatformerPhaser() {
 
       create() {
         this.cameras.main.setBackgroundColor('#0a0a1a')
+
+        // HUGE WORLD: Set physics world bounds for scrolling
+        this.physics.world.setBounds(0, 0, 2000, 3000)
 
         // Create procedural level
         this.platforms = this.physics.add.staticGroup()
@@ -45,19 +49,28 @@ export function NeonPlatformerPhaser() {
         this.enemies = this.physics.add.group()
         this.generateEnemies()
 
+        // Portal at the top
+        this.createPortal()
+
+        // Camera follows player
+        if (this.player) {
+          this.cameras.main.startFollow(this.player)
+          this.cameras.main.setBounds(0, 0, 2000, 3000)
+        }
+
         // Input
         this.cursors = this.input.keyboard?.createCursorKeys()
         this.input.keyboard?.addKey('SPACE')
 
         // Collisions
-        if (this.player) {
+        if (this.player && this.platforms) {
           this.physics.add.collider(this.player, this.platforms, () => {
-            this.canJump = true
+            this.isJumping = false
           })
         }
 
         if (this.player && this.coins) {
-          this.physics.add.overlap(this.player, this.coins, (player: any, coin: any) => {
+          this.physics.add.overlap(this.player, this.coins, (_: any, coin: any) => {
             this.handleCoinPickup(coin)
           })
         }
@@ -67,21 +80,43 @@ export function NeonPlatformerPhaser() {
             this.handleEnemyCollision()
           })
         }
+
+        if (this.player && this.portal) {
+          this.physics.add.overlap(this.player, this.portal, () => {
+            this.levelUp()
+          })
+        }
       }
 
       createPlayerShip() {
         // Create cyan player sprite
         const graphics = this.make.graphics({ x: 0, y: 0 }, false)
         graphics.fillStyle(0x00ffff, 1)
-        graphics.fillRect(0, 0, 30, 40)
+        graphics.fillRect(0, 0, 24, 32)
         graphics.fillStyle(0x0088ff, 1)
-        graphics.fillCircle(15, 10, 6)
-        graphics.generateTexture('playerShip', 30, 40)
+        graphics.fillCircle(12, 8, 5)
+        graphics.generateTexture('playerShip', 24, 32)
         graphics.destroy()
 
-        this.player = this.physics.add.sprite(100, 400, 'playerShip')
+        this.player = this.physics.add.sprite(100, 2800, 'playerShip')
         this.player.setBounce(0)
         this.player.setCollideWorldBounds(true)
+      }
+
+      createPortal() {
+        // Glowing portal at top
+        const portalGraphics = this.make.graphics({ x: 0, y: 0 }, false)
+        portalGraphics.fillStyle(0xff00ff, 1)
+        portalGraphics.fillCircle(24, 24, 20)
+        portalGraphics.lineStyle(3, 0x00ffff, 1)
+        portalGraphics.strokeCircle(24, 24, 20)
+        portalGraphics.lineStyle(2, 0xffff00, 1)
+        portalGraphics.strokeCircle(24, 24, 12)
+        portalGraphics.generateTexture('portal', 48, 48)
+        portalGraphics.destroy()
+
+        this.portal = this.physics.add.sprite(1000, 100, 'portal')
+        this.portal.setImmovable(true)
       }
 
       generateLevel() {
@@ -90,23 +125,21 @@ export function NeonPlatformerPhaser() {
         // Ground
         const groundGraphics = this.make.graphics({ x: 0, y: 0 }, false)
         groundGraphics.fillStyle(0x00ff88, 1)
-        groundGraphics.fillRect(0, 0, 800, 16)
+        groundGraphics.fillRect(0, 0, 2000, 20)
         groundGraphics.lineStyle(2, 0x00ffff, 1)
-        groundGraphics.strokeRect(0, 0, 800, 16)
-        groundGraphics.generateTexture('ground', 800, 16)
+        groundGraphics.strokeRect(0, 0, 2000, 20)
+        groundGraphics.generateTexture('ground', 2000, 20)
         groundGraphics.destroy()
 
-        this.platforms.create(400, 568, 'ground').setScale(1).refreshBody()
+        this.platforms.create(1000, 2920, 'ground').setScale(1).refreshBody()
 
-        // Procedural platforms - increasing difficulty per level
-        const platformCount = 5 + this.level * 2
-        let currentX = 100
-        let currentY = 480
+        // Procedural climbing platforms - UPWARD progression
+        const platformCount = 20 + this.level * 5
+        let currentX = 500
+        let currentY = 2750
+        const platformWidth = 80
 
         for (let i = 0; i < platformCount; i++) {
-          const platformWidth = 80 + Math.random() * 40
-
-          // Draw neon platform with gradient effect
           const platformGraphics = this.make.graphics({ x: 0, y: 0 }, false)
           platformGraphics.fillStyle(0x00ff88, 1)
           platformGraphics.fillRect(0, 0, platformWidth, 16)
@@ -119,22 +152,23 @@ export function NeonPlatformerPhaser() {
           platform.setScale(1)
           platform.refreshBody()
 
-          currentX += platformWidth + 40 + Math.random() * 60
-          currentY -= 60 + Math.random() * 40
-
-          if (currentX > 700) {
-            currentX = 100
-            currentY -= 80
+          // Zig-zag pattern upward
+          if (i % 2 === 0) {
+            currentX = Phaser.Math.Between(200, 600)
+          } else {
+            currentX = Phaser.Math.Between(1200, 1800)
           }
+          currentY -= 80 + Math.random() * 40
         }
       }
 
       generateCoins() {
         if (!this.coins) return
 
-        for (let i = 0; i < 10 + this.level * 3; i++) {
-          const x = Phaser.Math.Between(50, 750)
-          const y = Phaser.Math.Between(80, 500)
+        const coinCount = 15 + this.level * 5
+        for (let i = 0; i < coinCount; i++) {
+          const x = Phaser.Math.Between(200, 1800)
+          const y = Phaser.Math.Between(500, 2800)
 
           const coinGraphics = this.make.graphics({ x: 0, y: 0 }, false)
           coinGraphics.fillStyle(0xffff00, 1)
@@ -145,53 +179,53 @@ export function NeonPlatformerPhaser() {
           coinGraphics.destroy()
 
           const coin = this.coins.create(x, y, 'coin')
-          coin.setBounce(0.5)
-          coin.setVelocity(Phaser.Math.Between(-50, 50), Phaser.Math.Between(-100, 0))
+          coin.setBounce(0.3)
         }
       }
 
       generateEnemies() {
         if (!this.enemies) return
 
-        const enemyCount = 2 + this.level
+        const enemyCount = 3 + this.level
         for (let i = 0; i < enemyCount; i++) {
-          const x = Phaser.Math.Between(100, 700)
-          const y = Phaser.Math.Between(100, 400)
+          const x = Phaser.Math.Between(200, 1800)
+          const y = Phaser.Math.Between(500, 2500)
 
           const enemyGraphics = this.make.graphics({ x: 0, y: 0 }, false)
           enemyGraphics.fillStyle(0xff00ff, 1)
-          enemyGraphics.fillCircle(10, 10, 8)
-          enemyGraphics.lineStyle(2, 0xff88ff, 1)
-          enemyGraphics.strokeCircle(10, 10, 8)
+          enemyGraphics.fillRect(0, 0, 20, 20)
+          enemyGraphics.fillStyle(0xffff00, 1)
+          enemyGraphics.fillCircle(10, 8, 3)
           enemyGraphics.generateTexture('enemy', 20, 20)
           enemyGraphics.destroy()
 
           const enemy = this.enemies.create(x, y, 'enemy')
-          enemy.setBounce(1)
           enemy.setCollideWorldBounds(true)
-          enemy.setVelocity(Phaser.Math.Between(-100, 100), Phaser.Math.Between(-50, 50))
+          enemy.setBounce(1)
+          enemy.setVelocityX(Phaser.Math.Between(80, 150) * (Math.random() > 0.5 ? 1 : -1))
         }
       }
 
       handleCoinPickup(coin: any) {
         coin.destroy()
         this.score += 10
+        this.coinsCollected++
         setScore(this.score)
-
-        if (this.coins && this.coins.children.size === 0) {
-          this.levelUp()
-        }
       }
 
       handleEnemyCollision() {
         this.score = Math.max(0, this.score - 50)
         setScore(this.score)
-        this.player?.setPosition(100, 400)
+        if (this.player) {
+          this.player.setPosition(100, 2800)
+        }
       }
 
       levelUp() {
         this.level++
         setLevel(this.level)
+        this.score += 500
+        setScore(this.score)
         this.scene.restart()
       }
 
@@ -202,35 +236,33 @@ export function NeonPlatformerPhaser() {
         this.player.setVelocityX(0)
 
         if (this.cursors?.left.isDown) {
-          this.player.setVelocityX(-300)
+          this.player.setVelocityX(-250)
         } else if (this.cursors?.right.isDown) {
-          this.player.setVelocityX(300)
+          this.player.setVelocityX(250)
         }
 
-        // Jump (space or up)
+        // Jump
         const spaceKey = this.input.keyboard?.addKey('SPACE')
-        if ((this.cursors?.up.isDown || spaceKey?.isDown) && this.canJump) {
-          this.player.setVelocityY(-400)
-          this.canJump = false
-        }
-
-        // Reset jump when not pressing
-        if (!this.cursors?.up.isDown && !spaceKey?.isDown) {
-          this.canJump = false
+        if ((this.cursors?.up.isDown || spaceKey?.isDown) && !this.isJumping) {
+          this.player.setVelocityY(-350)
+          this.isJumping = true
         }
 
         // Respawn if fall off
-        if (this.player.y > 600) {
-          this.player.setPosition(100, 400)
+        if (this.player.y > 3100) {
           this.score = Math.max(0, this.score - 25)
           setScore(this.score)
+          this.player.setPosition(100, 2800)
+          this.player.setVelocity(0, 0)
         }
 
-        // Update enemies
+        // Update enemies - patrol left/right
         if (this.enemies) {
           Array.from(this.enemies.children).forEach((enemy: any) => {
-            if (enemy && (enemy.x < 50 || enemy.x > 750)) {
-              enemy.setVelocityX(-enemy.body.velocity.x)
+            if (enemy) {
+              if (enemy.x < 250 || enemy.x > 1750) {
+                enemy.setVelocityX(-enemy.body.velocity.x)
+              }
             }
           })
         }
@@ -246,7 +278,7 @@ export function NeonPlatformerPhaser() {
       physics: {
         default: 'arcade',
         arcade: {
-          gravity: { x: 0, y: 300 },
+          gravity: { x: 0, y: 320 },
           debug: false,
         },
       },
@@ -317,7 +349,7 @@ export function NeonPlatformerPhaser() {
           zIndex: 100,
         }}
       >
-        ← → Move • SPACE/↑ Jump • Collect coins!
+        ← → Move • SPACE/↑ Jump • Climb to the portal!
       </div>
     </div>
   )

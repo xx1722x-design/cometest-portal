@@ -28,10 +28,16 @@ export function Index() {
     })) as any
     const sims = SIMULATIONS_DATA
 
-    // 🔥 CRITICAL: Newest item ALWAYS at [0], ALL simulations at top
-    // Order: sims[0..N] (newest first) → games[0..M] (newest first)
-    // CuratedGrid adds STORE_CARD at position 0, so: STORE | sims[0] | sims[1] | sims[2] | games[0] | ...
-    return [...sims, ...games]
+    // 🔥 CRITICAL: GAMES FIRST (newest game at [0]) - interleave with sims
+    // Order: Newest game, Newest sim, 2nd newest game, 2nd newest sim, etc.
+    // CuratedGrid adds STORE_CARD at position 0, so: STORE | neon-platformer | ocean-water | neon-shooter | fluid-particle | ...
+    const merged = []
+    const maxLen = Math.max(games.length, sims.length)
+    for (let i = 0; i < maxLen; i++) {
+      if (i < games.length) merged.push(games[i])
+      if (i < sims.length) merged.push(sims[i])
+    }
+    return merged
   }, [])
 
   // 필터링된 아이템 - raw data를 필터링 없이 직접 렌더링
