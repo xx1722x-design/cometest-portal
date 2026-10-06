@@ -101,8 +101,8 @@ export function NeonSpaceShooter() {
         enemyGraphics.setPosition(x, y)
         enemyGraphics.setDepth(1)
 
-        const enemyBody = this.physics.add.existing(enemyGraphics)
-        enemyBody.setVelocityY(200 + this.wave * 30)
+        const enemyBody = this.physics.add.existing(enemyGraphics) as Phaser.Physics.Arcade.Body
+        ;(enemyBody as any).setVelocityY(200 + this.wave * 30)
         enemyBody.setData('graphics', enemyGraphics)
         this.enemies.add(enemyBody)
         this.enemyCount++
@@ -184,7 +184,7 @@ export function NeonSpaceShooter() {
 
         // Remove off-screen bullets
         if (this.bullets) {
-          this.bullets.children.entries.forEach((bullet: any) => {
+          Array.from(this.bullets.children).forEach((bullet: any) => {
             if (bullet && bullet.y < -50) {
               if (bullet.getData('graphics')) bullet.getData('graphics').destroy()
               bullet.destroy()
@@ -194,7 +194,7 @@ export function NeonSpaceShooter() {
 
         // Remove off-screen enemies
         if (this.enemies) {
-          this.enemies.children.entries.forEach((enemy: any) => {
+          Array.from(this.enemies.children).forEach((enemy: any) => {
             if (enemy && enemy.y > 650) {
               if (enemy.getData('graphics')) enemy.getData('graphics').destroy()
               enemy.destroy()
