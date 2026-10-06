@@ -12,6 +12,17 @@ export interface GameItem {
 
 export const GAMES_DATA: GameItem[] = [
   {
+    id: 'neon-platformer',
+    title: 'Neon Platformer',
+    description: '🎮 Premium 2D platformer - Jump through neon levels, collect coins, avoid enemies. Procedurally generated difficulty!',
+    thumbnail: '🎮',
+    category: 'web_games',
+    icon: '🎮',
+    path: '/game/neon-platformer',
+    tags: ['platformer', 'arcade', 'phaser', 'action', 'premium'],
+    play_count: 0,
+  },
+  {
     id: 'neon-space-shooter',
     title: 'Neon Space Shooter',
     description: '💥 Premium 2D arcade shooter - Arrow keys to move, SPACE to shoot. Destroy waves of neon enemies in a glowing void!',

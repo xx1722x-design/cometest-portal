@@ -28,14 +28,10 @@ export function Index() {
     })) as any
     const sims = SIMULATIONS_DATA
 
-    // 🔥 CRITICAL: Keep top simulations visible at top, not buried under all games
-    // Order: top 3 sims → top 6 games → remaining items
-    return [
-      ...sims.slice(0, 3),
-      ...games.slice(0, 6),
-      ...sims.slice(3),
-      ...games.slice(6),
-    ]
+    // 🔥 CRITICAL: Newest item ALWAYS at [0], ALL simulations at top
+    // Order: sims[0..N] (newest first) → games[0..M] (newest first)
+    // CuratedGrid adds STORE_CARD at position 0, so: STORE | sims[0] | sims[1] | sims[2] | games[0] | ...
+    return [...sims, ...games]
   }, [])
 
   // 필터링된 아이템 - raw data를 필터링 없이 직접 렌더링
