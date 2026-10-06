@@ -67,8 +67,12 @@ export function BreakoutArcadePhaser() {
         this.input.keyboard?.addKey('SPACE')
 
         // Collisions
-        this.physics.add.collider(this.ball, this.paddle, this.handlePaddleHit, undefined, this)
-        this.physics.add.collider(this.ball, this.bricks, this.handleBrickHit, undefined, this)
+        if (this.ball && this.paddle) {
+          this.physics.add.collider(this.ball, this.paddle, () => this.handlePaddleHit())
+        }
+        if (this.ball && this.bricks) {
+          this.physics.add.collider(this.ball, this.bricks, (_: any, brick: any) => this.handleBrickHit(_,brick))
+        }
 
         // Show start message
         this.add.text(400, 300, 'PRESS SPACE TO LAUNCH', {
