@@ -66,6 +66,13 @@ const OceanWaterSimulation = lazy(() =>
   }))
 )
 
+// Premium Physics Blocks Simulation
+const PhysicsBlocksSimulation = lazy(() =>
+  import('../components/simulations/PhysicsBlocksSimulation').then((m) => ({
+    default: m.PhysicsBlocksSimulation,
+  }))
+)
+
 export function Simulation() {
   const navigate = useNavigate()
   const { simulationId } = useParams<{ simulationId: string }>()
@@ -89,6 +96,12 @@ export function Simulation() {
 
   const renderSimulation = () => {
     switch (simulationId) {
+      case 'physics-blocks-simulation':
+        return (
+          <Suspense fallback={<div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Loading Physics Simulation...</div>}>
+            <PhysicsBlocksSimulation />
+          </Suspense>
+        )
       case 'ocean-water-simulation':
         return (
           <Suspense fallback={<div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>Loading Ocean Simulation...</div>}>

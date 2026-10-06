@@ -13,6 +13,17 @@ export interface SimulationItem {
 
 export const SIMULATIONS_DATA: SimulationItem[] = [
   {
+    id: 'physics-blocks-simulation',
+    title: 'Interactive Physics Blocks Tower',
+    description: '🎯 Premium 3D physics - Destructible tower of glowing blocks. Drag blocks & throw the magenta ball to break the neon structure!',
+    category: 'physics_chemistry',
+    icon: '🎯',
+    path: '/simulation/physics-blocks-simulation',
+    component: 'PhysicsBlocksSimulation',
+    tags: ['3d', 'physics', 'interactive', 'destruction', 'premium', 'cannon'],
+    play_count: 0,
+  },
+  {
     id: 'ocean-water-simulation',
     title: 'Premium Ocean Water Simulation',
     description: '🌊 Realistic shader-based ocean with dynamic waves, sky environment, and advanced lighting. Pure Three.js water physics rendering.',
