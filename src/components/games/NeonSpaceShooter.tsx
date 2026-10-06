@@ -13,12 +13,9 @@ export function NeonSpaceShooter() {
     gameInitialized.current = true
 
     class NeonShooterScene extends Phaser.Scene {
-      playerShip: Phaser.Geom.Triangle | null = null
-      playerBody: Phaser.Physics.Arcade.Body | null = null
+      player: Phaser.Physics.Arcade.Sprite | null = null
       bullets: Phaser.Physics.Arcade.Group | null = null
       enemies: Phaser.Physics.Arcade.Group | null = null
-      playerGraphics: Phaser.GameObjects.Graphics | null = null
-      gameGraphics: Phaser.GameObjects.Graphics | null = null
       score = 0
       health = 100
       wave = 1
@@ -32,7 +29,7 @@ export function NeonSpaceShooter() {
       create() {
         this.cameras.main.setBackgroundColor('#0a0a1a')
 
-        // Parallax starfield background
+        // Parallax starfield
         for (let i = 0; i < 200; i++) {
           const x = Phaser.Math.Between(0, 800)
           const y = Phaser.Math.Between(0, 600)
@@ -40,30 +37,19 @@ export function NeonSpaceShooter() {
           this.add.circle(x, y, size, 0xffffff).setDepth(-2)
         }
 
-        // Create graphics object for dynamic rendering
-        this.gameGraphics = this.add.graphics()
-        this.gameGraphics.setDepth(0)
+        // Create a simple cyan rectangle for the player
+        this.player = this.physics.add.sprite(400, 550, undefined)
+        this.player.setDisplaySize(40, 40)
+        this.player.setCollideWorldBounds(true)
+        this.player.setBounce(0, 0)
 
-        // Player ship (cyan triangle at bottom center)
-        this.playerGraphics = this.add.graphics()
-        this.playerGraphics.fillStyle(0x00ffff, 1)
-        this.playerGraphics.beginPath()
-        this.playerGraphics.moveTo(20, 0) // Top point
-        this.playerGraphics.lineTo(0, 40) // Bottom left
-        this.playerGraphics.lineTo(40, 40) // Bottom right
-        this.playerGraphics.closePath()
-        this.playerGraphics.fillPath()
-        this.playerGraphics.setPosition(380, 550) // Bottom center (400 - 20 width/2)
-        this.playerGraphics.setDepth(1)
-
-        // Create physics body for player
-        const playerTriangle = new Phaser.Geom.Triangle(20, 0, 0, 40, 40, 40)
-        this.playerBody = this.physics.add.existing(this.playerGraphics)
-        this.playerBody.setCollideWorldBounds(true)
-        this.playerBody.setBounce(0, 0)
-        this.playerBody.setDamping(true)
-        this.playerBody.setDrag(0.99)
-        this.playerBody.setData('health', 100)
+        // Draw player with graphics
+        const playerGraphics = this.make.graphics({ x: 0, y: 0 }, false)
+        playerGraphics.fillStyle(0x00ffff, 1)
+        playerGraphics.fillRect(0, 0, 40, 40)
+        playerGraphics.generateTexture('player', 40, 40)
+        playerGraphics.destroy()
+        this.player.setTexture('player')
 
         // Bullets
         this.bullets = this.physics.add.group()
@@ -76,11 +62,11 @@ export function NeonSpaceShooter() {
           this.handleBulletHit(bullet, enemy)
         })
 
-        this.physics.add.overlap(this.playerGraphics, this.enemies, (player: any, enemy: any) => {
+        this.physics.add.overlap(this.player, this.enemies, (player: any, enemy: any) => {
           this.handlePlayerHit(player, enemy)
         })
 
-        // Spawn enemies
+        // Spawn enemies every 1 second
         this.time.addEvent({
           delay: 1000,
           callback: () => this.spawnEnemy(),
@@ -94,43 +80,41 @@ export function NeonSpaceShooter() {
         const x = Phaser.Math.Between(50, 750)
         const y = Phaser.Math.Between(-50, -20)
 
-        // Create magenta rectangle for enemy
-        const enemyGraphics = this.add.graphics()
+        const enemy = this.enemies.create(x, y, undefined) as Phaser.Physics.Arcade.Sprite
+        enemy.setDisplaySize(30, 30)
+        enemy.setVelocityY(200 + this.wave * 30)
+
+        // Draw enemy with graphics (magenta)
+        const enemyGraphics = this.make.graphics({ x: 0, y: 0 }, false)
         enemyGraphics.fillStyle(0xff00ff, 1)
         enemyGraphics.fillRect(0, 0, 30, 30)
-        enemyGraphics.setPosition(x, y)
-        enemyGraphics.setDepth(1)
+        enemyGraphics.generateTexture('enemy', 30, 30)
+        enemyGraphics.destroy()
+        enemy.setTexture('enemy')
 
-        const enemyBody = this.physics.add.existing(enemyGraphics) as Phaser.Physics.Arcade.Body
-        ;(enemyBody as any).setVelocityY(200 + this.wave * 30)
-        enemyBody.setData('graphics', enemyGraphics)
-        this.enemies.add(enemyBody)
         this.enemyCount++
       }
 
       shoot() {
-        if (!this.playerGraphics || !this.bullets || this.lastShootTime + 100 > Date.now()) return
+        if (!this.player || !this.bullets || this.lastShootTime + 150 > Date.now()) return
         this.lastShootTime = Date.now()
 
-        const bulletGraphics = this.add.graphics()
+        const bullet = this.bullets.create(this.player.x, this.player.y - 25, undefined) as Phaser.Physics.Arcade.Sprite
+        bullet.setDisplaySize(10, 10)
+        bullet.setVelocityY(-500)
+
+        // Draw bullet with graphics (green)
+        const bulletGraphics = this.make.graphics({ x: 0, y: 0 }, false)
         bulletGraphics.fillStyle(0x00ff88, 1)
         bulletGraphics.fillCircle(5, 5, 5)
-        bulletGraphics.setPosition(this.playerGraphics.x + 15, this.playerGraphics.y - 20)
-        bulletGraphics.setDepth(1)
-
-        const bulletBody = this.physics.add.existing(bulletGraphics)
-        bulletBody.setVelocityY(-500)
-        bulletBody.setData('graphics', bulletGraphics)
-        this.bullets.add(bulletBody)
+        bulletGraphics.generateTexture('bullet', 10, 10)
+        bulletGraphics.destroy()
+        bullet.setTexture('bullet')
       }
 
       handleBulletHit(bullet: any, enemy: any) {
-        if (bullet && bullet.getData('graphics')) {
-          bullet.getData('graphics').destroy()
-          bullet.destroy()
-        }
-        if (enemy && enemy.getData('graphics')) {
-          enemy.getData('graphics').destroy()
+        if (bullet) bullet.destroy()
+        if (enemy) {
           enemy.destroy()
           this.score += 10
           setScore(this.score)
@@ -141,10 +125,7 @@ export function NeonSpaceShooter() {
       handlePlayerHit(player: any, enemy: any) {
         this.health -= 10
         setHealth(Math.max(0, this.health))
-        if (enemy && enemy.getData('graphics')) {
-          enemy.getData('graphics').destroy()
-          enemy.destroy()
-        }
+        if (enemy) enemy.destroy()
 
         if (this.health <= 0) {
           this.scene.restart()
@@ -157,46 +138,41 @@ export function NeonSpaceShooter() {
       }
 
       update() {
-        if (!this.playerGraphics || !this.playerBody) return
+        if (!this.player) return
 
-        // Player movement - direct velocity update
         const cursors = this.input.keyboard?.createCursorKeys()
         const aKey = this.input.keyboard?.addKey('A')
         const dKey = this.input.keyboard?.addKey('D')
         const spaceKey = this.input.keyboard?.addKey('SPACE')
 
-        this.playerBody.setVelocityX(0)
+        // Reset velocity
+        this.player.setVelocityX(0)
 
+        // Move left/right
         if (cursors?.left.isDown || aKey?.isDown) {
-          this.playerBody.setVelocityX(-250)
+          this.player.setVelocityX(-300)
+        } else if (cursors?.right.isDown || dKey?.isDown) {
+          this.player.setVelocityX(300)
         }
-        if (cursors?.right.isDown || dKey?.isDown) {
-          this.playerBody.setVelocityX(250)
-        }
-
-        // Keep player on screen
-        this.playerGraphics.x = Phaser.Math.Clamp(this.playerGraphics.x, 0, 760)
 
         // Shoot on space
         if (spaceKey?.isDown) {
           this.shoot()
         }
 
-        // Remove off-screen bullets
+        // Clean up off-screen bullets
         if (this.bullets) {
           Array.from(this.bullets.children).forEach((bullet: any) => {
             if (bullet && bullet.y < -50) {
-              if (bullet.getData('graphics')) bullet.getData('graphics').destroy()
               bullet.destroy()
             }
           })
         }
 
-        // Remove off-screen enemies
+        // Clean up off-screen enemies
         if (this.enemies) {
           Array.from(this.enemies.children).forEach((enemy: any) => {
             if (enemy && enemy.y > 650) {
-              if (enemy.getData('graphics')) enemy.getData('graphics').destroy()
               enemy.destroy()
               this.enemyCount--
             }
@@ -214,7 +190,7 @@ export function NeonSpaceShooter() {
       physics: {
         default: 'arcade',
         arcade: {
-          gravity: { x: 0, y: 0 },
+          gravity: { y: 0 },
           debug: false,
         },
       },
@@ -263,7 +239,7 @@ export function NeonSpaceShooter() {
     >
       <div id="neon-shooter-container" ref={gameContainerRef} style={{ width: '800px', height: '600px', border: '2px solid #00ffff' }} />
 
-      {/* HUD Overlay */}
+      {/* HUD */}
       <div
         style={{
           position: 'absolute',
@@ -277,9 +253,7 @@ export function NeonSpaceShooter() {
           zIndex: 100,
         }}
       >
-        <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', color: '#00ff88', fontWeight: '700' }}>
-          💥 Neon Space Shooter
-        </h3>
+        <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', color: '#00ff88', fontWeight: '700' }}>💥 Neon Space Shooter</h3>
         <p style={{ margin: '0 0 4px 0', fontSize: '12px', color: '#888' }}>Score: {score}</p>
         <p style={{ margin: '0', fontSize: '12px', color: health > 30 ? '#00ff88' : '#ff4444' }}>Health: {health}%</p>
       </div>
@@ -300,10 +274,10 @@ export function NeonSpaceShooter() {
           zIndex: 100,
         }}
       >
-        ← → Move • SPACE Shoot • Destroy enemies!
+        ← → Move • SPACE Shoot
       </div>
 
-      {/* Game Over Screen */}
+      {/* Game Over */}
       {health === 0 && (
         <div
           style={{
@@ -324,34 +298,10 @@ export function NeonSpaceShooter() {
           <h2 style={{ margin: '0 0 16px 0', fontSize: '32px', color: '#ff4444', fontWeight: '700' }}>Game Over</h2>
           <p style={{ margin: '0 0 24px 0', fontSize: '20px', color: '#fff', fontWeight: 'bold' }}>Final Score: {score}</p>
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
-            <button
-              onClick={handleRestart}
-              style={{
-                padding: '10px 24px',
-                backgroundColor: '#00ff88',
-                color: '#0a0a1a',
-                border: 'none',
-                borderRadius: '8px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                fontSize: '14px',
-              }}
-            >
+            <button onClick={handleRestart} style={{ padding: '10px 24px', backgroundColor: '#00ff88', color: '#0a0a1a', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}>
               Restart
             </button>
-            <button
-              onClick={handleQuit}
-              style={{
-                padding: '10px 24px',
-                backgroundColor: '#ff4444',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '8px',
-                fontWeight: '600',
-                cursor: 'pointer',
-                fontSize: '14px',
-              }}
-            >
+            <button onClick={handleQuit} style={{ padding: '10px 24px', backgroundColor: '#ff4444', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer' }}>
               Quit
             </button>
           </div>
