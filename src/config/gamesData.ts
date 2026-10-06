@@ -12,6 +12,17 @@ export interface GameItem {
 
 export const GAMES_DATA: GameItem[] = [
   {
+    id: 'neon-dodge',
+    title: 'Neon Dodge Arcade',
+    description: '⚡ Premium arcade dodger - Navigate a neon minefield with precision. Obstacles spawn faster as your score increases. One hit and it\'s game over!',
+    thumbnail: '⚡',
+    category: 'web_games',
+    icon: '⚡',
+    path: '/game/neon-dodge',
+    tags: ['action', 'arcade', 'neon', 'phaser', 'dodging', 'premium'],
+    play_count: 0,
+  },
+  {
     id: 'breakout-arcade',
     title: 'Breakout Arcade',
     description: '🎮 Premium brick breaker - Control the paddle, launch the ball, destroy colorful brick towers. Progressive difficulty with particle effects!',

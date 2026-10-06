@@ -9,6 +9,7 @@ import { Match3PuzzlePhaser } from '../components/games/Match3PuzzlePhaser'
 import { NeonSpaceShooter } from '../components/games/NeonSpaceShooter'
 import { NeonPlatformerPhaser } from '../components/games/NeonPlatformerPhaser'
 import { BreakoutArcadePhaser } from '../components/games/BreakoutArcadePhaser'
+import { NeonDodgePhaser } from '../components/games/NeonDodgePhaser'
 import { getGameById } from '../config/gamesData'
 
 // Dynamic import for AllYouCanTycoon (JSX file)
@@ -24,6 +25,8 @@ export function Game() {
 
   const renderGame = () => {
     switch (gameId) {
+      case 'neon-dodge':
+        return <NeonDodgePhaser />
       case 'breakout-arcade':
         return <BreakoutArcadePhaser />
       case 'neon-platformer':

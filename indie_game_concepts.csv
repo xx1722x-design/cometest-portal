@@ -1,0 +1,33 @@
+title,theme_or_genre,core_mechanic,description,source_url,platform
+Flappy Bird Clone,Arcade,"One-button timing - tap to flap, avoid obstacles",Simple one-button mechanic where player taps to control vertical movement and navigates through gaps,https://itch.io/games/tag-flappy-bird,Indie
+Neon Dodge,Action,Pattern dodge - avoid moving obstacles with precise timing,Player must dodge neon-colored moving obstacles with increasing speed and complex patterns,https://itch.io/games/tag-dodge,Indie
+Draw Climb,Physics,Draw physics - draw structures to climb obstacles,Draw lines and shapes that become physics-based structures to help player climb upward,https://itch.io/games/tag-physics,Indie
+Gravity Flip,Puzzle,Gravity manipulation - flip gravity to solve puzzles,Toggle gravity direction to navigate platforms and solve environmental puzzles,https://itch.io/games/tag-puzzle,Indie
+Ball Drop Puzzle,Puzzle,Physics drop - drop balls to create reactions and combos,"Drop colored balls into a grid, create physics reactions and chain combos for points",https://itch.io/games/tag-puzzle,Indie
+Match-3 Classic,Puzzle,Match-3 tiles - swap adjacent tiles to match three or more,"Swap adjacent colored tiles to create matches of three or more, earn points and clear board",https://itch.io/games/tag-match3,Indie
+Color Cascade,Puzzle,Falling blocks - stack and match falling colored blocks,Rotate and drop colored blocks to create horizontal or vertical lines,https://itch.io/games/tag-blocks,Indie
+Tap Tycoon,Clicker,"Incremental clicker - tap to earn, buy upgrades, unlock content","Click to earn currency, purchase upgrades to boost earnings, unlock new features",https://itch.io/games/tag-clicker,Indie
+Tap Tempo,Rhythm,Rhythm tapping - tap in time with music beats,"Tap to the beat of the music, perfect timing earns combo multipliers",https://itch.io/games/tag-rhythm,Indie
+Precise Jumper,Platformer,Platform jumping - precise jumps between moving platforms,"Navigate through platforms with precise timing, collect coins, avoid hazards",https://itch.io/games/tag-platformer,Indie
+Wall Slide Runner,Platformer,Wall slide mechanics - slide down walls and jump between them,Use wall slides to descend and jump between vertical walls in vertical level design,https://itch.io/games/tag-platformer,Indie
+Drag Bridge Builder,Puzzle,Drag physics - drag to build bridges connecting platforms,"Drag cables or materials to create bridges, ramps, and structures to reach goals",https://itch.io/games/tag-puzzle,Indie
+Line Draw Maze,Puzzle,Line drawing - draw paths to guide objects through mazes,Draw lines to create paths that guide rolling balls or characters through obstacles,https://itch.io/games/tag-puzzle,Indie
+Mini City Manager,Strategy,Resource management - balance resources to grow a settlement,"Manage limited resources (food, wood, gold) to build and expand a small civilization",https://itch.io/games/tag-management,Indie
+Farm Idle,Strategy,"Incremental strategy - plant crops, harvest, reinvest for growth","Plant seeds, wait for harvest, reinvest profits to unlock new crops and automation",https://itch.io/games/tag-farming,Indie
+Quick Swipe,Action,Swipe reaction - swipe in correct directions quickly,Swipe up/down/left/right matching on-screen prompts with lightning-fast timing,https://itch.io/games/tag-action,Indie
+Color Match Flash,Action,Color matching speed - tap matching colors as they appear,"Tap circles of matching colors as they rapidly appear on screen, build combos",https://itch.io/games/tag-action,Indie
+Rotate Defender,Action,Rotation control - rotate to block incoming threats,Rotate a shield or barrier to block incoming projectiles from all directions,https://itch.io/games/tag-action,Indie
+Block Turner,Puzzle,Block rotation - rotate pieces to solve spatial puzzles,Rotate blocks into correct positions to fit through obstacles or complete patterns,https://itch.io/games/tag-puzzle,Indie
+Endless Collector,Arcade,Collection drive - collect items to increase score and unlock progression,"Collect falling or moving items while avoiding obstacles, unlock new levels",https://itch.io/games/tag-arcade,Indie
+Chain Reaction,Puzzle,Combo chaining - create chain reactions for massive point multipliers,Chain matches or actions together to create exponential scoring cascades,https://itch.io/games/tag-puzzle,Indie
+Angle Shooter,Arcade,Angle aiming - aim and shoot at precise angles to hit targets,Adjust angle and power to shoot projectiles at targets with physics precision,https://itch.io/games/tag-arcade,Indie
+Portal Placement,Puzzle,Portal strategy - place portals to redirect objects toward goals,Place portals to redirect moving objects and guide them to target destinations,https://itch.io/games/tag-puzzle,Indie
+Merge Master,Puzzle,Merge mechanics - combine items to create more powerful ones,Drag and merge matching items to create upgraded versions and clear the board,https://itch.io/games/tag-puzzle,Indie
+Flow Connect,Puzzle,Path connection - connect matching pairs with flowing lines,"Draw flowing paths between matching colors, fill the board without crossing",https://itch.io/games/tag-puzzle,Indie
+Leap Frog,Platformer,Bounce physics - bounce off enemies and obstacles upward,Use bouncing off enemies and walls to reach higher platforms and obstacles,https://itch.io/games/tag-platformer,Indie
+Memory Flip,Puzzle,Memory matching - flip hidden tiles to find matching pairs,"Flip tiles to find hidden matching pairs, improve memory with progressive difficulty",https://itch.io/games/tag-puzzle,Indie
+Tile Reveal,Puzzle,Progressive reveal - clear tiles to unlock patterns and bonuses,"Tap tiles to reveal patterns beneath, match patterns to advance levels",https://itch.io/games/tag-puzzle,Indie
+Wave Survival,Action,Wave progression - survive increasingly difficult enemy waves,"Defeat enemies in progressing waves, gain upgrades between waves to increase difficulty",https://itch.io/games/tag-action,Indie
+Endless Runner,Arcade,Auto-scroll survival - navigate endless scrolling obstacles,"Jump and dodge through endlessly scrolling obstacles, beat high score",https://itch.io/games/tag-runner,Indie
+Zen Drop,Casual,Peaceful placement - arrange items for aesthetic satisfaction,"Gently place falling items to create pleasing patterns, relax and score points",https://itch.io/games/tag-casual,Indie
+Harmony Stack,Casual,Musical stacking - stack objects to create harmonies,"Stack tiles in patterns that create musical tones, build relaxing melodies",https://itch.io/games/tag-casual,Indie
