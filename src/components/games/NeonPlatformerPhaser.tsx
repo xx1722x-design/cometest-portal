@@ -50,9 +50,11 @@ export function NeonPlatformerPhaser() {
         this.input.keyboard?.addKey('SPACE')
 
         // Collisions
-        this.physics.add.collider(this.player, this.platforms, () => {
-          this.canJump = true
-        })
+        if (this.player) {
+          this.physics.add.collider(this.player, this.platforms, () => {
+            this.canJump = true
+          })
+        }
 
         this.physics.add.overlap(this.player, this.coins, (player: any, coin: any) => {
           this.handleCoinPickup(coin)
@@ -99,7 +101,6 @@ export function NeonPlatformerPhaser() {
 
         for (let i = 0; i < platformCount; i++) {
           const platformWidth = 80 + Math.random() * 40
-          const platform = this.platforms.create(currentX, currentY, null)
 
           // Draw neon platform with gradient effect
           const platformGraphics = this.make.graphics({ x: 0, y: 0 }, false)
@@ -110,7 +111,7 @@ export function NeonPlatformerPhaser() {
           platformGraphics.generateTexture(`platform${i}`, platformWidth, 16)
           platformGraphics.destroy()
 
-          platform.setTexture(`platform${i}`)
+          const platform = this.platforms.create(currentX, currentY, `platform${i}`)
           platform.setScale(1)
           platform.refreshBody()
 
