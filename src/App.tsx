@@ -17,8 +17,8 @@ function App() {
       <Analytics />
       <Routes>
         <Route path="/" element={<Index />} />
-        <Route path="/game" element={<GameList />} />
         <Route path="/game/:gameId" element={<Game />} />
+        <Route path="/game" element={<GameList />} />
         <Route path="/simulation/:simulationId" element={<Simulation />} />
         <Route path="/chemistry" element={<ChemistryPage />} />
         <Route path="/optics" element={<OpticsPage />} />
