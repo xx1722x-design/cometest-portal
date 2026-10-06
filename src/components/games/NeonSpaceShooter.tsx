@@ -16,6 +16,7 @@ export function NeonSpaceShooter() {
       player: Phaser.Physics.Arcade.Sprite | null = null
       bullets: Phaser.Physics.Arcade.Group | null = null
       enemies: Phaser.Physics.Arcade.Group | null = null
+      exhaustEmitter: Phaser.GameObjects.Particles.ParticleEmitter | null = null
       score = 0
       health = 100
       wave = 1
@@ -37,25 +38,41 @@ export function NeonSpaceShooter() {
           this.add.circle(x, y, size, 0xffffff).setDepth(-2)
         }
 
-        // Create a simple cyan rectangle for the player
-        this.player = this.physics.add.sprite(400, 550, '')
-        this.player.setDisplaySize(40, 40)
+        // Create player spaceship texture - upward-facing fighter jet
+        this.createPlayerShipTexture()
+
+        // Player sprite with cyan fighter ship
+        this.player = this.physics.add.sprite(400, 550, 'playerShip')
+        this.player.setDisplaySize(50, 50)
         this.player.setCollideWorldBounds(true)
         this.player.setBounce(0, 0)
+        this.player.setDepth(1)
 
-        // Draw player with graphics
-        const playerGraphics = this.make.graphics({ x: 0, y: 0 }, false)
-        playerGraphics.fillStyle(0x00ffff, 1)
-        playerGraphics.fillRect(0, 0, 40, 40)
-        playerGraphics.generateTexture('player', 40, 40)
-        playerGraphics.destroy()
-        this.player.setTexture('player')
+        // Engine exhaust particles
+        const particleGraphics = this.make.graphics({ x: 0, y: 0 }, false)
+        particleGraphics.fillStyle(0x00ffff, 0.8)
+        particleGraphics.fillCircle(2, 2, 2)
+        particleGraphics.generateTexture('exhaust', 4, 4)
+        particleGraphics.destroy()
+
+        const particles = this.add.particles('exhaust')
+        this.exhaustEmitter = particles.createEmitter({
+          speed: { min: -50, max: 50 },
+          angle: { min: 220, max: 320 },
+          scale: { start: 0.8, end: 0 },
+          lifespan: 400,
+          gravityY: 100,
+          emitZone: { type: 'rectangle', source: new Phaser.Geom.Rectangle(400, 550, 50, 50) },
+        })
 
         // Bullets
         this.bullets = this.physics.add.group()
 
         // Enemies
         this.enemies = this.physics.add.group()
+
+        // Create enemy ship texture - downward-facing alien
+        this.createEnemyShipTexture()
 
         // Physics collisions
         this.physics.add.overlap(this.bullets, this.enemies, (bullet: any, enemy: any) => {
@@ -66,12 +83,75 @@ export function NeonSpaceShooter() {
           this.handlePlayerHit(player, enemy)
         })
 
-        // Spawn enemies every 1 second
+        // Spawn enemies
         this.time.addEvent({
           delay: 1000,
           callback: () => this.spawnEnemy(),
           loop: true,
         })
+      }
+
+      createPlayerShipTexture() {
+        const graphics = this.make.graphics({ x: 0, y: 0 }, false)
+
+        // Upward-facing fighter jet in cyan
+        graphics.fillStyle(0x00ffff, 1)
+
+        // Main hull (triangle pointing up)
+        graphics.beginPath()
+        graphics.moveTo(25, 5) // Tip
+        graphics.lineTo(10, 45) // Bottom left
+        graphics.lineTo(40, 45) // Bottom right
+        graphics.closePath()
+        graphics.fillPath()
+
+        // Cockpit (small circle)
+        graphics.fillStyle(0x0088ff, 1)
+        graphics.fillCircle(25, 15, 4)
+
+        // Wing details (lines)
+        graphics.strokeStyle(0x00ff88, 2, 1)
+        graphics.beginPath()
+        graphics.moveTo(15, 25)
+        graphics.lineTo(35, 25)
+        graphics.strokePath()
+
+        graphics.generateTexture('playerShip', 50, 50)
+        graphics.destroy()
+      }
+
+      createEnemyShipTexture() {
+        const graphics = this.make.graphics({ x: 0, y: 0 }, false)
+
+        // Downward-facing alien ship in magenta
+        graphics.fillStyle(0xff00ff, 1)
+
+        // Main hull (inverted triangle pointing down)
+        graphics.beginPath()
+        graphics.moveTo(15, 5) // Top left
+        graphics.lineTo(35, 5) // Top right
+        graphics.lineTo(25, 45) // Bottom point
+        graphics.closePath()
+        graphics.fillPath()
+
+        // Alien eye (circle)
+        graphics.fillStyle(0xffff00, 1)
+        graphics.fillCircle(25, 20, 3)
+
+        // Tentacle-like protrusions
+        graphics.strokeStyle(0xff88ff, 2, 1)
+        graphics.beginPath()
+        graphics.moveTo(10, 15)
+        graphics.quadraticCurveTo(5, 25, 8, 35)
+        graphics.strokePath()
+
+        graphics.beginPath()
+        graphics.moveTo(40, 15)
+        graphics.quadraticCurveTo(45, 25, 42, 35)
+        graphics.strokePath()
+
+        graphics.generateTexture('enemyShip', 50, 50)
+        graphics.destroy()
       }
 
       spawnEnemy() {
@@ -80,18 +160,10 @@ export function NeonSpaceShooter() {
         const x = Phaser.Math.Between(50, 750)
         const y = Phaser.Math.Between(-50, -20)
 
-        const enemy = this.enemies.create(x, y, undefined) as Phaser.Physics.Arcade.Sprite
-        enemy.setDisplaySize(30, 30)
+        const enemy = this.enemies.create(x, y, 'enemyShip') as Phaser.Physics.Arcade.Sprite
+        enemy.setDisplaySize(50, 50)
         enemy.setVelocityY(200 + this.wave * 30)
-
-        // Draw enemy with graphics (magenta)
-        const enemyGraphics = this.make.graphics({ x: 0, y: 0 }, false)
-        enemyGraphics.fillStyle(0xff00ff, 1)
-        enemyGraphics.fillRect(0, 0, 30, 30)
-        enemyGraphics.generateTexture('enemy', 30, 30)
-        enemyGraphics.destroy()
-        enemy.setTexture('enemy')
-
+        enemy.setDepth(1)
         this.enemyCount++
       }
 
@@ -99,17 +171,19 @@ export function NeonSpaceShooter() {
         if (!this.player || !this.bullets || this.lastShootTime + 150 > Date.now()) return
         this.lastShootTime = Date.now()
 
-        const bullet = this.bullets.create(this.player.x, this.player.y - 25, undefined) as Phaser.Physics.Arcade.Sprite
-        bullet.setDisplaySize(10, 10)
-        bullet.setVelocityY(-500)
-
-        // Draw bullet with graphics (green)
+        // Create bullet graphics (green energy ball)
         const bulletGraphics = this.make.graphics({ x: 0, y: 0 }, false)
         bulletGraphics.fillStyle(0x00ff88, 1)
         bulletGraphics.fillCircle(5, 5, 5)
+        bulletGraphics.strokeStyle(0x00ffff, 1, 1)
+        bulletGraphics.strokeCircleShape(new Phaser.Geom.Circle(5, 5, 5))
         bulletGraphics.generateTexture('bullet', 10, 10)
         bulletGraphics.destroy()
-        bullet.setTexture('bullet')
+
+        const bullet = this.bullets.create(this.player.x + 5, this.player.y - 30, 'bullet') as Phaser.Physics.Arcade.Sprite
+        bullet.setDisplaySize(15, 15)
+        bullet.setVelocityY(-500)
+        bullet.setDepth(1)
       }
 
       handleBulletHit(bullet: any, enemy: any) {
@@ -138,7 +212,7 @@ export function NeonSpaceShooter() {
       }
 
       update() {
-        if (!this.player) return
+        if (!this.player || !this.exhaustEmitter) return
 
         const cursors = this.input.keyboard?.createCursorKeys()
         const aKey = this.input.keyboard?.addKey('A')
@@ -154,6 +228,9 @@ export function NeonSpaceShooter() {
         } else if (cursors?.right.isDown || dKey?.isDown) {
           this.player.setVelocityX(300)
         }
+
+        // Update exhaust emitter position
+        this.exhaustEmitter.emitZoneData.source.setPosition(this.player.x - 25, this.player.y + 20)
 
         // Shoot on space
         if (spaceKey?.isDown) {
@@ -274,7 +351,7 @@ export function NeonSpaceShooter() {
           zIndex: 100,
         }}
       >
-        ← → Move • SPACE Shoot
+        ← → Move • SPACE Shoot • Destroy enemies!
       </div>
 
       {/* Game Over */}
