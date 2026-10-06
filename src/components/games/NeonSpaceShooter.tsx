@@ -53,10 +53,10 @@ export function NeonSpaceShooter() {
         this.enemies = this.physics.add.group()
 
         // Particles
-        const graphics = this.make.graphics({ x: 0, y: 0, add: false })
+        const graphics = this.make.graphics({ x: 0, y: 0 } as any)
         graphics.fillStyle(0x00ffff, 1)
         graphics.fillCircle(4, 4, 4)
-        graphics.generateTexture('particle', 8, 8)
+        ;(graphics as any).generateTexture('particle', 8, 8)
         graphics.destroy()
 
         const particleConfig = {
@@ -95,7 +95,7 @@ export function NeonSpaceShooter() {
 
       drawNeonPlayer() {
         if (!this.player) return
-        const graphics = this.make.graphics({ x: 0, y: 0, add: false })
+        const graphics = this.make.graphics({ x: 0, y: 0 } as any)
         graphics.fillStyle(0x00ffff, 1)
         graphics.beginPath()
         graphics.moveTo(15, 0)
@@ -104,7 +104,7 @@ export function NeonSpaceShooter() {
         graphics.closePath()
         graphics.fillPath()
         graphics.strokePath()
-        graphics.generateTexture('player_ship', 30, 30)
+        ;(graphics as any).generateTexture('player_ship', 30, 30)
         graphics.destroy()
         this.player.setTexture('player_ship')
       }
@@ -117,11 +117,11 @@ export function NeonSpaceShooter() {
         const enemy = this.enemies.create(x, y, undefined)
 
         // Neon enemy (square)
-        const graphics = this.make.graphics({ x: 0, y: 0, add: false })
-        graphics.fillStyle(0xff00ff, 1)
-        graphics.fillRect(0, 0, 20, 20)
-        graphics.generateTexture('enemy', 20, 20)
-        graphics.destroy()
+        const enemyGraphics = this.make.graphics({ x: 0, y: 0 } as any)
+        enemyGraphics.fillStyle(0xff00ff, 1)
+        enemyGraphics.fillRect(0, 0, 20, 20)
+        ;(enemyGraphics as any).generateTexture('enemy', 20, 20)
+        enemyGraphics.destroy()
 
         enemy.setTexture('enemy')
         enemy.setVelocityY(150 + this.wave * 30)
@@ -135,11 +135,11 @@ export function NeonSpaceShooter() {
         const bullet = this.bullets.create(this.player.x, this.player.y - 20, undefined)
 
         // Neon bullet
-        const graphics = this.make.graphics({ x: 0, y: 0, add: false })
-        graphics.fillStyle(0x00ff88, 1)
-        graphics.fillCircle(3, 3, 3)
-        graphics.generateTexture('bullet', 6, 6)
-        graphics.destroy()
+        const bulletGraphics = this.make.graphics({ x: 0, y: 0 } as any)
+        bulletGraphics.fillStyle(0x00ff88, 1)
+        bulletGraphics.fillCircle(3, 3, 3)
+        ;(bulletGraphics as any).generateTexture('bullet', 6, 6)
+        bulletGraphics.destroy()
 
         bullet.setTexture('bullet')
         bullet.setVelocityY(-400)
