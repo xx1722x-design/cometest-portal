@@ -56,13 +56,17 @@ export function NeonPlatformerPhaser() {
           })
         }
 
-        this.physics.add.overlap(this.player, this.coins, (player: any, coin: any) => {
-          this.handleCoinPickup(coin)
-        })
+        if (this.player && this.coins) {
+          this.physics.add.overlap(this.player, this.coins, (player: any, coin: any) => {
+            this.handleCoinPickup(coin)
+          })
+        }
 
-        this.physics.add.overlap(this.player, this.enemies, () => {
-          this.handleEnemyCollision()
-        })
+        if (this.player && this.enemies) {
+          this.physics.add.overlap(this.player, this.enemies, () => {
+            this.handleEnemyCollision()
+          })
+        }
       }
 
       createPlayerShip() {
