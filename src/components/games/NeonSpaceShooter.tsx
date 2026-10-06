@@ -16,7 +16,6 @@ export function NeonSpaceShooter() {
       player: Phaser.Physics.Arcade.Sprite | null = null
       bullets: Phaser.Physics.Arcade.Group | null = null
       enemies: Phaser.Physics.Arcade.Group | null = null
-      particles: Phaser.GameObjects.Particles.ParticleEmitter | null = null
       score = 0
       health = 100
       wave = 1
@@ -35,39 +34,26 @@ export function NeonSpaceShooter() {
           const y = Phaser.Math.Between(0, 600)
           const size = Phaser.Math.Between(1, 3)
           const brightness = Phaser.Math.Between(100, 255)
-          this.add
-            .circle(x, y, size, Phaser.Display.Color.GetColor(brightness, brightness, brightness))
-            .setDepth(-2)
+          this.add.circle(x, y, size, Phaser.Display.Color.GetColor(brightness, brightness, brightness)).setDepth(-2)
         }
 
-        // Player ship (neon triangle)
-        this.player = this.physics.add.sprite(400, 550, undefined)
-        this.drawNeonPlayer()
+        // Player ship (using rectangle as placeholder)
+        this.player = this.physics.add.sprite(400, 550, '')
+        this.player.setDisplaySize(30, 30)
         this.player.setCollideWorldBounds(true)
         this.player.setData('health', 100)
+        const playerGraphics = this.make.graphics({ x: 400, y: 550 }, false)
+        playerGraphics.fillStyle(0x00ffff, 1)
+        playerGraphics.fillTriangleShape(new Phaser.Geom.Triangle(15, 0, 0, 30, 30, 30))
+        playerGraphics.generateTexture('player_ship', 30, 30)
+        playerGraphics.destroy()
+        this.player.setTexture('player_ship')
 
         // Bullets
         this.bullets = this.physics.add.group()
 
         // Enemies
         this.enemies = this.physics.add.group()
-
-        // Particles
-        const graphics = this.make.graphics({ x: 0, y: 0 } as any)
-        graphics.fillStyle(0x00ffff, 1)
-        graphics.fillCircle(4, 4, 4)
-        ;(graphics as any).generateTexture('particle', 8, 8)
-        graphics.destroy()
-
-        const particleConfig = {
-          speed: { min: -200, max: 200 },
-          angle: { min: 240, max: 300 },
-          scale: { start: 1, end: 0 },
-          lifespan: 600,
-          gravityY: 300,
-        }
-        this.particles = this.add.particles('particle')
-        this.particles.createEmitter(particleConfig)
 
         // Physics collisions
         this.physics.add.overlap(this.bullets, this.enemies, (bullet: any, enemy: any) => {
@@ -84,29 +70,6 @@ export function NeonSpaceShooter() {
           callback: () => this.spawnEnemy(),
           loop: true,
         })
-
-        // Input
-        this.input.keyboard?.on('keydown', (event: KeyboardEvent) => {
-          if (event.key === ' ' || event.key.toLowerCase() === 'w') {
-            this.shoot()
-          }
-        })
-      }
-
-      drawNeonPlayer() {
-        if (!this.player) return
-        const graphics = this.make.graphics({ x: 0, y: 0 } as any)
-        graphics.fillStyle(0x00ffff, 1)
-        graphics.beginPath()
-        graphics.moveTo(15, 0)
-        graphics.lineTo(0, 30)
-        graphics.lineTo(30, 30)
-        graphics.closePath()
-        graphics.fillPath()
-        graphics.strokePath()
-        ;(graphics as any).generateTexture('player_ship', 30, 30)
-        graphics.destroy()
-        this.player.setTexture('player_ship')
       }
 
       spawnEnemy() {
@@ -114,13 +77,12 @@ export function NeonSpaceShooter() {
 
         const x = Phaser.Math.Between(50, 750)
         const y = Phaser.Math.Between(-100, -20)
-        const enemy = this.enemies.create(x, y, undefined)
+        const enemy = this.enemies.create(x, y, '')
 
-        // Neon enemy (square)
-        const enemyGraphics = this.make.graphics({ x: 0, y: 0 } as any)
+        const enemyGraphics = this.make.graphics({ x: x, y: y }, false)
         enemyGraphics.fillStyle(0xff00ff, 1)
         enemyGraphics.fillRect(0, 0, 20, 20)
-        ;(enemyGraphics as any).generateTexture('enemy', 20, 20)
+        enemyGraphics.generateTexture('enemy', 20, 20)
         enemyGraphics.destroy()
 
         enemy.setTexture('enemy')
@@ -132,22 +94,16 @@ export function NeonSpaceShooter() {
       shoot() {
         if (!this.player || !this.bullets) return
 
-        const bullet = this.bullets.create(this.player.x, this.player.y - 20, undefined)
+        const bullet = this.bullets.create(this.player.x, this.player.y - 20, '')
 
-        // Neon bullet
-        const bulletGraphics = this.make.graphics({ x: 0, y: 0 } as any)
+        const bulletGraphics = this.make.graphics({ x: this.player.x, y: this.player.y - 20 }, false)
         bulletGraphics.fillStyle(0x00ff88, 1)
         bulletGraphics.fillCircle(3, 3, 3)
-        ;(bulletGraphics as any).generateTexture('bullet', 6, 6)
+        bulletGraphics.generateTexture('bullet', 6, 6)
         bulletGraphics.destroy()
 
         bullet.setTexture('bullet')
         bullet.setVelocityY(-400)
-
-        // Particle burst
-        if (this.particles) {
-          this.particles.emitParticleAt(this.player.x, this.player.y, 5)
-        }
       }
 
       handleBulletHit(bullet: any, enemy: any) {
@@ -157,16 +113,6 @@ export function NeonSpaceShooter() {
           this.score += 10
           setScore(this.score)
           this.enemyCount--
-
-          // Particle explosion
-          if (this.particles) {
-            this.particles.emitParticleAt(enemy.x, enemy.y, 20)
-          }
-
-          // Wave progression
-          if (this.enemyCount === 0 && this.enemies && this.enemies.children.size === 0) {
-            this.wave++
-          }
         }
       }
 
@@ -190,9 +136,12 @@ export function NeonSpaceShooter() {
 
         // Player movement
         const cursors = this.input.keyboard?.createCursorKeys()
-        if (cursors?.left.isDown || this.input.keyboard?.addKey('A').isDown) {
+        const aKey = this.input.keyboard?.addKey('A')
+        const dKey = this.input.keyboard?.addKey('D')
+
+        if (cursors?.left.isDown || aKey?.isDown) {
           this.player.setVelocityX(-300)
-        } else if (cursors?.right.isDown || this.input.keyboard?.addKey('D').isDown) {
+        } else if (cursors?.right.isDown || dKey?.isDown) {
           this.player.setVelocityX(300)
         } else {
           this.player.setVelocityX(0)
@@ -201,15 +150,22 @@ export function NeonSpaceShooter() {
         // Remove off-screen bullets
         if (this.bullets) {
           Array.from(this.bullets.children).forEach((bullet: any) => {
-            if (bullet.y < -50) bullet.destroy()
+            if (bullet && bullet.y < -50) bullet.destroy()
           })
         }
 
         // Remove off-screen enemies
         if (this.enemies) {
           Array.from(this.enemies.children).forEach((enemy: any) => {
-            if (enemy.y > 650) enemy.destroy()
+            if (enemy && enemy.y > 650) enemy.destroy()
           })
+        }
+
+        // Shoot on space
+        const spaceKey = this.input.keyboard?.addKey('SPACE')
+        if (spaceKey?.isDown) {
+          this.shoot()
+          spaceKey.isDown = false
         }
       }
     }
