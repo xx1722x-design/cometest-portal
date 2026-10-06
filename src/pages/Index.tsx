@@ -28,17 +28,17 @@ export function Index() {
     })) as any
     const sims = SIMULATIONS_DATA
 
-    // 🔥 CRITICAL: Top items ALWAYS visible - Group top N of each type, then rest
-    // Ensures newest games AND newest sims all fit on screen without scrolling
-    // Order: [top 6 games] → [top 6 sims] → [remaining games] → [remaining sims]
-    // CuratedGrid adds STORE_CARD, so screen shows: STORE | Top 6 games (row 1-2) + Top 6 sims (row 2-3)
-    const topN = 6
-    const topGames = games.slice(0, topN)
-    const topSims = sims.slice(0, topN)
-    const restGames = games.slice(topN)
-    const restSims = sims.slice(topN)
-
-    return [...topGames, ...topSims, ...restGames, ...restSims]
+    // 🔥 CRITICAL: Newest sim GUARANTEED at [0], then interleave
+    // Order: [sims[0], games[0], sims[1], games[1], sims[2], games[2], ...]
+    // This ensures EVERY new sim is immediately visible after Premium Store
+    // CuratedGrid adds STORE at [0], so: STORE | Physics Blocks | Platformer | Ocean | Shooter | ...
+    const merged = []
+    const maxLen = Math.max(games.length, sims.length)
+    for (let i = 0; i < maxLen; i++) {
+      if (i < sims.length) merged.push(sims[i])
+      if (i < games.length) merged.push(games[i])
+    }
+    return merged
   }, [])
 
   // 필터링된 아이템 - raw data를 필터링 없이 직접 렌더링
