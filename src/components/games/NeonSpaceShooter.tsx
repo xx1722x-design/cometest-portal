@@ -13,13 +13,17 @@ export function NeonSpaceShooter() {
     gameInitialized.current = true
 
     class NeonShooterScene extends Phaser.Scene {
-      player: Phaser.Physics.Arcade.Sprite | null = null
+      playerShip: Phaser.Geom.Triangle | null = null
+      playerBody: Phaser.Physics.Arcade.Body | null = null
       bullets: Phaser.Physics.Arcade.Group | null = null
       enemies: Phaser.Physics.Arcade.Group | null = null
+      playerGraphics: Phaser.GameObjects.Graphics | null = null
+      gameGraphics: Phaser.GameObjects.Graphics | null = null
       score = 0
       health = 100
       wave = 1
       enemyCount = 0
+      lastShootTime = 0
 
       constructor() {
         super({ key: 'NeonShooterScene' })
@@ -28,26 +32,38 @@ export function NeonSpaceShooter() {
       create() {
         this.cameras.main.setBackgroundColor('#0a0a1a')
 
-        // Parallax starfield
+        // Parallax starfield background
         for (let i = 0; i < 200; i++) {
           const x = Phaser.Math.Between(0, 800)
           const y = Phaser.Math.Between(0, 600)
           const size = Phaser.Math.Between(1, 3)
-          const brightness = Phaser.Math.Between(100, 255)
-          this.add.circle(x, y, size, Phaser.Display.Color.GetColor(brightness, brightness, brightness)).setDepth(-2)
+          this.add.circle(x, y, size, 0xffffff).setDepth(-2)
         }
 
-        // Player ship (using rectangle as placeholder)
-        this.player = this.physics.add.sprite(400, 550, '')
-        this.player.setDisplaySize(30, 30)
-        this.player.setCollideWorldBounds(true)
-        this.player.setData('health', 100)
-        const playerGraphics = this.make.graphics({ x: 400, y: 550 }, false)
-        playerGraphics.fillStyle(0x00ffff, 1)
-        playerGraphics.fillTriangleShape(new Phaser.Geom.Triangle(15, 0, 0, 30, 30, 30))
-        playerGraphics.generateTexture('player_ship', 30, 30)
-        playerGraphics.destroy()
-        this.player.setTexture('player_ship')
+        // Create graphics object for dynamic rendering
+        this.gameGraphics = this.add.graphics()
+        this.gameGraphics.setDepth(0)
+
+        // Player ship (cyan triangle at bottom center)
+        this.playerGraphics = this.add.graphics()
+        this.playerGraphics.fillStyle(0x00ffff, 1)
+        this.playerGraphics.beginPath()
+        this.playerGraphics.moveTo(20, 0) // Top point
+        this.playerGraphics.lineTo(0, 40) // Bottom left
+        this.playerGraphics.lineTo(40, 40) // Bottom right
+        this.playerGraphics.closePath()
+        this.playerGraphics.fillPath()
+        this.playerGraphics.setPosition(380, 550) // Bottom center (400 - 20 width/2)
+        this.playerGraphics.setDepth(1)
+
+        // Create physics body for player
+        const playerTriangle = new Phaser.Geom.Triangle(20, 0, 0, 40, 40, 40)
+        this.playerBody = this.physics.add.existing(this.playerGraphics)
+        this.playerBody.setCollideWorldBounds(true)
+        this.playerBody.setBounce(0, 0)
+        this.playerBody.setDamping(true)
+        this.playerBody.setDrag(0.99)
+        this.playerBody.setData('health', 100)
 
         // Bullets
         this.bullets = this.physics.add.group()
@@ -60,7 +76,7 @@ export function NeonSpaceShooter() {
           this.handleBulletHit(bullet, enemy)
         })
 
-        this.physics.add.overlap(this.player, this.enemies, (player: any, enemy: any) => {
+        this.physics.add.overlap(this.playerGraphics, this.enemies, (player: any, enemy: any) => {
           this.handlePlayerHit(player, enemy)
         })
 
@@ -76,39 +92,45 @@ export function NeonSpaceShooter() {
         if (!this.enemies || this.enemies.children.size > 15) return
 
         const x = Phaser.Math.Between(50, 750)
-        const y = Phaser.Math.Between(-100, -20)
-        const enemy = this.enemies.create(x, y, '')
+        const y = Phaser.Math.Between(-50, -20)
 
-        const enemyGraphics = this.make.graphics({ x: x, y: y }, false)
+        // Create magenta rectangle for enemy
+        const enemyGraphics = this.add.graphics()
         enemyGraphics.fillStyle(0xff00ff, 1)
-        enemyGraphics.fillRect(0, 0, 20, 20)
-        enemyGraphics.generateTexture('enemy', 20, 20)
-        enemyGraphics.destroy()
+        enemyGraphics.fillRect(0, 0, 30, 30)
+        enemyGraphics.setPosition(x, y)
+        enemyGraphics.setDepth(1)
 
-        enemy.setTexture('enemy')
-        enemy.setVelocityY(150 + this.wave * 30)
-        enemy.setData('health', 1)
+        const enemyBody = this.physics.add.existing(enemyGraphics)
+        enemyBody.setVelocityY(200 + this.wave * 30)
+        enemyBody.setData('graphics', enemyGraphics)
+        this.enemies.add(enemyBody)
         this.enemyCount++
       }
 
       shoot() {
-        if (!this.player || !this.bullets) return
+        if (!this.playerGraphics || !this.bullets || this.lastShootTime + 100 > Date.now()) return
+        this.lastShootTime = Date.now()
 
-        const bullet = this.bullets.create(this.player.x, this.player.y - 20, '')
-
-        const bulletGraphics = this.make.graphics({ x: this.player.x, y: this.player.y - 20 }, false)
+        const bulletGraphics = this.add.graphics()
         bulletGraphics.fillStyle(0x00ff88, 1)
-        bulletGraphics.fillCircle(3, 3, 3)
-        bulletGraphics.generateTexture('bullet', 6, 6)
-        bulletGraphics.destroy()
+        bulletGraphics.fillCircle(5, 5, 5)
+        bulletGraphics.setPosition(this.playerGraphics.x + 15, this.playerGraphics.y - 20)
+        bulletGraphics.setDepth(1)
 
-        bullet.setTexture('bullet')
-        bullet.setVelocityY(-400)
+        const bulletBody = this.physics.add.existing(bulletGraphics)
+        bulletBody.setVelocityY(-500)
+        bulletBody.setData('graphics', bulletGraphics)
+        this.bullets.add(bulletBody)
       }
 
       handleBulletHit(bullet: any, enemy: any) {
-        if (bullet) bullet.destroy()
-        if (enemy) {
+        if (bullet && bullet.getData('graphics')) {
+          bullet.getData('graphics').destroy()
+          bullet.destroy()
+        }
+        if (enemy && enemy.getData('graphics')) {
+          enemy.getData('graphics').destroy()
           enemy.destroy()
           this.score += 10
           setScore(this.score)
@@ -119,7 +141,10 @@ export function NeonSpaceShooter() {
       handlePlayerHit(player: any, enemy: any) {
         this.health -= 10
         setHealth(Math.max(0, this.health))
-        if (enemy) enemy.destroy()
+        if (enemy && enemy.getData('graphics')) {
+          enemy.getData('graphics').destroy()
+          enemy.destroy()
+        }
 
         if (this.health <= 0) {
           this.scene.restart()
@@ -132,40 +157,50 @@ export function NeonSpaceShooter() {
       }
 
       update() {
-        if (!this.player) return
+        if (!this.playerGraphics || !this.playerBody) return
 
-        // Player movement
+        // Player movement - direct velocity update
         const cursors = this.input.keyboard?.createCursorKeys()
         const aKey = this.input.keyboard?.addKey('A')
         const dKey = this.input.keyboard?.addKey('D')
+        const spaceKey = this.input.keyboard?.addKey('SPACE')
+
+        this.playerBody.setVelocityX(0)
 
         if (cursors?.left.isDown || aKey?.isDown) {
-          this.player.setVelocityX(-300)
-        } else if (cursors?.right.isDown || dKey?.isDown) {
-          this.player.setVelocityX(300)
-        } else {
-          this.player.setVelocityX(0)
+          this.playerBody.setVelocityX(-250)
+        }
+        if (cursors?.right.isDown || dKey?.isDown) {
+          this.playerBody.setVelocityX(250)
+        }
+
+        // Keep player on screen
+        this.playerGraphics.x = Phaser.Math.Clamp(this.playerGraphics.x, 0, 760)
+
+        // Shoot on space
+        if (spaceKey?.isDown) {
+          this.shoot()
         }
 
         // Remove off-screen bullets
         if (this.bullets) {
-          Array.from(this.bullets.children).forEach((bullet: any) => {
-            if (bullet && bullet.y < -50) bullet.destroy()
+          this.bullets.children.entries.forEach((bullet: any) => {
+            if (bullet && bullet.y < -50) {
+              if (bullet.getData('graphics')) bullet.getData('graphics').destroy()
+              bullet.destroy()
+            }
           })
         }
 
         // Remove off-screen enemies
         if (this.enemies) {
-          Array.from(this.enemies.children).forEach((enemy: any) => {
-            if (enemy && enemy.y > 650) enemy.destroy()
+          this.enemies.children.entries.forEach((enemy: any) => {
+            if (enemy && enemy.y > 650) {
+              if (enemy.getData('graphics')) enemy.getData('graphics').destroy()
+              enemy.destroy()
+              this.enemyCount--
+            }
           })
-        }
-
-        // Shoot on space
-        const spaceKey = this.input.keyboard?.addKey('SPACE')
-        if (spaceKey?.isDown) {
-          this.shoot()
-          spaceKey.isDown = false
         }
       }
     }
@@ -226,7 +261,7 @@ export function NeonSpaceShooter() {
         position: 'relative',
       }}
     >
-      <div id="neon-shooter-container" ref={gameContainerRef} style={{ width: '800px', height: '600px' }} />
+      <div id="neon-shooter-container" ref={gameContainerRef} style={{ width: '800px', height: '600px', border: '2px solid #00ffff' }} />
 
       {/* HUD Overlay */}
       <div
@@ -265,7 +300,7 @@ export function NeonSpaceShooter() {
           zIndex: 100,
         }}
       >
-        ← → Move • SPACE Shoot • Destroy all enemies!
+        ← → Move • SPACE Shoot • Destroy enemies!
       </div>
 
       {/* Game Over Screen */}
