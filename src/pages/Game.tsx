@@ -26,6 +26,8 @@ export function Game() {
 
   const renderGame = () => {
     switch (gameId) {
+      case 'mario':
+        return <PortedGameWrapper gameName="mario" />
       case 'tetris':
         return <PortedGameWrapper gameName="tetris" />
       case 'pacman':

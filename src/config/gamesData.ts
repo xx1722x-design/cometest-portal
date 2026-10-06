@@ -12,6 +12,17 @@ export interface GameItem {
 
 export const GAMES_DATA: GameItem[] = [
   {
+    id: 'mario',
+    title: 'Super Mario - HTML5',
+    description: '🍄 Classic platformer reborn - Jump, run, collect coins, defeat enemies! The legendary Super Mario experience.',
+    thumbnail: '🍄',
+    category: 'web_games',
+    icon: '🍄',
+    path: '/game/mario',
+    tags: ['platformer', 'classic', 'mario', 'arcade', 'action'],
+    play_count: 0,
+  },
+  {
     id: 'tetris',
     title: 'Tetris Classic',
     description: '🎮 The iconic falling blocks puzzle - Rotate, stack, and clear lines! Endless challenge with increasing speed.',

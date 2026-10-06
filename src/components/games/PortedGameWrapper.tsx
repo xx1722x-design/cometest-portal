@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 
 interface PortedGameWrapperProps {
-  gameName: '2048' | 'hextris' | 'tetris' | 'pacman' | 'snake'
+  gameName: '2048' | 'hextris' | 'tetris' | 'pacman' | 'snake' | 'mario'
 }
 
 export const PortedGameWrapper: React.FC<PortedGameWrapperProps> = ({ gameName }) => {
@@ -13,7 +13,8 @@ export const PortedGameWrapper: React.FC<PortedGameWrapperProps> = ({ gameName }
     if (!containerRef.current) return
 
     const iframe = document.createElement('iframe') as HTMLIFrameElement
-    iframe.src = `/games/${gameName}/index.html`
+    const iframeSrc = gameName === 'mario' ? `/games/${gameName}/main.html` : `/games/${gameName}/index.html`
+    iframe.src = iframeSrc
     iframe.style.width = '100%'
     iframe.style.height = '100%'
     iframe.style.border = 'none'
