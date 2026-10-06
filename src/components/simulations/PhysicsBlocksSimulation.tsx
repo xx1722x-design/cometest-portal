@@ -231,9 +231,7 @@ function PhysicsBlocksScene() {
         antialias: true,
         alpha: false,
         powerPreference: 'high-performance',
-        shadowMap: { enabled: true, type: THREE.PCFShadowShadowMap },
       }}
-      shadows
     >
       <PhysicsBlocksTower />
     </Canvas>
