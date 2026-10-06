@@ -138,20 +138,14 @@ export function BreakoutArcadePhaser() {
           }
         }
 
-        this.ball.setVelocityY(-Math.abs(this.ball.body.velocity.y))
+        if (this.ball.body) {
+          this.ball.setVelocityY(-Math.abs(this.ball.body.velocity.y))
+        }
       }
 
       createParticles(x: number, y: number, color: string) {
         const particles = this.add.particles(0x00ffff)
-        particles.createEmitter({
-          x,
-          y,
-          speed: { min: -200, max: 200 },
-          angle: { min: 240, max: 300 },
-          scale: { start: 1, end: 0 },
-          lifespan: 400,
-          gravityY: 300,
-        })
+        particles.emitParticleAt(x, y, 10)
 
         this.time.delayedCall(500, () => particles.destroy())
       }
