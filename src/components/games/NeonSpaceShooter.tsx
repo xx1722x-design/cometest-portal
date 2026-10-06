@@ -38,7 +38,7 @@ export function NeonSpaceShooter() {
         }
 
         // Create a simple cyan rectangle for the player
-        this.player = this.physics.add.sprite(400, 550, undefined)
+        this.player = this.physics.add.sprite(400, 550, '')
         this.player.setDisplaySize(40, 40)
         this.player.setCollideWorldBounds(true)
         this.player.setBounce(0, 0)
@@ -190,7 +190,7 @@ export function NeonSpaceShooter() {
       physics: {
         default: 'arcade',
         arcade: {
-          gravity: { y: 0 },
+          gravity: { x: 0, y: 0 },
           debug: false,
         },
       },
