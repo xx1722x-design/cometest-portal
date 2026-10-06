@@ -110,7 +110,7 @@ export function NeonSpaceShooter() {
         graphics.fillCircle(25, 15, 4)
 
         // Wing details (lines)
-        graphics.strokeStyle(0x00ff88, 2, 1)
+        graphics.lineStyle(2, 0x00ff88, 1)
         graphics.beginPath()
         graphics.moveTo(15, 25)
         graphics.lineTo(35, 25)
@@ -231,9 +231,9 @@ export function NeonSpaceShooter() {
           this.player.setVelocityX(300)
         }
 
-        // Update exhaust emitter position
-        if (this.exhaustEmitter && this.exhaustEmitter.emitZone) {
-          ;(this.exhaustEmitter.emitZone as any).source?.setPosition?.(this.player.x - 25, this.player.y + 20)
+        // Update exhaust emitter position (follow player)
+        if (this.exhaustEmitter) {
+          this.exhaustEmitter.setPosition(this.player.x, this.player.y + 25)
         }
 
         // Shoot on space
