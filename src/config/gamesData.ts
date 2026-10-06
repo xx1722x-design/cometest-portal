@@ -12,6 +12,17 @@ export interface GameItem {
 
 export const GAMES_DATA: GameItem[] = [
   {
+    id: 'neon-space-shooter',
+    title: 'Neon Space Shooter',
+    description: '💥 Premium 2D arcade shooter - Arrow keys to move, SPACE to shoot. Destroy waves of neon enemies in a glowing void!',
+    thumbnail: '💥',
+    category: 'web_games',
+    icon: '💥',
+    path: '/game/neon-space-shooter',
+    tags: ['shooter', 'arcade', 'neon', 'phaser', 'action', 'premium'],
+    play_count: 0,
+  },
+  {
     id: 'match3-puzzle',
     title: 'Match-3 Puzzle',
     description: '💎 Classical Match-3 puzzle gameplay - Click to select, swap adjacent tiles, match 3+ candies for big scores!',

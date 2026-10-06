@@ -6,6 +6,7 @@ import { DriftBossV2Safe } from '../components/games/DriftBoss/DriftBossV2Safe'
 import { CatchGamePhaser } from '../components/games/CatchGamePhaser'
 import { SnakeGamePhaser } from '../components/games/SnakeGamePhaser'
 import { Match3PuzzlePhaser } from '../components/games/Match3PuzzlePhaser'
+import { NeonSpaceShooter } from '../components/games/NeonSpaceShooter'
 import { getGameById } from '../config/gamesData'
 
 // Dynamic import for AllYouCanTycoon (JSX file)
@@ -39,6 +40,8 @@ export function Game() {
         return <SnakeGamePhaser />
       case 'match3-puzzle':
         return <Match3PuzzlePhaser />
+      case 'neon-space-shooter':
+        return <NeonSpaceShooter />
       default:
         return <div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>게임을 찾을 수 없습니다</div>
     }
