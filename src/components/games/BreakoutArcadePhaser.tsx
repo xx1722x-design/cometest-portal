@@ -17,6 +17,7 @@ export function BreakoutArcadePhaser() {
       paddle: Phaser.Physics.Arcade.Sprite | null = null
       ball: Phaser.Physics.Arcade.Sprite | null = null
       bricks: Phaser.Physics.Arcade.Group | null = null
+      launchText: Phaser.GameObjects.Text | null = null
       score = 0
       level = 1
       health = 3
@@ -75,7 +76,7 @@ export function BreakoutArcadePhaser() {
         }
 
         // Show start message
-        this.add.text(400, 300, 'PRESS SPACE TO LAUNCH', {
+        this.launchText = this.add.text(400, 300, 'PRESS SPACE TO LAUNCH', {
           fontSize: '24px',
           color: '#00ff88',
           fontFamily: 'Arial',
@@ -197,12 +198,24 @@ export function BreakoutArcadePhaser() {
           if (spaceKey?.isDown) {
             this.ball.setData('onPaddle', false)
             this.ball.setVelocity(Phaser.Math.Between(-300, 300), -400)
+            // Hide launch text when ball is launched
+            if (this.launchText) {
+              this.launchText.setVisible(false)
+            }
           }
         }
 
-        // Ball out of bounds
-        if (this.ball.y > 600) {
-          this.handleGameOver()
+        // CRITICAL: Ball fell past paddle - reset it
+        if (this.ball.y > 580) {
+          this.ballLaunched = false
+          this.ball.setVelocity(0, 0)
+          this.ball.setPosition(this.paddle.x, this.paddle.y - 30)
+          this.ball.setData('onPaddle', true)
+
+          // Show launch prompt again
+          if (this.launchText) {
+            this.launchText.setVisible(true)
+          }
         }
       }
     }
