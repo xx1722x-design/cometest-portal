@@ -200,14 +200,14 @@ export function NeonSpaceShooter() {
 
         // Remove off-screen bullets
         if (this.bullets) {
-          this.bullets.children.entries.forEach((bullet: any) => {
+          Array.from(this.bullets.children).forEach((bullet: any) => {
             if (bullet.y < -50) bullet.destroy()
           })
         }
 
         // Remove off-screen enemies
         if (this.enemies) {
-          this.enemies.children.entries.forEach((enemy: any) => {
+          Array.from(this.enemies.children).forEach((enemy: any) => {
             if (enemy.y > 650) enemy.destroy()
           })
         }
@@ -223,7 +223,7 @@ export function NeonSpaceShooter() {
       physics: {
         default: 'arcade',
         arcade: {
-          gravity: { y: 0 },
+          gravity: { x: 0, y: 0 },
           debug: false,
         },
       },
