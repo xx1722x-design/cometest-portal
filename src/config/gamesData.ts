@@ -12,6 +12,28 @@ export interface GameItem {
 
 export const GAMES_DATA: GameItem[] = [
   {
+    id: '2048',
+    title: '2048 - Classic Puzzle',
+    description: '🧩 Legendary puzzle game - Slide tiles, merge numbers, reach 2048! Simple rules, infinite challenge.',
+    thumbnail: '🧩',
+    category: 'web_games',
+    icon: '🧩',
+    path: '/game/2048',
+    tags: ['puzzle', 'numbers', 'classic', 'html5', 'casual'],
+    play_count: 0,
+  },
+  {
+    id: 'hextris',
+    title: 'Hextris - Neon Arcade',
+    description: '⚡ Fast-paced hex puzzle - Drop colorful hexagons, match colors, beat your score! Neon-powered arcade action.',
+    thumbnail: '⚡',
+    category: 'web_games',
+    icon: '⚡',
+    path: '/game/hextris',
+    tags: ['puzzle', 'arcade', 'neon', 'html5', 'action'],
+    play_count: 0,
+  },
+  {
     id: 'neon-dodge',
     title: 'Neon Dodge Arcade',
     description: '⚡ Premium arcade dodger - Navigate a neon minefield with precision. Obstacles spawn faster as your score increases. One hit and it\'s game over!',
