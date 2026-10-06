@@ -16,7 +16,6 @@ export function NeonSpaceShooter() {
       player: Phaser.Physics.Arcade.Sprite | null = null
       bullets: Phaser.Physics.Arcade.Group | null = null
       enemies: Phaser.Physics.Arcade.Group | null = null
-      exhaustEmitter: Phaser.GameObjects.Particles.ParticleEmitter | null = null
       score = 0
       health = 100
       wave = 1
@@ -48,22 +47,6 @@ export function NeonSpaceShooter() {
         this.player.setBounce(0, 0)
         this.player.setDepth(1)
 
-        // Engine exhaust particles
-        const particleGraphics = this.make.graphics({ x: 0, y: 0 }, false)
-        particleGraphics.fillStyle(0x00ffff, 0.8)
-        particleGraphics.fillCircle(2, 2, 2)
-        particleGraphics.generateTexture('exhaust', 4, 4)
-        particleGraphics.destroy()
-
-        const particles = this.add.particles('exhaust')
-        this.exhaustEmitter = particles.createEmitter({
-          speed: { min: -50, max: 50 },
-          angle: { min: 220, max: 320 },
-          scale: { start: 0.8, end: 0 },
-          lifespan: 400,
-          gravityY: 100,
-          emitZone: { type: 'rectangle', source: new Phaser.Geom.Rectangle(400, 550, 50, 50) },
-        })
 
         // Bullets
         this.bullets = this.physics.add.group()
@@ -229,11 +212,6 @@ export function NeonSpaceShooter() {
           this.player.setVelocityX(-300)
         } else if (cursors?.right.isDown || dKey?.isDown) {
           this.player.setVelocityX(300)
-        }
-
-        // Update exhaust emitter position (follow player)
-        if (this.exhaustEmitter) {
-          this.exhaustEmitter.setPosition(this.player.x, this.player.y + 25)
         }
 
         // Shoot on space
