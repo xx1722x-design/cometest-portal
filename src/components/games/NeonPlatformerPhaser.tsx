@@ -82,7 +82,15 @@ export function NeonPlatformerPhaser() {
         if (!this.platforms) return
 
         // Ground
-        this.platforms.create(400, 568, null).setScale(2).refreshBody()
+        const groundGraphics = this.make.graphics({ x: 0, y: 0 }, false)
+        groundGraphics.fillStyle(0x00ff88, 1)
+        groundGraphics.fillRect(0, 0, 800, 16)
+        groundGraphics.lineStyle(2, 0x00ffff, 1)
+        groundGraphics.strokeRect(0, 0, 800, 16)
+        groundGraphics.generateTexture('ground', 800, 16)
+        groundGraphics.destroy()
+
+        this.platforms.create(400, 568, 'ground').setScale(1).refreshBody()
 
         // Procedural platforms - increasing difficulty per level
         const platformCount = 5 + this.level * 2
