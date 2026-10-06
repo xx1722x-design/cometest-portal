@@ -1,5 +1,5 @@
-import React, { Suspense, useRef, useEffect, useState, ReactNode } from 'react'
-import { Canvas, useFrame, useThree } from '@react-three/fiber'
+import React, { Suspense, useRef, ReactNode } from 'react'
+import { Canvas, useFrame } from '@react-three/fiber'
 import { OrbitControls, Sky } from '@react-three/drei'
 import * as THREE from 'three'
 
@@ -90,11 +90,11 @@ const WaterShader = {
   `
 }
 
-// Ocean water scene with custom shader waves
-function OceanScene() {
+// CRITICAL: Component with R3F hooks - MUST BE INSIDE Canvas
+function WaterMesh() {
   const waterRef = useRef<THREE.Mesh>(null)
 
-  useFrame((state) => {
+  useFrame(() => {
     if (waterRef.current) {
       const material = waterRef.current.material as THREE.ShaderMaterial
       if (material.uniforms.time) {
@@ -104,15 +104,7 @@ function OceanScene() {
   })
 
   return (
-    <Canvas
-      style={{ width: '100%', height: '100%' }}
-      camera={{ position: [0, 15, 30], fov: 50 }}
-      gl={{
-        antialias: true,
-        alpha: false,
-        powerPreference: 'high-performance',
-      }}
-    >
+    <>
       {/* Sky with sun */}
       <Sky sunPosition={[100, 30, 100]} turbidity={2} rayleigh={0.5} mieCoefficient={0.01} mieDirectionalG={0.8} />
 
@@ -159,6 +151,23 @@ function OceanScene() {
 
       <color attach="background" args={['#87ceeb']} />
       <fog attach="fog" args={['#87ceeb', 100, 500]} />
+    </>
+  )
+}
+
+// Main Canvas component - NO R3F hooks here
+function OceanScene() {
+  return (
+    <Canvas
+      style={{ width: '100%', height: '100%' }}
+      camera={{ position: [0, 15, 30], fov: 50 }}
+      gl={{
+        antialias: true,
+        alpha: false,
+        powerPreference: 'high-performance',
+      }}
+    >
+      <WaterMesh />
     </Canvas>
   )
 }
