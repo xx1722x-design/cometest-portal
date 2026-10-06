@@ -12,6 +12,17 @@ export interface GameItem {
 
 export const GAMES_DATA: GameItem[] = [
   {
+    id: 'breakout-arcade',
+    title: 'Breakout Arcade',
+    description: '🎮 Premium brick breaker - Control the paddle, launch the ball, destroy colorful brick towers. Progressive difficulty with particle effects!',
+    thumbnail: '🎮',
+    category: 'web_games',
+    icon: '🎮',
+    path: '/game/breakout-arcade',
+    tags: ['breakout', 'arcade', 'phaser', 'casual', 'premium'],
+    play_count: 0,
+  },
+  {
     id: 'neon-platformer',
     title: 'Neon Platformer',
     description: '🎮 Premium 2D platformer - Jump through neon levels, collect coins, avoid enemies. Procedurally generated difficulty!',
