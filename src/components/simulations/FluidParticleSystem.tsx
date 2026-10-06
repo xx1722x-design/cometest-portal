@@ -1,7 +1,6 @@
 import React, { Suspense, useRef, useEffect, useState, ReactNode } from 'react'
 import { Canvas, useFrame, useThree } from '@react-three/fiber'
-import { OrbitControls, Points, PointMaterial, Environment } from '@react-three/drei'
-import { EffectComposer, Bloom, DepthOfField, Vignette } from '@react-three/postprocessing'
+import { OrbitControls, Points, PointMaterial } from '@react-three/drei'
 import * as THREE from 'three'
 
 // Error Boundary
@@ -128,9 +127,10 @@ function ParticleFluid() {
       <PointMaterial
         transparent
         color="#00ffff"
-        size={0.08}
+        size={0.12}
         sizeAttenuation
         depthWrite={false}
+        blending={THREE.AdditiveBlending}
       />
     </Points>
   )
@@ -151,12 +151,6 @@ function FluidScene() {
       <ParticleFluid />
 
       <OrbitControls autoRotate autoRotateSpeed={1} enableZoom enablePan />
-
-      <EffectComposer>
-        <Bloom luminanceThreshold={0.2} luminanceSmoothing={0.9} intensity={2} />
-        <DepthOfField focusDistance={10} focalLength={0.02} bokehScale={8} />
-        <Vignette darkness={0.3} />
-      </EffectComposer>
 
       <fog attach="fog" args={['#0b0f19', 5, 30]} />
       <color attach="background" args={['#0b0f19']} />
