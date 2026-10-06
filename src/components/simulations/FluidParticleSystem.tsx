@@ -75,10 +75,10 @@ function ParticleFluid() {
     const positions = particlesRef.current
     const velocities = velocitiesRef.current
 
-    // Mouse-based attraction
+    // Mouse-based attraction (simple mouse position)
     const mouseWorldPos = new THREE.Vector3(
-      (mouse.x * camera.aspect * 2),
-      mouse.y * 2,
+      (mouse.x * 10),
+      mouse.y * 10,
       5
     )
 
