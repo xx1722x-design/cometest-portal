@@ -65,7 +65,20 @@ export function Game() {
       case 'neon-space-shooter':
         return <NeonSpaceShooter />
       default:
-        return <div style={{ color: '#fff', textAlign: 'center', marginTop: '20vh' }}>게임을 찾을 수 없습니다</div>
+        // Auto-uploaded games from /public/labs/
+        return (
+          <iframe
+            src={`/labs/${gameId}/index.html`}
+            style={{
+              width: '100%',
+              height: '100%',
+              border: 'none',
+              borderRadius: '0',
+            }}
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-pointer-lock"
+            title={gameId}
+          />
+        )
     }
   }
 
