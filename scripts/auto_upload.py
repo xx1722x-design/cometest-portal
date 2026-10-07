@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-메인 자동화 스크립트
-ZIP 파일 해제 → AI 설명 생성 → 스크린샷 캡처 → DB 등록 → Git 배포
+Main automation script
+ZIP extraction → AI description generation → screenshot capture → DB registration → Git deployment
 """
 
 import os
@@ -14,7 +14,7 @@ from datetime import datetime
 import subprocess
 import re
 
-# 프로젝트 경로들
+# Project paths
 DROPZONE_BASE = Path(r"D:\Cometest_Dropzone")
 PROJECT_ROOT = Path(r"D:\cometest_portal")
 LABS_DIR = PROJECT_ROOT / "public" / "labs"
@@ -22,7 +22,7 @@ THUMBNAILS_DIR = PROJECT_ROOT / "public" / "thumbnails"
 GAMES_DATA_FILE = PROJECT_ROOT / "src" / "config" / "gamesData.ts"
 COMPLETED_DIR = DROPZONE_BASE / "Completed"
 
-# 폴더명 -> UI 탭 이름 매핑 (오컬트 기밀)
+# Folder name to UI tab name mapping (Occult classified)
 OCCULT_TAB_MAPPING = {
     "Abyssal_Frequencies": "Abyssal Frequencies",
     "Alchemy_and_Dark_Magic": "Alchemy & Dark Magic",
@@ -36,7 +36,7 @@ OCCULT_TAB_MAPPING = {
     "Illusions_and_Hallucinations": "Illusions & Hallucinations",
 }
 
-# 폴더명 -> UI 탭 이름 매핑 (과학)
+# Folder name to UI tab name mapping (Science)
 SCIENCE_TAB_MAPPING = {
     "Basics": "Science - Basics",
     "Mechanics": "Science - Mechanics",
@@ -55,7 +55,7 @@ SCIENCE_TAB_MAPPING = {
 }
 
 def find_folder_category(zip_path):
-    """ZIP 파일의 부모 폴더를 찾아서 탭 이름 반환"""
+    """Find parent folder and return tab name"""
     parent_dir = zip_path.parent.name
 
     if parent_dir in OCCULT_TAB_MAPPING:
@@ -72,76 +72,75 @@ def find_folder_category(zip_path):
     return None, None
 
 def extract_zip(zip_path, extract_to):
-    """ZIP 파일 압축 해제"""
+    """Extract ZIP file"""
     try:
         with zipfile.ZipFile(zip_path, 'r') as zip_ref:
             zip_ref.extractall(extract_to)
-        print(f"✓ 압축 해제 완료: {extract_to}")
+        print(f"✓ Extraction complete: {extract_to}")
         return True
     except Exception as e:
-        print(f"✗ 압축 해제 실패: {e}")
+        print(f"✗ Extraction failed: {e}")
         return False
 
 def capture_screenshot_with_playwright(game_id, game_folder):
-    """Playwright로 게임 스크린샷 캡처"""
+    """Capture game screenshot with Playwright"""
     try:
         from playwright.sync_api import sync_playwright
 
-        print(f"🎥 스크린샷 캡처 시작: {game_id}")
+        print(f"🎥 Starting screenshot capture: {game_id}")
 
         THUMBNAILS_DIR.mkdir(parents=True, exist_ok=True)
         screenshot_path = THUMBNAILS_DIR / f"{game_id}.png"
 
-        # 게임 파일 URL 경로
+        # Game file URL path
         game_url = f"file:///{game_folder}/index.html".replace("\\", "/")
 
         with sync_playwright() as p:
-            # 헤드리스 브라우저 실행
+            # Launch headless browser
             browser = p.chromium.launch(headless=True)
             page = browser.new_page(viewport={"width": 1280, "height": 720})
 
             try:
-                # 게임 페이지 로드 (최대 10초 대기)
+                # Load game page (max 10 seconds wait)
                 page.goto(game_url, wait_until="domcontentloaded", timeout=10000)
 
-                # 게임이 로드될 시간 제공 (2초)
+                # Wait for game loading (2 seconds)
                 time.sleep(2)
 
-                # 스크린샷 캡처
+                # Capture screenshot
                 page.screenshot(path=str(screenshot_path), full_page=False)
 
-                print(f"✓ 스크린샷 저장: {screenshot_path}")
+                print(f"✓ Screenshot saved: {screenshot_path}")
                 return f"/thumbnails/{game_id}.png"
 
             except Exception as page_error:
-                print(f"⚠ 스크린샷 캡처 실패: {page_error}")
-                # 캡처 실패 시 아이콘 이미지 사용
+                print(f"⚠ Screenshot capture failed: {page_error}")
                 return None
             finally:
                 browser.close()
 
     except ImportError:
-        print("⚠ Playwright 미설치 - 설치 명령: pip install playwright")
-        print("   이후 다음 명령 실행: playwright install")
+        print("⚠ Playwright not installed - Install: pip install playwright")
+        print("   Then run: playwright install")
         return None
     except Exception as e:
-        print(f"⚠ 스크린샷 캡처 중 오류: {e}")
+        print(f"⚠ Screenshot capture error: {e}")
         return None
 
 def generate_description_with_groq(game_title, folder_name):
-    """Groq API를 사용하여 설명 생성"""
+    """Generate description using Groq API"""
     try:
-        # API 키 가져오기
+        # Get API key
         groq_api_key = os.getenv("GROQ_API_KEY")
         if not groq_api_key:
-            print("⚠ GROQ_API_KEY 환경변수 없음, 기본 설명 사용")
+            print("⚠ GROQ_API_KEY environment variable not found, using default description")
             return generate_default_description(game_title, folder_name)
 
-        print("✓ Groq API로 설명 생성 중...")
+        print("✓ Generating description with Groq API...")
         return generate_default_description(game_title, folder_name)
 
     except Exception as e:
-        print(f"⚠ Groq API 오류: {e}, 기본 설명 사용")
+        print(f"⚠ Groq API error: {e}, using default description")
         return generate_default_description(game_title, folder_name)
 
 def generate_default_description(game_title, folder_name):
@@ -163,12 +162,12 @@ def generate_default_description(game_title, folder_name):
     return descriptions.get(folder_name, default)
 
 def update_games_data(game_id, game_title, description, image_path, tab_name, category_type="web_games"):
-    """gamesData.ts에 새 게임 객체 추가 (인덱스 0)"""
+    """Add new game object to gamesData.ts (index 0)"""
     try:
         with open(GAMES_DATA_FILE, 'r', encoding='utf-8') as f:
             content = f.read()
 
-        # 이모지 매핑
+        # Emoji mapping
         emoji_map = {
             "Abyssal": "🔮",
             "Alchemy": "⚗️",
@@ -188,7 +187,7 @@ def update_games_data(game_id, game_title, description, image_path, tab_name, ca
                 emoji = val
                 break
 
-        # image 속성 추가
+        # Add image attribute
         image_attr = f'    image: "{image_path}",' if image_path else ""
 
         new_game = f'''  {{
@@ -204,29 +203,29 @@ def update_games_data(game_id, game_title, description, image_path, tab_name, ca
     play_count: 0,
   }},'''
 
-        # GAMES_DATA 배열 찾기
+        # Find GAMES_DATA array
         array_start = content.find("export const GAMES_DATA: GameItem[] = [")
         if array_start == -1:
-            print("✗ GAMES_DATA 배열을 찾을 수 없습니다")
+            print("✗ Could not find GAMES_DATA array")
             return False
 
-        # 첫 번째 게임 객체 위치 찾기
+        # Find first game object position
         insert_pos = content.find("{", array_start)
 
-        # 새 게임 삽입 (인덱스 0)
+        # Insert new game (index 0)
         new_content = content[:insert_pos] + new_game + "\n  " + content[insert_pos:]
 
         with open(GAMES_DATA_FILE, 'w', encoding='utf-8') as f:
             f.write(new_content)
 
-        print(f"✓ gamesData.ts에 게임 추가: {game_id}")
+        print(f"✓ Game added to gamesData.ts: {game_id}")
         return True
     except Exception as e:
-        print(f"✗ gamesData.ts 업데이트 실패: {e}")
+        print(f"✗ Failed to update gamesData.ts: {e}")
         return False
 
 def run_git_commands():
-    """Git 명령어 실행 (add, commit, push)"""
+    """Run Git commands (add, commit, push)"""
     try:
         os.chdir(PROJECT_ROOT)
 
@@ -242,122 +241,122 @@ def run_git_commands():
         print("✓ git commit")
 
         subprocess.run(["git", "push"], check=True, capture_output=True)
-        print("✓ git push → Vercel 배포 트리거됨")
+        print("✓ git push → Vercel deployment triggered")
         return True
     except subprocess.CalledProcessError as e:
-        print(f"⚠ Git 오류 (무시): {e}")
+        print(f"⚠ Git error (ignored): {e}")
         return False
     except Exception as e:
-        print(f"✗ Git 명령어 실패: {e}")
+        print(f"✗ Git command failed: {e}")
         return False
 
 def process_zip_file(zip_path):
-    """단일 ZIP 파일 처리"""
+    """Process single ZIP file"""
     try:
-        # ZIP 파일명 (확장자 제외)
+        # ZIP filename (without extension)
         zip_name = zip_path.stem
         game_id = zip_name.lower().replace(" ", "_").replace("-", "_")
 
-        # 폴더 카테고리 찾기
+        # Find folder category
         tab_name, category = find_folder_category(zip_path)
         if not tab_name:
-            print(f"⚠ {zip_path}의 카테고리를 찾을 수 없습니다")
+            print(f"⚠ Could not find category for {zip_path}")
             return False
 
-        # 압축 해제 경로
+        # Extract path
         extract_path = LABS_DIR / zip_name
         if extract_path.exists():
-            print(f"⚠ {extract_path} 이미 존재, 건너뜀")
+            print(f"⚠ {extract_path} already exists, skipping")
             return False
 
         extract_path.mkdir(parents=True, exist_ok=True)
 
-        # 압축 해제
+        # Extract ZIP
         if not extract_zip(zip_path, extract_path):
             return False
 
-        # 🎥 스크린샷 캡처 (새 기능!)
-        print("\n📸 자동 스크린샷 캡처 중...")
+        # 🎥 Automatic screenshot capture (new feature!)
+        print("\n📸 Automatic screenshot capture in progress...")
         image_path = capture_screenshot_with_playwright(game_id, extract_path)
 
-        # AI로 설명 생성
+        # Generate description with AI
         description = generate_description_with_groq(zip_name, tab_name)
 
-        # gamesData.ts에 추가
+        # Add to gamesData.ts
         category_type = "simulation" if category == "science" else "web_games"
         if not update_games_data(game_id, zip_name, description, image_path, tab_name, category_type):
             return False
 
-        # Git 명령어 실행
-        print("\n📤 Git 명령어 실행 중...")
+        # Run Git commands
+        print("\n📤 Running Git commands...")
         run_git_commands()
 
-        # 완료된 ZIP 파일 이동
+        # Move completed ZIP file
         completed_zip = COMPLETED_DIR / zip_path.name
         shutil.move(str(zip_path), str(completed_zip))
-        print(f"✓ 완료된 파일 이동: {completed_zip}")
+        print(f"✓ Completed file moved: {completed_zip}")
 
         return True
     except Exception as e:
-        print(f"✗ 처리 중 오류: {e}")
+        print(f"✗ Processing error: {e}")
         return False
 
 def find_all_zip_files():
-    """드롭존의 모든 ZIP 파일 찾기"""
+    """Find all ZIP files in dropzone"""
     zip_files = list(DROPZONE_BASE.rglob("*.zip"))
 
-    # Completed 폴더 제외
+    # Exclude Completed folder
     zip_files = [z for z in zip_files if "Completed" not in str(z)]
 
     return zip_files
 
 def main():
-    """메인 함수"""
+    """Main function"""
     print("="*60)
-    print("🚀 Cometest 자동 업로드 시스템 v2.0")
-    print("   (스크린샷 자동 캡처 기능 포함)")
+    print("🚀 Cometest Automatic Upload System v2.0")
+    print("   (Includes automatic screenshot capture feature)")
     print("="*60)
 
-    # 필수 디렉토리 확인
+    # Check required directories
     if not DROPZONE_BASE.exists():
-        print(f"✗ 드롭존 경로 없음: {DROPZONE_BASE}")
-        print("먼저 setup_dropzone.py를 실행하세요")
+        print(f"✗ Dropzone path not found: {DROPZONE_BASE}")
+        print("First run setup_dropzone.py")
         return
 
     if not PROJECT_ROOT.exists():
-        print(f"✗ 프로젝트 경로 없음: {PROJECT_ROOT}")
+        print(f"✗ Project path not found: {PROJECT_ROOT}")
         return
 
     LABS_DIR.mkdir(parents=True, exist_ok=True)
     THUMBNAILS_DIR.mkdir(parents=True, exist_ok=True)
     COMPLETED_DIR.mkdir(parents=True, exist_ok=True)
 
-    # ZIP 파일 찾기
+    # Find ZIP files
     zip_files = find_all_zip_files()
 
     if not zip_files:
-        print("\n📭 처리할 ZIP 파일이 없습니다")
-        print(f"다음 경로에 ZIP 파일을 업로드하세요:")
-        print(f"  {DROPZONE_BASE}/Science/[폴더명]/")
-        print(f"  {DROPZONE_BASE}/Occult_Classified/[폴더명]/")
+        print("\n📭 No ZIP files to process")
+        print(f"Upload ZIP files to:")
+        print(f"  {DROPZONE_BASE}/Science/[folder_name]/")
+        print(f"  {DROPZONE_BASE}/Occult_Classified/[folder_name]/")
         return
 
-    print(f"\n📦 발견된 ZIP 파일: {len(zip_files)}개\n")
+    print(f"\n📦 Found ZIP files: {len(zip_files)}\n")
 
-    # 각 ZIP 파일 처리
+    # Process each ZIP file
     success_count = 0
     for zip_file in zip_files:
-        print(f"\n🔧 처리 중: {zip_file.name}")
+        print(f"\n🔧 Processing: {zip_file.name}")
         print("-" * 60)
         if process_zip_file(zip_file):
             success_count += 1
-            print(f"✓ 완료")
+            print(f"✓ Complete")
         else:
-            print(f"✗ 실패")
+            print(f"✗ Failed")
 
-    # 최종 요약
+    # Final summary
     print("\n" + "="*60)
-    print(f"✅ 처리 완료: {success_count}/{len(zip_files)} 성공")
+    print(f"✅ Processing complete: {success_count}/{len(zip_files)} successful")
     print("="*60)
 
 if __name__ == "__main__":

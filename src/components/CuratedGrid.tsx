@@ -43,7 +43,7 @@ export function CuratedGrid({ items, columns = 6 }: CuratedGridProps) {
     return () => window.removeEventListener('resize', handleResize)
   }, [])
 
-  // Intersection Observer로 무한 스크롤 구현
+  // Infinite scroll implementation using Intersection Observer
   useEffect(() => {
     const observer = new IntersectionObserver(
       ([entry]) => {

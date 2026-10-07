@@ -1,10 +1,9 @@
 export interface MenuItem {
   id: string
   name: string
-  nameKr: string
   category: 'kfood' | 'steak' | 'pasta' | 'seafood' | 'salad' | 'dessert'
   price: number
-  prepTime: number // 초 단위
+  prepTime: number // seconds
   icon: string
   color: string
 }
@@ -17,11 +16,10 @@ export interface MenuCategory {
 }
 
 export const menuItems: MenuItem[] = [
-  // K-푸드 & 분식류
+  // K-Food & Fusion
   {
     id: 'ramen',
     name: 'Ramen',
-    nameKr: '라면',
     category: 'kfood',
     price: 12,
     prepTime: 30,
@@ -29,11 +27,10 @@ export const menuItems: MenuItem[] = [
     color: '#d4a574',
   },
 
-  // 스테이크 & 그릴류
+  // Steak & Grill
   {
     id: 'ribeye',
     name: 'Ribeye Steak',
-    nameKr: '립아이 스테이크',
     category: 'steak',
     price: 28,
     prepTime: 45,
@@ -43,7 +40,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'tomahawk',
     name: 'Tomahawk Steak',
-    nameKr: '토마호크 스테이크',
     category: 'steak',
     price: 42,
     prepTime: 60,
@@ -53,7 +49,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'chicken_steak',
     name: 'Chicken Steak',
-    nameKr: '치킨 스테이크',
     category: 'steak',
     price: 18,
     prepTime: 35,
@@ -61,11 +56,10 @@ export const menuItems: MenuItem[] = [
     color: '#cd853f',
   },
 
-  // 파스타 & 핫푸드류
+  // Pasta & Hot
   {
     id: 'toomba_pasta',
     name: 'Toomba Pasta',
-    nameKr: '투움바 파스타',
     category: 'pasta',
     price: 16,
     prepTime: 40,
@@ -75,7 +69,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'carbonara',
     name: 'Carbonara',
-    nameKr: '까르보나라',
     category: 'pasta',
     price: 14,
     prepTime: 38,
@@ -85,7 +78,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'tomato_pasta',
     name: 'Tomato Pasta',
-    nameKr: '토마토 파스타',
     category: 'pasta',
     price: 13,
     prepTime: 35,
@@ -95,7 +87,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'aglio_olio',
     name: 'Aglio e Olio',
-    nameKr: '알리올리오 파스타',
     category: 'pasta',
     price: 12,
     prepTime: 32,
@@ -105,7 +96,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'squid_ink_risotto',
     name: 'Squid Ink Risotto',
-    nameKr: '먹물 리조또',
     category: 'pasta',
     price: 20,
     prepTime: 50,
@@ -115,7 +105,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'gorgonzola_pizza',
     name: 'Gorgonzola Pizza',
-    nameKr: '고르곤졸라 피자',
     category: 'pasta',
     price: 15,
     prepTime: 42,
@@ -125,7 +114,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'soup',
     name: 'Soup',
-    nameKr: '국물요리',
     category: 'pasta',
     price: 8,
     prepTime: 25,
@@ -135,7 +123,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'fish_chips',
     name: 'Fish & Chips',
-    nameKr: '피시앤칩스',
     category: 'pasta',
     price: 15,
     prepTime: 38,
@@ -145,7 +132,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'taco',
     name: 'Taco',
-    nameKr: '타코',
     category: 'pasta',
     price: 10,
     prepTime: 28,
@@ -153,11 +139,10 @@ export const menuItems: MenuItem[] = [
     color: '#ff6347',
   },
 
-  // 일식 & 시푸드류
+  // Sushi & Seafood
   {
     id: 'california_roll',
     name: 'California Roll',
-    nameKr: '캘리포니아롤',
     category: 'seafood',
     price: 12,
     prepTime: 30,
@@ -167,7 +152,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'sushi',
     name: 'Sushi',
-    nameKr: '스시',
     category: 'seafood',
     price: 16,
     prepTime: 35,
@@ -177,7 +161,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'salmon_sashimi',
     name: 'Salmon Sashimi',
-    nameKr: '연어회',
     category: 'seafood',
     price: 18,
     prepTime: 25,
@@ -187,7 +170,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'flounder_sashimi',
     name: 'Flounder Sashimi',
-    nameKr: '광어회',
     category: 'seafood',
     price: 20,
     prepTime: 20,
@@ -197,7 +179,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'king_crab',
     name: 'King Crab',
-    nameKr: '킹크랩',
     category: 'seafood',
     price: 35,
     prepTime: 55,
@@ -207,7 +188,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'snow_crab',
     name: 'Snow Crab',
-    nameKr: '대게',
     category: 'seafood',
     price: 32,
     prepTime: 50,
@@ -217,7 +197,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'lobster',
     name: 'Lobster',
-    nameKr: '랍스타',
     category: 'seafood',
     price: 38,
     prepTime: 60,
@@ -225,11 +204,10 @@ export const menuItems: MenuItem[] = [
     color: '#cd5c5c',
   },
 
-  // 샐러드 & 베이커리/조식류
+  // Salad & Breakfast
   {
     id: 'chicken_salad',
     name: 'Chicken Breast Salad',
-    nameKr: '닭가슴살 샐러드',
     category: 'salad',
     price: 11,
     prepTime: 22,
@@ -239,7 +217,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'cheese',
     name: 'Cheese Platter',
-    nameKr: '치즈',
     category: 'salad',
     price: 14,
     prepTime: 15,
@@ -249,7 +226,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'bushman_bread',
     name: 'Bushman Bread',
-    nameKr: '부시맨 브래드',
     category: 'salad',
     price: 6,
     prepTime: 18,
@@ -259,7 +235,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'bacon',
     name: 'Bacon',
-    nameKr: '베이컨',
     category: 'salad',
     price: 8,
     prepTime: 12,
@@ -269,7 +244,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'scrambled_egg',
     name: 'Scrambled Egg',
-    nameKr: '스크램블 에그',
     category: 'salad',
     price: 5,
     prepTime: 10,
@@ -279,7 +253,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'milk',
     name: 'Milk',
-    nameKr: '우유',
     category: 'salad',
     price: 3,
     prepTime: 5,
@@ -289,7 +262,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'juice',
     name: 'Juice',
-    nameKr: '쥬스',
     category: 'salad',
     price: 4,
     prepTime: 8,
@@ -297,11 +269,10 @@ export const menuItems: MenuItem[] = [
     color: '#ff69b4',
   },
 
-  // 디저트 & 음료류
+  // Dessert & Beverage
   {
     id: 'cake',
     name: 'Cake',
-    nameKr: '케이크',
     category: 'dessert',
     price: 9,
     prepTime: 20,
@@ -311,7 +282,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'ice_cream',
     name: 'Ice Cream',
-    nameKr: '아이스크림',
     category: 'dessert',
     price: 6,
     prepTime: 8,
@@ -321,7 +291,6 @@ export const menuItems: MenuItem[] = [
   {
     id: 'coffee',
     name: 'Coffee',
-    nameKr: '커피',
     category: 'dessert',
     price: 5,
     prepTime: 12,

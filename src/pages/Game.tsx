@@ -95,10 +95,10 @@ export function Game() {
         position: 'relative',
       }}
     >
-      {/* 게임 렌더링 */}
+      {/* Game Rendering */}
       {renderGame()}
 
-      {/* 뒤로가기 버튼 - 게임 위에 오버레이 */}
+      {/* Back Button - Overlay on top of game */}
       <button
         onClick={() => navigate('/game')}
         style={{
