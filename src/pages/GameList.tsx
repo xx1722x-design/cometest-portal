@@ -1,23 +1,14 @@
-import { useState, useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Header } from '../components/Header'
 import { Sidebar } from '../components/Sidebar'
 import { SiteFooter } from '../components/SiteFooter'
 import { GAMES_DATA } from '../config/gamesData'
-import { SIMULATIONS_DATA } from '../config/simulationsData'
-
-const SIMULATION_CATEGORIES = ['biology', 'earth_science']
-const CATEGORY_LABELS: { [key: string]: string } = {
-  biology: '🧬 Biology',
-  earth_science: '🌎 Earth Science',
-}
 
 export function GameList() {
   const navigate = useNavigate()
   const { t } = useTranslation()
-  const [activeTab, setActiveTab] = useState<'games' | 'labs'>('games')
-  const [activeCategory, setActiveCategory] = useState('space_universe')
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
 
   useEffect(() => {
@@ -32,8 +23,6 @@ export function GameList() {
     if (width < 1024) return 'repeat(3, 1fr)'
     return 'repeat(auto-fill, minmax(200px, 1fr))'
   }
-
-  const getSimulationsByCategory = (category: string) => SIMULATIONS_DATA.filter((sim) => sim.category === category)
 
   const renderCardGrid = (items: any[]) => (
     <div
@@ -157,7 +146,7 @@ export function GameList() {
               }}
               onClick={() => navigate(item.path)}
             >
-              {item.path?.includes('game') ? '플레이' : 'Explore'}
+              🎮 플레이
             </button>
           </div>
         </div>
@@ -171,106 +160,16 @@ export function GameList() {
 
       <div className="category-layout">
         <main className="category-main">
-          {/* Tabs */}
-          <div
-            style={{
-              display: 'flex',
-              gap: '20px',
-              padding: '20px 20px 0 20px',
-              borderBottom: '1px solid rgba(255,255,255,0.1)',
-              marginBottom: '30px',
-            }}
-          >
-            <button
-              onClick={() => setActiveTab('games')}
-              style={{
-                padding: '12px 24px',
-                backgroundColor: activeTab === 'games' ? '#667eea' : 'transparent',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '8px 8px 0 0',
-                cursor: 'pointer',
-                fontSize: '16px',
-                fontWeight: '600',
-                transition: 'all 0.3s',
-              }}
-            >
-              🎮 Web Games
-            </button>
-            <button
-              onClick={() => setActiveTab('labs')}
-              style={{
-                padding: '12px 24px',
-                backgroundColor: activeTab === 'labs' ? '#667eea' : 'transparent',
-                color: '#fff',
-                border: 'none',
-                borderRadius: '8px 8px 0 0',
-                cursor: 'pointer',
-                fontSize: '16px',
-                fontWeight: '600',
-                transition: 'all 0.3s',
-              }}
-            >
-              🔬 Educational Labs
-            </button>
+          {/* Hero Section */}
+          <div className="category-hero">
+            <h1 className="category-hero__title">
+              <span aria-hidden="true">🎮</span> {t('web_games')}
+            </h1>
+            <p className="category-hero__subtitle">{t('portal_subtitle')}</p>
           </div>
 
-          {/* Content */}
-          {activeTab === 'games' && (
-            <>
-              <div className="category-hero">
-                <h1 className="category-hero__title">
-                  <span aria-hidden="true">🎮</span> {t('web_games')}
-                </h1>
-                <p className="category-hero__subtitle">{t('portal_subtitle')}</p>
-              </div>
-              {renderCardGrid(GAMES_DATA)}
-            </>
-          )}
-
-          {activeTab === 'labs' && (
-            <>
-              <div className="category-hero">
-                <h1 className="category-hero__title">
-                  <span aria-hidden="true">🔬</span> Educational Labs
-                </h1>
-                <p className="category-hero__subtitle">Interactive 3D science experiments and simulations</p>
-              </div>
-
-              {/* Category tabs for labs */}
-              <div
-                style={{
-                  display: 'flex',
-                  gap: '10px',
-                  padding: '20px',
-                  flexWrap: 'wrap',
-                }}
-              >
-                {SIMULATION_CATEGORIES.map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setActiveCategory(cat)}
-                    style={{
-                      padding: '10px 16px',
-                      backgroundColor: activeCategory === cat ? '#667eea' : '#333',
-                      color: '#fff',
-                      border: `2px solid ${activeCategory === cat ? '#667eea' : '#555'}`,
-                      borderRadius: '8px',
-                      cursor: 'pointer',
-                      fontSize: '14px',
-                      fontWeight: '600',
-                      transition: 'all 0.3s',
-                    }}
-                  >
-                    {CATEGORY_LABELS[cat]}
-                  </button>
-                ))}
-              </div>
-
-              {/* Display simulations for selected category */}
-              {renderCardGrid(getSimulationsByCategory(activeCategory))}
-            </>
-          )}
+          {/* Game Grid */}
+          {renderCardGrid(GAMES_DATA)}
         </main>
 
         {/* 우측 사이드바 */}
