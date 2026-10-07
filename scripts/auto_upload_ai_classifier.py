@@ -341,6 +341,7 @@ def update_games_data(game_id: str, game_title: str, description: str, image_pat
             print("✗ Could not find GAMES_DATA array")
             return False
 
+        # Prepend: Insert new game at the VERY BEGINNING of array (right after opening bracket)
         insert_pos = content.find("{", array_start)
         new_content = content[:insert_pos] + new_game + "\n  " + content[insert_pos:]
 
