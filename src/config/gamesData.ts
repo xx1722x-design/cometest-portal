@@ -11,6 +11,17 @@ export interface GameItem {
 }
 
 export const GAMES_DATA: GameItem[] = [
+    {
+    id: 'spectral_horn',
+    title: 'spectral-horn',
+    description: '🔮 미스터리한 Abyssal Frequencies 실험실. spectral-horn을 통해 미지의 영역을 탐험하세요.',
+    thumbnail: '🔮',
+    category: 'web_games',
+    icon: '🔮',
+    path: '/game/spectral_horn',
+    tags: ['experimental', 'classified', 'mystery', 'abyssal_frequencies'],
+    play_count: 0,
+  },
   {
     id: 'mario',
     title: 'Super Mario - HTML5',
