@@ -14,8 +14,8 @@ export interface GameItem {
 export const GAMES_DATA: GameItem[] = [
   {
     id: 'dante',
-    title: 'Dante - Puzzle Adventure',
-    description: '🔮 신비로운 차원을 탐험하는 퍼즐 어드벤처. 섬뜩한 분위기 속에서 미지의 영역을 풀어내세요.',
+    title: 'Dante - Dimensional Puzzle',
+    description: '🔮 A gripping puzzle adventure through mysterious dimensions. Navigate surreal environments, solve cryptic puzzles, and uncover the secrets of forgotten realms.',
     thumbnail: '🔮',
     category: 'simulation',
     icon: '🔮',
@@ -26,8 +26,8 @@ export const GAMES_DATA: GameItem[] = [
   },
   {
     id: 'clawstrike',
-    title: 'Clawstrike - Action Battle',
-    description: '⚔️ 신비한 존재들과의 격렬한 전투. 직관적인 컨트롤로 위험한 순간들을 헤쳐나가세요.',
+    title: 'Clawstrike - Battle Arena',
+    description: '⚔️ Intense combat against mysterious entities. Master intuitive controls, dodge deadly attacks, and emerge victorious in this action-packed arena battle.',
     thumbnail: '⚔️',
     category: 'simulation',
     icon: '⚔️',
@@ -38,8 +38,8 @@ export const GAMES_DATA: GameItem[] = [
   },
   {
     id: 'neon-platformer',
-    title: 'Neon Platformer - Premium',
-    description: '🎮 형광빛 나는 미로 같은 스테이지를 뛰어다니는 프리미엄 플랫포머. 동전을 모으고 적을 피하며 난이도 상승의 쾌감을 즐기세요.',
+    title: 'Neon Platformer - Premium Edition',
+    description: '🎮 Jump through neon-lit maze levels in this premium 2D platformer. Collect coins, dodge enemies, and master progressively challenging stages with addictive gameplay.',
     thumbnail: '🎮',
     category: 'web_games',
     icon: '🎮',
@@ -51,7 +51,7 @@ export const GAMES_DATA: GameItem[] = [
   {
     id: 'neon-space-shooter',
     title: 'Neon Space Shooter',
-    description: '💥 형광색 우주에서 펼쳐지는 슈팅 게임. 화살표 키로 이동하고 스페이스바로 사격하여 파도 같이 밀려오는 적들을 격퇴하세요.',
+    description: '💥 Battle through neon-glowing space in this arcade shooter. Navigate with arrow keys, fire with SPACE, and destroy waves of enemies in a glowing void.',
     thumbnail: '💥',
     category: 'web_games',
     icon: '💥',
@@ -63,7 +63,7 @@ export const GAMES_DATA: GameItem[] = [
   {
     id: 'catch-game',
     title: 'Fruit Catch - Classic Arcade',
-    description: '🎮 떨어지는 과일을 바구니로 잡는 클래식 아케이드 게임. 마우스를 움직여 신속하게 반응하고 높은 점수를 기록하세요.',
+    description: '🎮 Catch falling fruits in this classic arcade game. Move your basket with precision, test your reflexes, and rack up high scores in addictive casual gameplay.',
     thumbnail: '🎮',
     category: 'web_games',
     icon: '🎮',

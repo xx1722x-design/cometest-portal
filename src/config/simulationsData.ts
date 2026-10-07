@@ -16,7 +16,7 @@ export const SIMULATIONS_DATA: SimulationItem[] = [
   {
     id: 'physics-blocks-simulation',
     title: 'Interactive Physics Blocks Tower',
-    description: '🎯 형광색 블록으로 만들어진 거대한 탑을 파괴하는 3D 물리 시뮬레이션. 블록을 끌어서 던지고 마젠타 공을 발사하여 구조물을 무너뜨리세요!',
+    description: '🎯 Destroy a colossal tower of glowing blocks using realistic 3D physics. Drag blocks and launch the magenta ball to shatter the neon structure and test your strategy.',
     category: 'physics_chemistry',
     icon: '🎯',
     path: '/simulation/physics-blocks-simulation',
@@ -28,7 +28,7 @@ export const SIMULATIONS_DATA: SimulationItem[] = [
   {
     id: 'ocean-water-simulation',
     title: 'Premium Ocean Water Simulation',
-    description: '🌊 셰이더 기반의 사실적인 해양 환경. 동적 파도, 하늘 환경, 고급 조명을 갖춘 Three.js 물리 렌더링으로 살아있는 바다를 경험하세요.',
+    description: '🌊 Experience a breathtaking shader-based ocean with dynamic waves, realistic sky, and advanced lighting. Pure Three.js water physics rendering.',
     category: 'physics_chemistry',
     icon: '🌊',
     path: '/simulation/ocean-water-simulation',
@@ -40,7 +40,7 @@ export const SIMULATIONS_DATA: SimulationItem[] = [
   {
     id: 'fluid-particle-system',
     title: 'Interactive Fluid Particle System',
-    description: '✨ 5000개 이상의 형광 입자로 이루어진 프리미엄 3D 유체 시뮬레이션. 마우스 움직임에 반응하며 가산 블렌딩으로 자연스러운 빛 효과를 제공합니다.',
+    description: '✨ Control 5000+ glowing particles in premium 3D fluid simulation. React to your mouse movement with additive blending for stunning natural glow effects.',
     category: 'physics_chemistry',
     icon: '✨',
     path: '/simulation/fluid-particle-system',
@@ -52,7 +52,7 @@ export const SIMULATIONS_DATA: SimulationItem[] = [
   {
     id: 'advanced-cloth-physics',
     title: 'Advanced Cloth Physics',
-    description: '🧵 Verlet 적분 기반의 고급 천 물리 시뮬레이션. 후처리 효과와 상호작용 가능한 물리 객체로 현실감 있는 천의 움직임을 관찰하세요.',
+    description: '🧵 Advanced cloth simulation using Verlet integration and post-processing effects. Watch realistic fabric movement with interactive physics objects.',
     category: 'physics_chemistry',
     icon: '🧵',
     path: '/simulation/advanced-cloth-physics',
@@ -64,7 +64,7 @@ export const SIMULATIONS_DATA: SimulationItem[] = [
   {
     id: 'solar-system',
     title: 'Solar System Explorer',
-    description: '🌍 우리 태양계의 3D 모델. 마우스로 줌 인/아웃하며 행성의 궤도와 특성을 학습하는 인터랙티브 천문학 시뮬레이션.',
+    description: '🌍 Explore our Solar System in 3D. Zoom in and out, observe planetary orbits, and learn about each celestial body in an interactive educational experience.',
     category: 'space_universe',
     icon: '🌍',
     path: '/simulation/solar-system',
@@ -76,7 +76,7 @@ export const SIMULATIONS_DATA: SimulationItem[] = [
   {
     id: 'moon-phases',
     title: 'Moon Phases Simulator',
-    description: '🌙 달의 위상 변화를 시각화하는 인터랙티브 시뮬레이션. 한 달 주기의 달 변화를 직관적으로 이해하세요.',
+    description: '🌙 Visualize lunar phases in an interactive simulation. Understand the monthly cycle of the Moon and discover the science behind its changing appearance.',
     category: 'space_universe',
     icon: '🌙',
     path: '/simulation/moon-phases',
@@ -88,7 +88,7 @@ export const SIMULATIONS_DATA: SimulationItem[] = [
   {
     id: 'candle-extinguishing',
     title: 'Candle Extinguishing Methods',
-    description: '🔥 촛불의 연소와 소화 원리를 탐험하는 화학 시뮬레이션. 다양한 방법으로 불을 끄고 화학 반응을 관찰하세요.',
+    description: '🔥 Explore combustion and extinction principles through interactive chemistry simulation. Discover different ways to extinguish flames and observe reactions.',
     category: 'physics_chemistry',
     icon: '🔥',
     path: '/simulation/candle-extinguishing',
@@ -99,8 +99,8 @@ export const SIMULATIONS_DATA: SimulationItem[] = [
   },
   {
     id: 'states-of-water',
-    title: 'States of Water - Transformation Lab',
-    description: '💧 물의 세 가지 상태(고체, 액체, 기체) 변화를 관찰하는 시뮬레이션. 온도와 압력의 영향을 직접 경험해보세요.',
+    title: 'States of Water Transformation Lab',
+    description: '💧 Observe water transitioning between solid, liquid, and gas states. Experiment with temperature and pressure effects in this interactive lab.',
     category: 'physics_chemistry',
     icon: '💧',
     path: '/simulation/states-of-water',
@@ -111,8 +111,8 @@ export const SIMULATIONS_DATA: SimulationItem[] = [
   },
   {
     id: 'states-of-matter',
-    title: 'States of Matter - Physics Basics',
-    description: '⚛️ 물질의 세 가지 상태를 3D로 시각화한 물리 교육 시뮬레이션. 원자 수준에서 상태 변화를 이해하세요.',
+    title: 'States of Matter Physics Lab',
+    description: '⚛️ Visualize the three states of matter in 3D. Understand atomic behavior and state changes from a molecular perspective in this physics education simulation.',
     category: 'physics_chemistry',
     icon: '⚛️',
     path: '/simulation/states-of-matter',
@@ -124,7 +124,7 @@ export const SIMULATIONS_DATA: SimulationItem[] = [
   {
     id: 'room-convection',
     title: 'Room Convection Simulator',
-    description: '🌬️ 방 안의 대류 현상을 시각화하는 물리 시뮬레이션. 열이 공간에서 어떻게 흐르고 순환하는지 관찰하세요.',
+    description: '🌬️ Visualize heat flow and convection patterns in a room. Observe how thermal energy circulates and creates convection currents in this physics simulation.',
     category: 'physics_chemistry',
     icon: '🌬️',
     path: '/simulation/room-convection',
@@ -136,7 +136,7 @@ export const SIMULATIONS_DATA: SimulationItem[] = [
   {
     id: 'physics-3d-balls',
     title: '3D Physics Balls',
-    description: '🎱 낙하하는 컬러풀한 공의 3D 물리 시뮬레이션. 마우스로 드래그하여 뷰를 회전하고 중력과 충돌을 탐험하세요.',
+    description: '🎱 Interactive 3D physics simulation with falling colorful balls. Rotate the view, explore gravity effects, and observe realistic collision physics.',
     category: 'physics_chemistry',
     icon: '🎱',
     path: '/simulation/physics-3d-balls',

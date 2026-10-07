@@ -145,21 +145,21 @@ def generate_description_with_groq(game_title, folder_name):
         return generate_default_description(game_title, folder_name)
 
 def generate_default_description(game_title, folder_name):
-    """기본 설명 생성"""
+    """Generate description in English"""
     descriptions = {
-        "Abyssal_Frequencies": f"🔮 심연의 주파수로부터 울려오는 신비로운 신호를 감지하세요. 미지의 차원에서 흘러나오는 기묘한 음향 현상을 탐험하는 비밀 실험실.",
-        "Alchemy_and_Dark_Magic": f"⚗️ 금지된 연금술의 비법을 깨우치는 어두운 마술사의 수련장. {game_title}을 통해 물질의 본질과 마법의 진리를 다루세요.",
-        "Anomalous_Physics": f"⚡ 정상 물리학의 법칙을 벗어난 이상 현상들을 관찰하고 실험하세요. 차원의 틈에서 관찰된 비상식적인 물리 법칙.",
-        "Cosmic_Horror": f"👁️ 우주의 심연에서 관찰되는 공포스러운 현상. {game_title}은 인류가 마주해서는 안 될 우주적 진실을 암시합니다.",
-        "Forbidden_Specimens": f"🧬 금지된 표본관에 보관된 미지의 생명체들을 연구하세요. 알려지지 않은 생물학적 이상 현상들의 비밀 문고.",
-        "Sacred_Geometry": f"✨ 우주의 기본 구조를 이루는 신성한 기하학적 패턴을 탐험하세요. 고대 문명의 숨겨진 수학적 진리.",
-        "Necromancy_and_Spirits": f"💀 죽음의 경계를 넘나드는 영혼 소환 기술을 탐구하세요. 저승과 현세를 잇는 비밀의 문을 열다.",
-        "Unidentified_Artifacts": f"📿 정체 불명의 고대 유물들이 보관된 기밀 아카이브. {game_title}을 통해 미지의 문명이 남긴 흔적을 해석하세요.",
-        "Breach_and_Anomalies": f"🌌 현실의 벽에 난 틈으로 새어나오는 이상 현상들을 추적하세요. 차원의 균열에서 비롯된 재해를 연구하는 비밀 기지.",
-        "Illusions_and_Hallucinations": f"🎭 현실과 환각의 경계가 흐려지는 정신적 실험실. {game_title}을 통해 의식의 깊이 있는 차원을 탐험하세요.",
+        "Abyssal_Frequencies": f"🔮 Detect mysterious signals from the abyssal depths. Explore strange acoustic phenomena flowing from unknown dimensions in this secret laboratory.",
+        "Alchemy_and_Dark_Magic": f"⚗️ Master forbidden alchemical secrets in a dark wizard's training ground. Uncover the essence of matter and magical truths through {game_title}.",
+        "Anomalous_Physics": f"⚡ Observe and experiment with anomalous phenomena beyond normal physics laws. Discover non-conventional physical laws found at dimensional rifts.",
+        "Cosmic_Horror": f"👁️ Encounter terrifying phenomena observed from the cosmic abyss. {game_title} hints at cosmic truths humanity should never face.",
+        "Forbidden_Specimens": f"🧬 Research mysterious life forms stored in forbidden archives. Secret collection of unknown biological anomalies and rare specimens.",
+        "Sacred_Geometry": f"✨ Explore sacred geometric patterns forming the universe's foundation. Unlock ancient civilizations' hidden mathematical truths.",
+        "Necromancy_and_Spirits": f"💀 Master spirit summoning techniques beyond death's boundary. Open the secret door connecting the underworld and the living world.",
+        "Unidentified_Artifacts": f"📿 Classified archive of unidentified ancient artifacts. Interpret traces left by unknown civilizations through {game_title}.",
+        "Breach_and_Anomalies": f"🌌 Track anomalies seeping through reality's boundaries. Secret facility studying dimensional rifts and catastrophic events.",
+        "Illusions_and_Hallucinations": f"🎭 Mental laboratory where reality and hallucination blur. Explore profound dimensions of consciousness through {game_title}.",
     }
 
-    default = f"🔮 미스터리한 {folder_name} 실험실. {game_title}을 통해 미지의 영역을 탐험하세요."
+    default = f"🔮 Mysterious {folder_name} laboratory. Explore unknown realms through {game_title}."
     return descriptions.get(folder_name, default)
 
 def update_games_data(game_id, game_title, description, image_path, tab_name, category_type="web_games"):
