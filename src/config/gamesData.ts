@@ -11,7 +11,18 @@ export interface GameItem {
 }
 
 export const GAMES_DATA: GameItem[] = [
-        {
+          {
+    id: 'dante',
+    title: 'dante',
+    description: '🔮 미스터리한 Science - Web Games 실험실. dante을 통해 미지의 영역을 탐험하세요.',
+    thumbnail: '🔮',
+    category: 'simulation',
+    icon: '🔮',
+    path: '/game/dante',
+    tags: ['experimental', 'classified', 'mystery', 'science_-_web_games'],
+    play_count: 0,
+  },
+  {
     id: 'clawstrike',
     title: 'clawstrike',
     description: '🔮 미스터리한 Science - Web Games 실험실. clawstrike을 통해 미지의 영역을 탐험하세요.',
