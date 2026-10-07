@@ -369,8 +369,8 @@ def run_git_commands() -> bool:
         )
         print("✓ git commit")
 
-        subprocess.run(["git", "push"], check=True, capture_output=True)
-        print("✓ git push → Vercel deployment triggered")
+        subprocess.run(["git", "push", "origin", "main"], check=True, capture_output=True)
+        print("✓ git push origin main → Vercel deployment triggered")
         return True
     except subprocess.CalledProcessError as e:
         print(f"⚠ Git error (ignored): {e}")
