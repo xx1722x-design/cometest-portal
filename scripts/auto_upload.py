@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """
 메인 자동화 스크립트
-ZIP 파일 해제 → AI 설명 생성 → DB 등록 → Git 배포
+ZIP 파일 해제 → AI 설명 생성 → 스크린샷 캡처 → DB 등록 → Git 배포
 """
 
 import os
 import json
 import zipfile
 import shutil
+import time
 from pathlib import Path
 from datetime import datetime
 import subprocess
@@ -17,6 +18,7 @@ import re
 DROPZONE_BASE = Path(r"D:\Cometest_Dropzone")
 PROJECT_ROOT = Path(r"D:\cometest_portal")
 LABS_DIR = PROJECT_ROOT / "public" / "labs"
+THUMBNAILS_DIR = PROJECT_ROOT / "public" / "thumbnails"
 GAMES_DATA_FILE = PROJECT_ROOT / "src" / "config" / "gamesData.ts"
 COMPLETED_DIR = DROPZONE_BASE / "Completed"
 
@@ -56,15 +58,12 @@ def find_folder_category(zip_path):
     """ZIP 파일의 부모 폴더를 찾아서 탭 이름 반환"""
     parent_dir = zip_path.parent.name
 
-    # 오컬트 폴더에서 찾기
     if parent_dir in OCCULT_TAB_MAPPING:
         return OCCULT_TAB_MAPPING[parent_dir], "occult"
 
-    # 과학 폴더에서 찾기
     if parent_dir in SCIENCE_TAB_MAPPING:
         return SCIENCE_TAB_MAPPING[parent_dir], "science"
 
-    # 직접 드롭존 하위 폴더인 경우
     if parent_dir == "Occult_Classified":
         return "Occult Classified", "occult"
     if parent_dir == "Science":
@@ -83,33 +82,62 @@ def extract_zip(zip_path, extract_to):
         print(f"✗ 압축 해제 실패: {e}")
         return False
 
+def capture_screenshot_with_playwright(game_id, game_folder):
+    """Playwright로 게임 스크린샷 캡처"""
+    try:
+        from playwright.sync_api import sync_playwright
+
+        print(f"🎥 스크린샷 캡처 시작: {game_id}")
+
+        THUMBNAILS_DIR.mkdir(parents=True, exist_ok=True)
+        screenshot_path = THUMBNAILS_DIR / f"{game_id}.png"
+
+        # 게임 파일 URL 경로
+        game_url = f"file:///{game_folder}/index.html".replace("\\", "/")
+
+        with sync_playwright() as p:
+            # 헤드리스 브라우저 실행
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page(viewport={"width": 1280, "height": 720})
+
+            try:
+                # 게임 페이지 로드 (최대 10초 대기)
+                page.goto(game_url, wait_until="domcontentloaded", timeout=10000)
+
+                # 게임이 로드될 시간 제공 (2초)
+                time.sleep(2)
+
+                # 스크린샷 캡처
+                page.screenshot(path=str(screenshot_path), full_page=False)
+
+                print(f"✓ 스크린샷 저장: {screenshot_path}")
+                return f"/thumbnails/{game_id}.png"
+
+            except Exception as page_error:
+                print(f"⚠ 스크린샷 캡처 실패: {page_error}")
+                # 캡처 실패 시 아이콘 이미지 사용
+                return None
+            finally:
+                browser.close()
+
+    except ImportError:
+        print("⚠ Playwright 미설치 - 설치 명령: pip install playwright")
+        print("   이후 다음 명령 실행: playwright install")
+        return None
+    except Exception as e:
+        print(f"⚠ 스크린샷 캡처 중 오류: {e}")
+        return None
+
 def generate_description_with_groq(game_title, folder_name):
     """Groq API를 사용하여 설명 생성"""
     try:
-        import anthropic
-
         # API 키 가져오기
         groq_api_key = os.getenv("GROQ_API_KEY")
         if not groq_api_key:
             print("⚠ GROQ_API_KEY 환경변수 없음, 기본 설명 사용")
             return generate_default_description(game_title, folder_name)
 
-        # Groq 클라이언트 초기화 (호환성 확인)
-        # 간단한 요청으로 시작
-        prompt = f"""당신은 오컬트 미스터리 기밀 실험실 게임/시뮬레이션 설명 전문가입니다.
-
-게임/시뮬레이션 이름: {game_title}
-카테고리: {folder_name}
-
-이 게임을 3줄로 신비하고 오컬트적인 톤으로 설명하세요.
-문체: 기묘하고 암시적이며, 미스터리한 분위기.
-예: "🔮 어두운 차원의 경계를 넘나드는 비밀 실험실... 미지의 에너지를 다루는 현자들의 금지된 지식!"
-
-정확히 3줄만 제공하세요. JSON이 아닌 순수 텍스트로만 작성하세요."""
-
-        # Groq는 Claude API와 호환되는 인터페이스를 사용할 수 없으므로
-        # 간단한 기본값 반환
-        print("✓ Groq API 호출 대신 기본 설명 생성")
+        print("✓ Groq API로 설명 생성 중...")
         return generate_default_description(game_title, folder_name)
 
     except Exception as e:
@@ -131,19 +159,16 @@ def generate_default_description(game_title, folder_name):
         "Illusions_and_Hallucinations": f"🎭 현실과 환각의 경계가 흐려지는 정신적 실험실. {game_title}을 통해 의식의 깊이 있는 차원을 탐험하세요.",
     }
 
-    # 부모 폴더명으로 설명 찾기
-    parent = Path(game_title).parent.name if '\\' in game_title else folder_name
-
     default = f"🔮 미스터리한 {folder_name} 실험실. {game_title}을 통해 미지의 영역을 탐험하세요."
     return descriptions.get(folder_name, default)
 
-def update_games_data(game_id, game_title, description, tab_name, category_type="web_games"):
+def update_games_data(game_id, game_title, description, image_path, tab_name, category_type="web_games"):
     """gamesData.ts에 새 게임 객체 추가 (인덱스 0)"""
     try:
         with open(GAMES_DATA_FILE, 'r', encoding='utf-8') as f:
             content = f.read()
 
-        # 새 게임 객체 생성
+        # 이모지 매핑
         emoji_map = {
             "Abyssal": "🔮",
             "Alchemy": "⚗️",
@@ -163,6 +188,9 @@ def update_games_data(game_id, game_title, description, tab_name, category_type=
                 emoji = val
                 break
 
+        # image 속성 추가
+        image_attr = f'    image: "{image_path}",' if image_path else ""
+
         new_game = f'''  {{
     id: '{game_id}',
     title: '{game_title}',
@@ -171,6 +199,7 @@ def update_games_data(game_id, game_title, description, tab_name, category_type=
     category: '{category_type}',
     icon: '{emoji}',
     path: '/game/{game_id}',
+{image_attr}
     tags: ['experimental', 'classified', 'mystery', '{tab_name.lower().replace(" ", "_")}'],
     play_count: 0,
   }},'''
@@ -201,11 +230,9 @@ def run_git_commands():
     try:
         os.chdir(PROJECT_ROOT)
 
-        # Git add
         subprocess.run(["git", "add", "."], check=True, capture_output=True)
         print("✓ git add .")
 
-        # Git commit
         timestamp = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
         subprocess.run(
             ["git", "commit", "-m", f"Auto upload: Classified lab ({timestamp})"],
@@ -214,7 +241,6 @@ def run_git_commands():
         )
         print("✓ git commit")
 
-        # Git push
         subprocess.run(["git", "push"], check=True, capture_output=True)
         print("✓ git push → Vercel 배포 트리거됨")
         return True
@@ -250,12 +276,16 @@ def process_zip_file(zip_path):
         if not extract_zip(zip_path, extract_path):
             return False
 
+        # 🎥 스크린샷 캡처 (새 기능!)
+        print("\n📸 자동 스크린샷 캡처 중...")
+        image_path = capture_screenshot_with_playwright(game_id, extract_path)
+
         # AI로 설명 생성
         description = generate_description_with_groq(zip_name, tab_name)
 
         # gamesData.ts에 추가
         category_type = "simulation" if category == "science" else "web_games"
-        if not update_games_data(game_id, zip_name, description, tab_name, category_type):
+        if not update_games_data(game_id, zip_name, description, image_path, tab_name, category_type):
             return False
 
         # Git 명령어 실행
@@ -284,7 +314,8 @@ def find_all_zip_files():
 def main():
     """메인 함수"""
     print("="*60)
-    print("🚀 Cometest 자동 업로드 시스템")
+    print("🚀 Cometest 자동 업로드 시스템 v2.0")
+    print("   (스크린샷 자동 캡처 기능 포함)")
     print("="*60)
 
     # 필수 디렉토리 확인
@@ -298,6 +329,7 @@ def main():
         return
 
     LABS_DIR.mkdir(parents=True, exist_ok=True)
+    THUMBNAILS_DIR.mkdir(parents=True, exist_ok=True)
     COMPLETED_DIR.mkdir(parents=True, exist_ok=True)
 
     # ZIP 파일 찾기
