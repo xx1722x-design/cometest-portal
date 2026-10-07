@@ -12,6 +12,18 @@ export interface GameItem {
 }
 
 export const GAMES_DATA: GameItem[] = [
+    {
+    id: 'ninja_vs_evilcorp',
+    title: 'ninja-vs-evilcorp',
+    description: '🎮 Engaging web-based game featuring interactive gameplay. Enjoy addictive mechanics and challenging levels.',
+    thumbnail: '🎮',
+    category: 'web_games',
+    icon: '🎮',
+    path: '/game/ninja_vs_evilcorp',
+    image: "/thumbnails/ninja_vs_evilcorp.png",
+    tags: ['auto-classified', 'web_games'],
+    play_count: 0,
+  },
   {
     id: 'dante',
     title: 'Dante - Dimensional Puzzle',
