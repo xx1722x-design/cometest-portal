@@ -159,27 +159,46 @@ export function CuratedGrid({ items, columns = 6 }: CuratedGridProps) {
               </>
             )}
 
-            {/* 일반 카드 배경 */}
+            {/* 일반 카드 배경 - 실제 이미지 또는 그래디언트 */}
             {item.id !== 'store-hero' && (
               <>
+                {/* 실제 게임 스크린샷 이미지 배경 */}
+                {(item as any).image && (
+                  <div
+                    style={{
+                      position: 'absolute',
+                      inset: 0,
+                      backgroundImage: `url("${(item as any).image}")`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      backgroundRepeat: 'no-repeat',
+                      borderRadius: '12px',
+                      zIndex: 0,
+                    }}
+                  />
+                )}
+
+                {/* 그래디언트 오버레이 (이미지가 없거나 어두운 처리용) */}
                 <div
                   style={{
                     position: 'absolute',
                     inset: 0,
-                    backgroundColor: 'rgba(100, 181, 246, 0.1)',
-                    backgroundImage: 'linear-gradient(135deg, rgba(100, 181, 246, 0.05) 0%, rgba(156, 39, 176, 0.05) 100%)',
+                    backgroundColor: (item as any).image ? 'rgba(0, 0, 0, 0.3)' : 'rgba(100, 181, 246, 0.1)',
+                    backgroundImage: (item as any).image
+                      ? 'none'
+                      : 'linear-gradient(135deg, rgba(100, 181, 246, 0.05) 0%, rgba(156, 39, 176, 0.05) 100%)',
                     border: '2px solid rgba(100, 181, 246, 0.2)',
                     borderRadius: '12px',
-                    zIndex: 0,
+                    zIndex: 1,
                   }}
                 />
                 {/* 불꽃 레이어 */}
-                <div className="fire-layer" style={{ position: 'absolute', inset: 0, zIndex: 1 }} />
+                <div className="fire-layer" style={{ position: 'absolute', inset: 0, zIndex: 2 }} />
               </>
             )}
 
             {/* 콘텐츠 */}
-            <div style={{ position: 'relative', zIndex: item.id === 'store-hero' ? 3 : 2 }}>
+            <div style={{ position: 'relative', zIndex: item.id === 'store-hero' ? 3 : 10 }}>
               <div
                 style={{
                   fontSize: item.id === 'store-hero' ? '80px' : `${Math.min(60, 20 + col * 10 + row * 10)}px`,
