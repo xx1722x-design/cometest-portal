@@ -11,7 +11,18 @@ export interface GameItem {
 }
 
 export const GAMES_DATA: GameItem[] = [
-    {
+      {
+    id: '13th_floor',
+    title: '13th-floor',
+    description: '🔮 미스터리한 Science - Web Games 실험실. 13th-floor을 통해 미지의 영역을 탐험하세요.',
+    thumbnail: '🔮',
+    category: 'simulation',
+    icon: '🔮',
+    path: '/game/13th_floor',
+    tags: ['experimental', 'classified', 'mystery', 'science_-_web_games'],
+    play_count: 0,
+  },
+  {
     id: 'spectral_horn',
     title: 'spectral-horn',
     description: '🔮 미스터리한 Abyssal Frequencies 실험실. spectral-horn을 통해 미지의 영역을 탐험하세요.',
