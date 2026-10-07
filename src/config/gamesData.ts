@@ -12,7 +12,19 @@ export interface GameItem {
 }
 
 export const GAMES_DATA: GameItem[] = [
-    {
+      {
+    id: '13th_floor',
+    title: '13th-floor',
+    description: '🎮 Engaging web-based game featuring interactive gameplay. Enjoy addictive mechanics and challenging levels.',
+    thumbnail: '🎮',
+    category: 'web_games',
+    icon: '🎮',
+    path: '/game/13th_floor',
+    image: "/thumbnails/13th_floor.png",
+    tags: ['auto-classified', 'web_games'],
+    play_count: 0,
+  },
+  {
     id: 'ninja_vs_evilcorp',
     title: 'ninja-vs-evilcorp',
     description: '🎮 Engaging web-based game featuring interactive gameplay. Enjoy addictive mechanics and challenging levels.',
