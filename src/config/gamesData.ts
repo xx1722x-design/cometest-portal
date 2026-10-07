@@ -11,7 +11,18 @@ export interface GameItem {
 }
 
 export const GAMES_DATA: GameItem[] = [
-          {
+            {
+    id: 'path_to_glory',
+    title: 'path-to-glory',
+    description: '🔮 미스터리한 Science - Web Games 실험실. path-to-glory을 통해 미지의 영역을 탐험하세요.',
+    thumbnail: '🔮',
+    category: 'simulation',
+    icon: '🔮',
+    path: '/game/path_to_glory',
+    tags: ['experimental', 'classified', 'mystery', 'science_-_web_games'],
+    play_count: 0,
+  },
+  {
     id: 'dante',
     title: 'dante',
     description: '🔮 미스터리한 Science - Web Games 실험실. dante을 통해 미지의 영역을 탐험하세요.',
