@@ -83,7 +83,7 @@ export function MenuHUD() {
             >
               <span style={{ fontSize: '14px' }}>{item.icon}</span>
               <div>
-                <div style={{ fontWeight: 'bold', color: '#fff' }}>{item.nameKr}</div>
+                <div style={{ fontWeight: 'bold', color: '#fff' }}>{item.name}</div>
                 <div style={{ fontSize: '9px', color: '#aaa' }}>{item.prepTime}s</div>
               </div>
             </div>
