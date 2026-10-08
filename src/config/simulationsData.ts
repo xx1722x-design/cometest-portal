@@ -6,6 +6,7 @@ export interface SimulationItem {
   icon: string
   path: string
   component: string
+  occultTheme?: string
   image?: string
   isTranslationKey?: boolean
   tags?: string[]

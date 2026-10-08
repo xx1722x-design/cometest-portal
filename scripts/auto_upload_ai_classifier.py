@@ -117,9 +117,10 @@ Game info:
 - Files: {files}
 - Content: {content_snippet}
 
-Respond with EXACTLY these 5 lines (no more, no less):
+Respond with EXACTLY these 6 lines (no more, no less):
 
 CATEGORY: [one category key: web_games/puzzle/space_universe/physics_chemistry/optics_waves/occult_abyssal/occult_alchemy/occult_anomalous/occult_cosmic/occult_forbidden/occult_sacred/occult_necromancy/occult_artifacts/occult_breach/occult_illusions]
+OCCULT_THEME: [if CATEGORY starts with 'occult_', use the theme name like 'abyssal-frequencies'/'alchemy-dark-magic'/'anomalous-physics'/'breach-anomalies'/'cosmic-horror'/'forbidden-specimens'/'illusions-hallucinations'/'necromancy-spirits'/'sacred-geometry'/'unidentified-artifacts', otherwise use 'none']
 STORY: [3-4 sentence immersive story description about mysterious/scientific phenomena. Make it sound like an occult/science mystery experience. Write in English.]
 KEYWORDS: [keyword1, keyword2, keyword3, keyword4, keyword5] (comma-separated SEO keywords for niche search optimization - use terms like "anomaly", "dimension", "experiment", "phenomenon", etc.)
 CONTROLS: [1-2 sentence concise game controls. Example: "⌨️ [Arrow Keys] to Move | [Space] Jump | 🖱️ [Click] Interact | [R] Reset"]
@@ -127,6 +128,7 @@ REASON: [one sentence explaining classification]
 
 Example format:
 CATEGORY: occult_cosmic
+OCCULT_THEME: cosmic-horror
 STORY: A probe detects signals from a black hole that defy all known physics. Anomalous gravitational patterns suggest consciousness itself may bend spacetime. Journey through the cosmic unknown and decode the universe's darkest secrets.
 KEYWORDS: black hole anomaly, quantum consciousness simulator, cosmic entity detector, gravitational phenomenon game, dimensional physics explorer
 CONTROLS: ⌨️ [Arrow Keys] or [WASD] Navigate | [Space] Fire/Interact | 🖱️ [Click] Confirm | [R] Reset
@@ -142,6 +144,7 @@ REASON: Space-themed with cosmic horror elements and scientific mystery tone."""
         lines = [line.strip() for line in response_text.strip().split('\n') if line.strip()]
 
         category_key = "web_games"
+        occult_theme = "none"
         story_description = ""
         seo_keywords = []
         controls = ""
@@ -150,6 +153,8 @@ REASON: Space-themed with cosmic horror elements and scientific mystery tone."""
         for line in lines:
             if line.startswith("CATEGORY:"):
                 category_key = line.replace("CATEGORY:", "").strip()
+            elif line.startswith("OCCULT_THEME:"):
+                occult_theme = line.replace("OCCULT_THEME:", "").strip()
             elif line.startswith("STORY:"):
                 story_description = line.replace("STORY:", "").strip()
             elif line.startswith("KEYWORDS:"):
@@ -169,6 +174,8 @@ REASON: Space-themed with cosmic horror elements and scientific mystery tone."""
         description = generate_game_description(filename, category_key)
 
         print(f"✅ AI Classification: {category_key} ({display_name})")
+        if occult_theme != "none":
+            print(f"   Occult Theme: {occult_theme}")
         print(f"   Story: {story_description[:60]}...")
         print(f"   Controls: {controls[:50]}...")
         print(f"   Keywords: {', '.join(seo_keywords[:3])}")
@@ -176,6 +183,7 @@ REASON: Space-themed with cosmic horror elements and scientific mystery tone."""
 
         return {
             "category_key": category_key,
+            "occult_theme": occult_theme,
             "display_name": display_name,
             "description": description,
             "controls": controls,
@@ -248,10 +256,26 @@ def classify_genre_heuristic(zip_info: dict) -> dict:
 
     controls = default_controls.get(best_category, "⌨️ Keyboard/🖱️ Mouse controls available")
 
+    # Map category to occult theme if applicable
+    occult_theme_map = {
+        "occult_abyssal": "abyssal-frequencies",
+        "occult_alchemy": "alchemy-dark-magic",
+        "occult_anomalous": "anomalous-physics",
+        "occult_cosmic": "cosmic-horror",
+        "occult_forbidden": "forbidden-specimens",
+        "occult_sacred": "sacred-geometry",
+        "occult_necromancy": "necromancy-spirits",
+        "occult_artifacts": "unidentified-artifacts",
+        "occult_breach": "breach-anomalies",
+        "occult_illusions": "illusions-hallucinations",
+    }
+    occult_theme = occult_theme_map.get(best_category, "none")
+
     print(f"📊 Heuristic Classification: {best_category} ({display_name})")
 
     return {
         "category_key": best_category,
+        "occult_theme": occult_theme,
         "display_name": display_name,
         "description": description,
         "controls": controls,
@@ -356,7 +380,8 @@ def update_games_data(
     category: str,
     story_description: str = "",
     seo_keywords: list = None,
-    controls: str = ""
+    controls: str = "",
+    occult_theme: str = "none"
 ) -> bool:
     """Add new game to gamesData.ts with SEO metadata and controls"""
     try:
@@ -388,6 +413,7 @@ def update_games_data(
         image_attr = f'    image: "{image_path}",' if image_path else ""
         controls_attr = f'    controls: "{controls}",' if controls else ""
         story_attr = f'    storyDescription: "{story_description}",' if story_description else ""
+        occult_theme_attr = f'    occultTheme: "{occult_theme}",' if occult_theme and occult_theme != "none" else ""
 
         # Format SEO keywords as array
         keywords_array = ""
@@ -402,7 +428,7 @@ def update_games_data(
     id: '{game_id}',
     title: '{game_title}',
     description: '{description}',
-{controls_attr}{story_attr}{image_attr}{keywords_array}
+{controls_attr}{story_attr}{occult_theme_attr}{image_attr}{keywords_array}
     thumbnail: '{emoji}',
     category: '{category_type}',
     icon: '{emoji}',
@@ -468,6 +494,7 @@ def process_inbox_zip(zip_path: Path) -> bool:
         print("\n🤖 AI Classification in progress...")
         ai_result = classify_genre_with_ai(zip_info)
         category_key = ai_result["category_key"]
+        occult_theme = ai_result.get("occult_theme", "none")
         display_name = ai_result["display_name"]
         description = ai_result["description"]
         controls = ai_result.get("controls", "")
@@ -511,7 +538,8 @@ def process_inbox_zip(zip_path: Path) -> bool:
             category_key,
             story_description,
             seo_keywords,
-            controls
+            controls,
+            occult_theme
         ):
             return False
 

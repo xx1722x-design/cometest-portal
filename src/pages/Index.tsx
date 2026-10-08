@@ -6,19 +6,12 @@ import { CuratedGrid } from '../components/CuratedGrid'
 import { GAMES_DATA } from '../config/gamesData'
 import { SIMULATIONS_DATA } from '../config/simulationsData'
 import { type ContentItemUnion } from '../lib/curatedList'
-
-const CATEGORY_FILTERS = [
-  { id: 'all', icon: '🎮' },
-  { id: 'web_games', icon: '🕹️' },
-  { id: 'space_universe', icon: '🌌' },
-  { id: 'physics_chemistry', icon: '🧪' },
-  { id: 'optics_waves', icon: '💡' },
-  { id: 'puzzle', icon: '🧩' },
-]
+import { PRIMARY_CATEGORIES, SECONDARY_CATEGORIES } from '../data/gameCategories'
 
 export function Index() {
   const { t } = useTranslation()
   const [activeCategory, setActiveCategory] = useState('all')
+  const [activeSecondaryCategory, setActiveSecondaryCategory] = useState<string | null>(null)
 
   // 게임과 시뮬레이션 통합 - 최신 항목이 맨 앞에 오도록 배치
   const allItems: ContentItemUnion[] = useMemo(() => {
@@ -43,11 +36,16 @@ export function Index() {
 
   // 필터링된 아이템 - raw data를 필터링 없이 직접 렌더링
   const filteredItems = useMemo(() => {
+    // Secondary category 선택 시 우선 처리
+    if (activeSecondaryCategory) {
+      return allItems.filter(item => item.occultTheme === activeSecondaryCategory)
+    }
+
     if (activeCategory === 'all') {
       return allItems
     }
     return allItems.filter(item => item.category === activeCategory)
-  }, [activeCategory, allItems])
+  }, [activeCategory, activeSecondaryCategory, allItems])
 
   return (
     <div
@@ -60,7 +58,7 @@ export function Index() {
     >
       <Header />
 
-      {/* Sticky Category Filter Bar */}
+      {/* Sticky Category Filter Bar - Primary Row */}
       <div
         style={{
           position: 'sticky',
@@ -70,9 +68,10 @@ export function Index() {
           backdropFilter: 'blur(10px)',
           borderBottom: '1px solid var(--border-color)',
           padding: '16px 20px',
-          marginBottom: '20px',
+          marginBottom: '0',
         }}
       >
+        {/* Primary Categories Row */}
         <div
           style={{
             display: 'flex',
@@ -81,25 +80,34 @@ export function Index() {
             scrollBehavior: 'smooth',
             maxWidth: '1600px',
             margin: '0 auto',
-            paddingBottom: '8px',
+            paddingBottom: '12px',
           }}
         >
-          {CATEGORY_FILTERS.map(cat => (
+          {PRIMARY_CATEGORIES.map(cat => (
             <button
               key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
+              onClick={() => {
+                setActiveCategory(cat.id)
+                setActiveSecondaryCategory(null)
+              }}
               style={{
                 padding: '8px 16px',
                 borderRadius: '20px',
                 border: 'none',
                 backgroundColor:
-                  activeCategory === cat.id
+                  activeCategory === cat.id && !activeSecondaryCategory
                     ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
                     : 'rgba(100, 181, 246, 0.1)',
-                color: activeCategory === cat.id ? '#fff' : 'var(--text-primary)',
+                color:
+                  activeCategory === cat.id && !activeSecondaryCategory
+                    ? '#fff'
+                    : 'var(--text-primary)',
                 cursor: 'pointer',
                 fontSize: '14px',
-                fontWeight: activeCategory === cat.id ? '600' : '500',
+                fontWeight:
+                  activeCategory === cat.id && !activeSecondaryCategory
+                    ? '600'
+                    : '500',
                 whiteSpace: 'nowrap',
                 transition: 'all 0.3s ease',
                 display: 'flex',
@@ -107,22 +115,87 @@ export function Index() {
                 gap: '6px',
               }}
               onMouseEnter={(e) => {
-                if (activeCategory !== cat.id) {
+                if (activeCategory !== cat.id || activeSecondaryCategory) {
                   e.currentTarget.style.backgroundColor = 'rgba(100, 181, 246, 0.2)'
                 }
               }}
               onMouseLeave={(e) => {
-                if (activeCategory !== cat.id) {
+                if (activeCategory !== cat.id || activeSecondaryCategory) {
                   e.currentTarget.style.backgroundColor = 'rgba(100, 181, 246, 0.1)'
                 }
               }}
             >
               <span>{cat.icon}</span>
-              {t(cat.id)}
+              {cat.name}
+            </button>
+          ))}
+        </div>
+
+        {/* Secondary Categories Row - Occult Themes */}
+        <div
+          style={{
+            display: 'flex',
+            gap: '8px',
+            overflowX: 'auto',
+            scrollBehavior: 'smooth',
+            maxWidth: '1600px',
+            margin: '0 auto',
+            paddingBottom: '0',
+            paddingTop: '8px',
+            borderTop: '1px solid rgba(100, 181, 246, 0.2)',
+          }}
+        >
+          {SECONDARY_CATEGORIES.map(cat => (
+            <button
+              key={cat.id}
+              onClick={() => {
+                setActiveSecondaryCategory(
+                  activeSecondaryCategory === cat.id ? null : cat.id
+                )
+                setActiveCategory('all')
+              }}
+              style={{
+                padding: '6px 12px',
+                borderRadius: '16px',
+                border: 'none',
+                backgroundColor:
+                  activeSecondaryCategory === cat.id
+                    ? 'linear-gradient(135deg, #764ba2 0%, #667eea 100%)'
+                    : 'rgba(118, 75, 162, 0.1)',
+                color:
+                  activeSecondaryCategory === cat.id
+                    ? '#fff'
+                    : 'rgba(200, 200, 255, 0.7)',
+                cursor: 'pointer',
+                fontSize: '12px',
+                fontWeight:
+                  activeSecondaryCategory === cat.id ? '600' : '500',
+                whiteSpace: 'nowrap',
+                transition: 'all 0.3s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '4px',
+              }}
+              onMouseEnter={(e) => {
+                if (activeSecondaryCategory !== cat.id) {
+                  e.currentTarget.style.backgroundColor = 'rgba(118, 75, 162, 0.2)'
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (activeSecondaryCategory !== cat.id) {
+                  e.currentTarget.style.backgroundColor = 'rgba(118, 75, 162, 0.1)'
+                }
+              }}
+            >
+              <span>{cat.icon}</span>
+              {cat.name}
             </button>
           ))}
         </div>
       </div>
+
+      {/* Add margin after tabs */}
+      <div style={{ marginBottom: '20px' }} />
 
       {/* Main Grid */}
       <main style={{ flex: 1, padding: '0 20px' }}>

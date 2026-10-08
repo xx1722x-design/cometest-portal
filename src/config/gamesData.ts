@@ -5,6 +5,7 @@ export interface GameItem {
   controls?: string
   storyDescription?: string
   seoKeywords?: string[]
+  occultTheme?: string
   thumbnail: string
   category: 'web_games' | 'simulation' | '3d_physics'
   icon: string
