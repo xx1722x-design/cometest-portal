@@ -14,6 +14,10 @@ from datetime import datetime
 import subprocess
 import re
 from typing import Tuple, Optional
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env")
 
 # Project paths
 INBOX_FOLDER = Path(r"D:\Cometest_Dropzone\Inbox")
