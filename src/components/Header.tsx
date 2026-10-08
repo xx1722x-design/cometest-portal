@@ -128,7 +128,7 @@ export function Header() {
           />
           <button type="submit">{t('search_button')}</button>
 
-          {/* 검색 결과 드롭다운 */}
+          {/* Search Results Dropdown */}
           {showDropdown && (
             <div
               ref={dropdownRef}
@@ -142,46 +142,54 @@ export function Header() {
                 border: `1px solid ${isDarkMode ? '#333333' : '#e0e0e0'}`,
                 borderTop: 'none',
                 borderRadius: '0 0 8px 8px',
-                maxHeight: '400px',
+                maxHeight: '500px',
                 overflowY: 'auto',
                 zIndex: 1000,
-                boxShadow: isDarkMode ? '0 4px 12px rgba(0,0,0,0.4)' : '0 4px 12px rgba(0,0,0,0.1)',
+                boxShadow: isDarkMode ? '0 4px 16px rgba(0,0,0,0.5)' : '0 4px 16px rgba(0,0,0,0.12)',
               }}
             >
               {searchResults.length > 0 ? (
                 <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
                   {searchResults.map((result) => (
                     <li
-                      key={result.id}
+                      key={`${result.type}-${result.id}`}
                       onClick={() => handleSelectResult(result)}
                       style={{
                         padding: '12px 16px',
                         cursor: 'pointer',
                         borderBottom: `1px solid ${isDarkMode ? '#2a2a2a' : '#f0f0f0'}`,
-                        transition: 'background-color 0.2s',
+                        transition: 'all 0.15s ease',
                         backgroundColor: isDarkMode ? '#1a1a1a' : '#ffffff',
                         color: isDarkMode ? '#ffffff' : '#1a1a1a',
                       }}
                       onMouseEnter={(e) => {
                         e.currentTarget.style.backgroundColor = isDarkMode ? '#2a2a2a' : '#f5f5f5'
+                        e.currentTarget.style.transform = 'translateX(2px)'
                       }}
                       onMouseLeave={(e) => {
                         e.currentTarget.style.backgroundColor = isDarkMode ? '#1a1a1a' : '#ffffff'
+                        e.currentTarget.style.transform = 'translateX(0)'
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <span style={{ fontSize: '18px' }}>{result.icon}</span>
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: 500 }}>{result.title}</div>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
+                        <span style={{ fontSize: '18px', flexShrink: 0, marginTop: '2px' }}>{result.icon}</span>
+                        <div style={{ flex: 1, minWidth: 0 }}>
+                          <div style={{ fontWeight: 500, fontSize: '14px', wordBreak: 'break-word' }}>
+                            {result.title}
+                          </div>
                           {result.description && (
                             <div
                               style={{
                                 fontSize: '12px',
-                                opacity: 0.7,
-                                marginTop: '4px',
+                                opacity: 0.65,
+                                marginTop: '3px',
+                                lineHeight: '1.3',
+                                color: isDarkMode ? '#bbb' : '#555',
                               }}
                             >
-                              {result.description}
+                              {result.description.length > 80
+                                ? result.description.substring(0, 77) + '...'
+                                : result.description}
                             </div>
                           )}
                           <div
@@ -192,7 +200,14 @@ export function Header() {
                               color: isDarkMode ? '#888' : '#666',
                             }}
                           >
-                            {result.type === 'category' ? '📂 카테고리' : '🎮 시뮬레이션'}
+                            {result.type === 'game'
+                              ? '🎮 Web Game'
+                              : result.type === 'simulation'
+                                ? '⚛️ Simulation'
+                                : result.type === 'category'
+                                  ? '📂 Category'
+                                  : '✨ Theme'}
+                            {result.category && ` • ${result.category.replace(/_/g, ' ')}`}
                           </div>
                         </div>
                       </div>
@@ -202,12 +217,18 @@ export function Header() {
               ) : (
                 <div
                   style={{
-                    padding: '24px',
+                    padding: '32px 24px',
                     textAlign: 'center',
-                    color: isDarkMode ? '#888' : '#666',
+                    color: isDarkMode ? '#888' : '#999',
                   }}
                 >
-                  {t('search_no_results') || '검색 결과가 없습니다'}
+                  <div style={{ fontSize: '32px', marginBottom: '8px' }}>🔍</div>
+                  <div style={{ fontWeight: 500, marginBottom: '4px' }}>
+                    {t('search_no_results') || 'No results found'}
+                  </div>
+                  <div style={{ fontSize: '12px', opacity: 0.7 }}>
+                    Try searching for game titles, themes, categories, or keywords
+                  </div>
                 </div>
               )}
             </div>
