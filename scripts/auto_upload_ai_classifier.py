@@ -138,13 +138,13 @@ KEYWORDS: black hole anomaly, quantum consciousness simulator, cosmic entity det
 CONTROLS: ⌨️ [Arrow Keys] or [WASD] Navigate | [Space] Fire/Interact | 🖱️ [Click] Confirm | [R] Reset
 REASON: Space-themed with cosmic horror elements and scientific mystery tone."""
 
-        response = client.messages.create(
+        response = client.chat.completions.create(
             model="mixtral-8x7b-32768",
             max_tokens=500,
             messages=[{"role": "user", "content": prompt}]
         )
 
-        response_text = response.content[0].text
+        response_text = response.choices[0].message.content
         lines = [line.strip() for line in response_text.strip().split('\n') if line.strip()]
 
         category_key = "web_games"
