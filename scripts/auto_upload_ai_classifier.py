@@ -150,23 +150,24 @@ Analysis: Infer the scientific topic from the filename and content. Examples:
   - "color-vision" → optics/light → CATEGORY: occult_alchemy
 
 RESPOND WITH EXACTLY 7 LINES (no more, no less):
+ALL TEXT MUST BE IN ENGLISH ONLY - No Korean, no other languages.
 
 CATEGORY: [CHOOSE ONE: occult_abyssal/occult_alchemy/occult_anomalous/occult_cosmic/occult_forbidden/occult_sacred/occult_necromancy/occult_artifacts/occult_breach/occult_illusions - based on scientific topic]
 OCCULT_THEME: [theme name matching category: abyssal-frequencies/alchemy-dark-magic/anomalous-physics/breach-anomalies/cosmic-horror/forbidden-specimens/illusions-hallucinations/necromancy-spirits/sacred-geometry/unidentified-artifacts]
-OCCULT_TITLE: [Create an ENTIRELY NEW 4-7 word occult/mysterious Korean title like "심연의 측정기" or "[기밀] 우주의 속박" - Must be Korean with dark/mystical tone]
-OCCULT_DESCRIPTION: [Create a 2-3 sentence occult reimagining of the PhET content - dark, mysterious, scientific, immersive - Example: "마리아나 해구 바닥에서 수집된 미지의 구체를 떨어뜨려 확률의 경계에서 우주 운명을 측정한다."]
-KEYWORDS: [keyword1, keyword2, keyword3, keyword4, keyword5] (comma-separated keywords - use Korean and English mix, terms like "비정상 현상", "차원", "실험실", "anomaly", "dimension", etc.)
-STORY: [2-3 sentence immersive story description in Korean - situate the simulation in occult context. Example: "금지된 실험실에서 양자 측정 도구로 차원의 경계를 탐사한다. 각 측정마다 다른 현실이 펼쳐진다."]
+OCCULT_TITLE: [Create an ENTIRELY NEW 4-7 word occult/mysterious English title like "The Abyss Measure" or "Forbidden Cosmic Prison" - Must be English with dark/mystical tone - include an emoji prefix]
+OCCULT_DESCRIPTION: [Create a 2-3 sentence occult reimagining of the PhET content - dark, mysterious, scientific, immersive - ALL IN ENGLISH - Example: "Ancient spheres fall through abyssal depths, measuring probability at the edge of cosmic fate. Each measurement reveals hidden truths of the dark universe."]
+KEYWORDS: [keyword1, keyword2, keyword3, keyword4, keyword5] (comma-separated keywords - ALL IN ENGLISH - use terms like "anomaly", "dimension", "laboratory", "cosmic-horror", "experimental-device"]
+STORY: [2-3 sentence immersive story description in ENGLISH ONLY - situate the simulation in occult context. Example: "In the forbidden laboratory, explorers wield quantum measurement tools to probe the boundaries of dimension. Each measurement unlocks secrets of alternate realities."]
 REASON: [one sentence explaining why this mapping makes sense]
 
 Example Perfect Response:
 CATEGORY: occult_cosmic
 OCCULT_THEME: cosmic-horror
-OCCULT_TITLE: 🌀 우주의 감옥
-OCCULT_DESCRIPTION: 암흑 천체들이 보이지 않는 힘으로 서로를 묶어놓는다. 중력의 마법 속에서 영원한 궤도에 갇힌 세계를 경험하라.
-KEYWORDS: 중력 마법, 우주 감옥, 천체 운동, 차원 물리학, cosmic-horror-simulator
-STORY: 밤하늘을 지배하는 검은 힘을 경험하는 금지된 천문 실험. 별들은 중력의 속박에서 벗어날 수 없다.
-REASON: Orbital mechanics simulation maps to cosmic horror and gravitational mysteries in occult classification."""
+OCCULT_TITLE: 🌀 The Cosmic Prison
+OCCULT_DESCRIPTION: Dark celestial bodies bind each other with invisible forces. Experience the eternal orbit trapped within the sorcery of gravity and the abyss of space.
+KEYWORDS: gravitational-magic, cosmic-prison, celestial-mechanics, dimensional-physics, cosmic-horror-simulator
+STORY: A forbidden astronomical experiment where the black forces governing the night sky reveal themselves. Stars cannot escape the binding chains of gravity.
+REASON: Orbital mechanics simulation naturally maps to cosmic horror themes and gravitational mysteries in occult classification."""
 
         response = client.chat.completions.create(
             model="openai/gpt-oss-20b",
