@@ -118,47 +118,29 @@
     <priority>0.8</priority>
   </url>
 
-  <!-- Additional Simulations (Recent) -->
+  <!-- HTML-based PhET Simulations with Occult Theme -->
   <url>
-    <loc>https://cometest.com/game/phet-density_ko</loc>
+    <loc>https://cometest.com/game/phet-keplers-laws_ko</loc>
     <lastmod>2026-10-08</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://cometest.com/game/phet-gene-expression-essentials_ko</loc>
+    <loc>https://cometest.com/game/phet-gravity-force-lab-basics_ko</loc>
     <lastmod>2026-10-08</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://cometest.com/game/phet-membrane-transport_en</loc>
+    <loc>https://cometest.com/game/phet-gravity-and-orbits_ko</loc>
     <lastmod>2026-10-08</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://cometest.com/game/phet-molecule-polarity_ko</loc>
+    <loc>https://cometest.com/game/phet-quantum-measurement_ko</loc>
     <lastmod>2026-10-08</lastmod>
     <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://cometest.com/game/phet-natural-selection_ko</loc>
-    <lastmod>2026-10-08</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://cometest.com/game/phet-neuron_ko</loc>
-    <lastmod>2026-10-08</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://cometest.com/game/phet-ph-scale_ko</loc>
-    <lastmod>2026-10-08</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <priority>0.9</priority>
   </url>
 </urlset>
