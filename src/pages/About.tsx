@@ -153,20 +153,6 @@ export function About() {
             </ul>
 
             <h3 style={{ fontSize: '18px', fontWeight: '500', marginBottom: '12px', marginTop: '16px' }}>
-              Web Games & js13kGames Community
-            </h3>
-            <p>
-              Our web games collection is curated from the <strong>js13kGames</strong> community archive and independent game developers.
-              js13kGames is an annual JavaScript programming competition where developers create games in 13KB or less.
-            </p>
-            <ul style={{ marginTop: '8px', paddingLeft: '24px' }}>
-              <li>Source: <a href="https://js13kgames.com/" target="_blank" rel="noopener noreferrer" style={{ color: '#007bff', textDecoration: 'none' }}>js13kGames</a></li>
-              <li>Archive Type: Community-curated game collection</li>
-              <li>Original Creators: Credited per individual game entries</li>
-              <li>Usage: Personal and educational use</li>
-            </ul>
-
-            <h3 style={{ fontSize: '18px', fontWeight: '500', marginBottom: '12px', marginTop: '16px' }}>
               Archive & Non-Commercial Notice
             </h3>
             <p>

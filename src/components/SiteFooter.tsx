@@ -93,11 +93,7 @@ export function SiteFooter() {
             Used for educational purposes under the Creative Commons BY 4.0 license.
           </p>
           <p style={{ margin: '8px 0' }}>
-            <strong>Web Games:</strong> Curated from js13kGames community archive and independent developers.
-            Provided as educational and entertainment platform for non-commercial use.
-          </p>
-          <p style={{ margin: '8px 0' }}>
-            <strong>Archive Notice:</strong> Cometest Portal is an educational game and simulation archive.
+            <strong>Archive Notice:</strong> Cometest Portal is an educational simulation and interactive platform.
             All content is provided for personal, non-commercial use only. Unauthorized commercial reproduction is prohibited.
           </p>
         </div>

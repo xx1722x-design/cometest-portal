@@ -10,7 +10,6 @@ import { NeonSpaceShooter } from '../components/games/NeonSpaceShooter'
 import { NeonPlatformerPhaser } from '../components/games/NeonPlatformerPhaser'
 import { BreakoutArcadePhaser } from '../components/games/BreakoutArcadePhaser'
 import { NeonDodgePhaser } from '../components/games/NeonDodgePhaser'
-import { PortedGameWrapper } from '../components/games/PortedGameWrapper'
 import { getGameById } from '../config/gamesData'
 
 // Dynamic import for AllYouCanTycoon (JSX file)
@@ -125,18 +124,6 @@ export function Game() {
 
   const renderGame = () => {
     switch (gameId) {
-      case 'mario':
-        return <PortedGameWrapper gameName="mario" />
-      case 'tetris':
-        return <PortedGameWrapper gameName="tetris" />
-      case 'pacman':
-        return <PortedGameWrapper gameName="pacman" />
-      case 'snake':
-        return <PortedGameWrapper gameName="snake" />
-      case '2048':
-        return <PortedGameWrapper gameName="2048" />
-      case 'hextris':
-        return <PortedGameWrapper gameName="hextris" />
       case 'neon-dodge':
         return <NeonDodgePhaser />
       case 'breakout-arcade':
