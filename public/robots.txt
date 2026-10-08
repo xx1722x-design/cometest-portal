@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+Disallow: /private/
+Disallow: /*.json$
+Disallow: /*.env*
+
+Sitemap: https://cometest.com/sitemap.xml
