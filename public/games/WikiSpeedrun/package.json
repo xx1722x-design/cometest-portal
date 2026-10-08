@@ -1,0 +1,22 @@
+{
+  "name": "wikispeedrun",
+  "version": "1.0.0",
+  "description": "Multiplayer Wikipedia speedrun game",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "generate-pool": "node scripts/generatePool.js",
+    "generate-pool:fast": "node scripts/generatePool.js --fast",
+    "clean-pool": "node scripts/cleanPool.js",
+    "test:backlinks": "node scripts/testBacklinks.js"
+  },
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "pg": "^8.21.0"
+  }
+}
