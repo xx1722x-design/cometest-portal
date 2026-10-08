@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 """
 AI-Powered PhET HTML Simulation Auto-Curation & Occult Theme Factory
 Inbox → HTML Metadata Extraction → AI Occult Transformation → Auto-categorization → Auto-registration → Vercel deployment
 """
 
 import os
+import sys
 import json
 import shutil
 import time
@@ -15,16 +17,17 @@ import re
 from typing import Tuple, Optional
 from dotenv import load_dotenv
 
+# 🔧 CRITICAL: UTF-8 인코딩 설정 (한글 깨짐 방지)
+if sys.platform == 'win32':
+    import io
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding='utf-8')
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding='utf-8')
+
 try:
     from bs4 import BeautifulSoup
     HAS_BEAUTIFULSOUP = True
 except ImportError:
     HAS_BEAUTIFULSOUP = False
-
-# UTF-8 Support for Windows Console
-if os.sys.platform == 'win32':
-    import io
-    os.sys.stdout = io.TextIOWrapper(os.sys.stdout.buffer, encoding='utf-8')
 
 # Load environment variables from .env file
 load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env")
@@ -554,17 +557,18 @@ def run_git_commands() -> bool:
 def process_inbox_html(html_path: Path) -> bool:
     """Process single PhET HTML file from Inbox with AI occult transformation"""
     try:
-        print(f"\n🔍 Analyzing: {html_path.name}")
-        print("-" * 60)
+        print(f"\n📄 파일 분석 중...")
 
         # Step 1: Analyze HTML content
+        print(f"   [1/7] HTML 메타데이터 추출...")
         html_info = analyze_html_content(html_path)
         if "error" in html_info:
-            print(f"✗ Failed to analyze HTML: {html_info['error']}")
+            print(f"   ✗ 실패: {html_info['error']}")
             return False
+        print(f"   ✓ 완료 (원본 제목: {html_info.get('title', 'Unknown')})")
 
         # Step 2: AI Occult Transformation
-        print("\n🤖 AI Occult Transformation in progress...")
+        print(f"\n   [2/7] AI 오컬트 변환 진행 중...")
         ai_result = classify_phet_with_ai(html_info)
         category_key = ai_result["category_key"]
         occult_theme = ai_result.get("occult_theme", "cosmic-horror")
@@ -572,24 +576,31 @@ def process_inbox_html(html_path: Path) -> bool:
         occult_description = ai_result.get("occult_description", "")
         story_description = ai_result["storyDescription"]
         seo_keywords = ai_result["seoKeywords"]
+        print(f"   ✓ 완료 (오컬트 제목: {occult_title})")
 
         # Step 3: Copy HTML to public/simulations/
-        print(f"\n📁 Copying to simulations folder...")
+        print(f"\n   [3/7] public/simulations/ 폴더로 복사...")
         if not copy_html_to_simulations(html_path):
+            print(f"   ✗ 실패")
             return False
+        print(f"   ✓ 완료")
 
         # Step 4: Move to appropriate category folder in Dropzone
-        print(f"\n📁 Moving to category folder in Dropzone...")
+        print(f"\n   [4/7] Dropzone 카테고리 폴더로 아카이브...")
         if not move_to_category_folder(html_path, category_key):
-            print("⚠ Warning: Could not move to category folder, continuing...")
+            print(f"   ⚠ 경고: 아카이브 실패 (계속 진행)")
 
         # Step 5: Capture screenshot
-        print("\n📸 Automatic screenshot capture...")
+        print(f"\n   [5/7] 스크린샷 캡처...")
         html_filename = html_path.name
         image_path = capture_screenshot_with_playwright(html_filename, html_path)
+        if image_path:
+            print(f"   ✓ 완료 ({image_path})")
+        else:
+            print(f"   ⚠ 스크린샷 캡처 실패 (계속 진행)")
 
         # Step 6: Register in gamesData.ts with occult metadata
-        print("\n📝 Registering PhET data with occult metadata...")
+        print(f"\n   [6/7] gamesData.ts에 등록...")
         game_id = html_path.stem
         if not update_games_data_phet(
             game_id,
@@ -601,26 +612,45 @@ def process_inbox_html(html_path: Path) -> bool:
             seo_keywords,
             occult_theme
         ):
+            print(f"   ✗ 실패")
             return False
+        print(f"   ✓ 완료")
 
         # Step 7: Move source HTML to Completed
+        print(f"\n   [7/7] Inbox → Completed 폴더로 이동...")
         completed_html = COMPLETED_DIR / html_path.name
         completed_html.parent.mkdir(parents=True, exist_ok=True)
         shutil.move(str(html_path), str(completed_html))
-        print(f"✓ Source file moved to Completed: {completed_html}")
+        print(f"   ✓ 완료")
 
         return True
     except Exception as e:
-        print(f"✗ Processing error: {e}")
+        print(f"   ✗ 오류: {e}")
+        import traceback
+        traceback.print_exc()
         return False
 
 def find_inbox_html_files() -> list:
-    """Find all HTML files in Inbox folder"""
+    """Find all HTML files in Inbox folder with detailed debugging"""
+    print(f"\n🔍 스캔 중: {INBOX_FOLDER}")
+
     if not INBOX_FOLDER.exists():
-        print(f"✗ Inbox folder not found: {INBOX_FOLDER}")
+        print(f"✗ Inbox 폴더를 찾을 수 없음: {INBOX_FOLDER}")
         return []
 
-    html_files = list(INBOX_FOLDER.glob("*.html")) + list(INBOX_FOLDER.glob("*.htm"))
+    # 모든 파일 목록 출력 (디버깅용)
+    all_files = list(INBOX_FOLDER.iterdir())
+    print(f"   📂 Inbox 전체 파일 수: {len(all_files)}")
+    for f in all_files:
+        print(f"      - {f.name} ({f.stat().st_size} bytes)")
+
+    # HTML 파일만 필터링
+    html_files = sorted(list(INBOX_FOLDER.glob("*.html")) + list(INBOX_FOLDER.glob("*.htm")))
+
+    print(f"\n✅ HTML 파일 발견: {len(html_files)}개")
+    for html_file in html_files:
+        print(f"   📄 {html_file.name}")
+
     return html_files
 
 def main():
@@ -675,21 +705,26 @@ def main():
     html_files = find_inbox_html_files()
 
     if not html_files:
-        print(f"\n📭 No HTML files in Inbox")
-        print(f"Upload PhET HTML files to: {INBOX_FOLDER}")
-        print(f"\n✅ Script ready and waiting for PhET HTML files...")
+        print(f"\n❌ Inbox에 HTML 파일이 없습니다!")
+        print(f"📍 파일 위치: {INBOX_FOLDER}")
+        print(f"\n✅ PhET HTML 파일들을 위 폴더에 복사한 뒤 다시 실행해주세요.")
         return
 
-    print(f"\n📦 Found PhET HTML files in Inbox: {len(html_files)}\n")
+    print(f"\n" + "="*70)
+    print(f"🚀 처리 시작: {len(html_files)}개 파일")
+    print("="*70)
 
-    # Process each HTML file
+    # Process each HTML file with detailed progress
     success_count = 0
-    for html_file in html_files:
+    for idx, html_file in enumerate(html_files, 1):
+        print(f"\n[{idx}/{len(html_files)}] 처리 중: {html_file.name}")
+        print("-" * 70)
+
         if process_inbox_html(html_file):
             success_count += 1
-            print(f"✅ Complete")
+            print(f"✅ 완료!")
         else:
-            print(f"❌ Failed")
+            print(f"❌ 실패!")
 
     # Final summary and deployment
     print("\n" + "="*70)

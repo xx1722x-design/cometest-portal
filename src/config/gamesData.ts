@@ -16,7 +16,19 @@ export interface GameItem {
 }
 
 export const GAMES_DATA: GameItem[] = [
-  // ==================== PhET Interactive Simulations ====================
+  {
+    id: 'color-vision_ko',
+    title: 'PhET 시뮬레이션',
+    description: '',
+    occultTheme: "cosmic-horror",    image: "/thumbnails/color-vision_ko.png",
+    thumbnail: '🌀',
+    category: 'simulation',
+    icon: '🌀',
+    path: '/game/phet-color-vision_ko',
+    tags: ['phet', 'simulation', 'occult_cosmic'],
+    play_count: 0,
+  },
+    // ==================== PhET Interactive Simulations ====================
   // CC BY 4.0 License - University of Colorado Boulder
 
         {
