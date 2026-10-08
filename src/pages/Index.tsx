@@ -80,7 +80,8 @@ export function Index() {
             overflowX: 'auto',
             overflowY: 'hidden',
             scrollBehavior: 'smooth',
-            padding: '16px 20px',
+            padding: '16px 20px 16px 20px',
+            minWidth: 'max-content',
             // Hide scrollbar for all browsers
             scrollbarWidth: 'none' as any,
             msOverflowStyle: 'none' as any,
@@ -134,8 +135,8 @@ export function Index() {
               {cat.name}
             </button>
           ))}
-          {/* Spacer to prevent last item clipping */}
-          <div style={{ width: '16px', flexShrink: 0 }} />
+          {/* Trailing spacer to prevent last item clipping at right edge - allows full scrolling past final tab */}
+          <div style={{ width: '32px', flexShrink: 0 }} />
         </div>
       </div>
 

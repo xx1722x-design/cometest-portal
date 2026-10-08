@@ -73,10 +73,12 @@ export function Header() {
   useEffect(() => {
     if (showDropdown && searchContainerRef.current) {
       const rect = searchContainerRef.current.getBoundingClientRect()
+      // Expand dropdown width for better readability (min 420px, prefer 480px for comfortable spacing)
+      const dropdownWidth = Math.max(rect.width, 480)
       setDropdownPos({
         top: rect.bottom + 4,
         left: rect.left,
-        width: rect.width,
+        width: dropdownWidth,
       })
     }
   }, [showDropdown])
@@ -173,7 +175,7 @@ export function Header() {
                   top: `${dropdownPos.top}px`,
                   left: `${dropdownPos.left}px`,
                   width: `${dropdownPos.width}px`,
-                  maxWidth: `calc(100vw - ${dropdownPos.left}px - 8px)`,
+                  maxWidth: `calc(100vw - ${dropdownPos.left}px - 16px)`,
                   backgroundColor: isDarkMode ? '#0f172a' : '#ffffff',
                   border: `1px solid ${isDarkMode ? '#333333' : '#e0e0e0'}`,
                   borderRadius: '8px',
