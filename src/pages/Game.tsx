@@ -22,6 +22,7 @@ export function Game() {
   const { gameId } = useParams<{ gameId: string }>()
   const { t } = useTranslation()
   const [saveExists, setSaveExists] = useState(false)
+  const [isPanelOpen, setIsPanelOpen] = useState(true)
 
   const game = gameId ? getGameById(gameId) : null
 
@@ -270,8 +271,40 @@ export function Game() {
         </div>
       )}
 
+      {/* Collapsed Panel Toggle Button */}
+      {(game?.controls || game?.storyDescription) && !isPanelOpen && (
+        <button
+          onClick={() => setIsPanelOpen(true)}
+          style={{
+            position: 'absolute',
+            bottom: '0',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            zIndex: 60,
+            padding: '0.5rem 1rem',
+            backgroundColor: 'rgba(100, 181, 246, 0.15)',
+            border: '1px solid rgba(100, 181, 246, 0.3)',
+            borderRadius: '8px 8px 0 0',
+            cursor: 'pointer',
+            fontSize: '16px',
+            transition: 'all 0.3s ease',
+            color: 'rgba(100, 181, 246, 0.8)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(100, 181, 246, 0.25)'
+            e.currentTarget.style.transform = 'translateX(-50%) translateY(-2px)'
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.backgroundColor = 'rgba(100, 181, 246, 0.15)'
+            e.currentTarget.style.transform = 'translateX(-50%) translateY(0)'
+          }}
+        >
+          🔼 Show Info
+        </button>
+      )}
+
       {/* Controls & Story Description Panel - Bottom overlay */}
-      {(game?.controls || game?.storyDescription) && (
+      {(game?.controls || game?.storyDescription) && isPanelOpen && (
         <div
           style={{
             position: 'absolute',
@@ -285,8 +318,35 @@ export function Game() {
             padding: '1.5rem 2rem',
             maxHeight: '240px',
             overflowY: 'auto',
+            transition: 'all 0.3s ease',
           }}
         >
+          {/* Toggle Button - Hide Panel */}
+          <button
+            onClick={() => setIsPanelOpen(false)}
+            style={{
+              position: 'absolute',
+              top: '0.5rem',
+              right: '2rem',
+              backgroundColor: 'transparent',
+              border: 'none',
+              color: 'rgba(100, 181, 246, 0.6)',
+              cursor: 'pointer',
+              fontSize: '20px',
+              transition: 'all 0.3s ease',
+              padding: '0.25rem 0.5rem',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = 'rgba(100, 181, 246, 1)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = 'rgba(100, 181, 246, 0.6)'
+            }}
+            title="Hide panel"
+          >
+            🔽
+          </button>
+
           {/* Controls Section - PROMINENT */}
           {game?.controls && (
             <div
