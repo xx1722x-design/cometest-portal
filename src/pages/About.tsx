@@ -136,6 +136,55 @@ export function About() {
           </section>
 
           <section style={{ marginBottom: '32px' }}>
+            <h2 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '16px' }}>🏛️ Archive & Attribution</h2>
+
+            <h3 style={{ fontSize: '18px', fontWeight: '500', marginBottom: '12px', marginTop: '16px' }}>
+              PhET Interactive Simulations
+            </h3>
+            <p>
+              Cometest features physics and chemistry simulations developed by <strong>PhET Interactive Simulations</strong>,
+              a project of the <strong>University of Colorado Boulder</strong>. These simulations are provided under the
+              <strong> Creative Commons Attribution 4.0 (CC BY 4.0) license</strong> and are used for educational purposes only.
+            </p>
+            <ul style={{ marginTop: '8px', paddingLeft: '24px' }}>
+              <li>Source: <a href="https://phet.colorado.edu/" target="_blank" rel="noopener noreferrer" style={{ color: '#007bff', textDecoration: 'none' }}>PhET Colorado</a></li>
+              <li>License: Creative Commons BY 4.0</li>
+              <li>Usage: Educational simulations for interactive learning</li>
+            </ul>
+
+            <h3 style={{ fontSize: '18px', fontWeight: '500', marginBottom: '12px', marginTop: '16px' }}>
+              Web Games & js13kGames Community
+            </h3>
+            <p>
+              Our web games collection is curated from the <strong>js13kGames</strong> community archive and independent game developers.
+              js13kGames is an annual JavaScript programming competition where developers create games in 13KB or less.
+            </p>
+            <ul style={{ marginTop: '8px', paddingLeft: '24px' }}>
+              <li>Source: <a href="https://js13kgames.com/" target="_blank" rel="noopener noreferrer" style={{ color: '#007bff', textDecoration: 'none' }}>js13kGames</a></li>
+              <li>Archive Type: Community-curated game collection</li>
+              <li>Original Creators: Credited per individual game entries</li>
+              <li>Usage: Personal and educational use</li>
+            </ul>
+
+            <h3 style={{ fontSize: '18px', fontWeight: '500', marginBottom: '12px', marginTop: '16px' }}>
+              Archive & Non-Commercial Notice
+            </h3>
+            <p>
+              <strong>Cometest Portal is an educational game and simulation archive</strong> operated for the public benefit.
+              All content is curated and provided for:
+            </p>
+            <ul style={{ marginTop: '8px', paddingLeft: '24px' }}>
+              <li>✅ Educational use by students and teachers</li>
+              <li>✅ Personal entertainment and casual play</li>
+              <li>✅ Learning through interactive simulation</li>
+              <li>✅ Game development inspiration and study</li>
+            </ul>
+            <p style={{ marginTop: '16px', fontWeight: '500', color: '#d9534f' }}>
+              ❌ Commercial reproduction or redistribution of content without permission is strictly prohibited.
+            </p>
+          </section>
+
+          <section style={{ marginBottom: '32px' }}>
             <h2 style={{ fontSize: '24px', fontWeight: '600', marginBottom: '16px' }}>📋 Legal & Compliance</h2>
             <p>
               For more information about how we handle your data and our terms of use, please review:

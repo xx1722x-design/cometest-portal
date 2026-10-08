@@ -403,6 +403,25 @@ export function Game() {
               ))}
             </div>
           )}
+
+          {/* License & Attribution Notice */}
+          <div
+            style={{
+              marginTop: '1rem',
+              paddingTop: '0.75rem',
+              borderTop: '1px solid rgba(100, 181, 246, 0.2)',
+              fontSize: '11px',
+              color: 'rgba(255, 255, 255, 0.5)',
+              lineHeight: '1.4',
+            }}
+          >
+            <span style={{ display: 'block', marginBottom: '0.25rem' }}>
+              © Game provided by Cometest Portal Educational Archive
+            </span>
+            <span style={{ display: 'block' }}>
+              🎮 For personal entertainment and educational use only. Non-commercial use.
+            </span>
+          </div>
         </div>
       )}
 

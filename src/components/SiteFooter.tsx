@@ -85,6 +85,22 @@ export function SiteFooter() {
 
       <div className="site-footer__bottom">
         <p>{t('copyright')}</p>
+
+        {/* Legal Credits & Attribution */}
+        <div style={{ marginTop: '16px', fontSize: '12px', opacity: '0.8', lineHeight: '1.5' }}>
+          <p style={{ margin: '8px 0' }}>
+            <strong>PhET Interactive Simulations:</strong> Physics education simulations developed by University of Colorado Boulder.
+            Used for educational purposes under the Creative Commons BY 4.0 license.
+          </p>
+          <p style={{ margin: '8px 0' }}>
+            <strong>Web Games:</strong> Curated from js13kGames community archive and independent developers.
+            Provided as educational and entertainment platform for non-commercial use.
+          </p>
+          <p style={{ margin: '8px 0' }}>
+            <strong>Archive Notice:</strong> Cometest Portal is an educational game and simulation archive.
+            All content is provided for personal, non-commercial use only. Unauthorized commercial reproduction is prohibited.
+          </p>
+        </div>
       </div>
     </footer>
   )

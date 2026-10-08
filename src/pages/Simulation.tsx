@@ -195,6 +195,53 @@ export function Simulation() {
       {/* Simulation rendering */}
       {renderSimulation()}
 
+      {/* Simulation Info Panel - Top Left */}
+      {simulation && (
+        <div
+          style={{
+            position: 'absolute',
+            top: '1rem',
+            left: '1rem',
+            zIndex: 90,
+            backgroundColor: 'rgba(10, 10, 26, 0.92)',
+            backdropFilter: 'blur(10px)',
+            border: '1px solid rgba(100, 181, 246, 0.3)',
+            borderRadius: '8px',
+            padding: '1rem',
+            maxWidth: '320px',
+            boxShadow: '0 4px 15px rgba(0,0,0,0.3)',
+          }}
+        >
+          <h3 style={{ color: 'rgba(100, 181, 246, 1)', fontSize: '16px', margin: '0 0 0.5rem 0', fontWeight: '600' }}>
+            {simulation.title}
+          </h3>
+
+          <p style={{ color: 'rgba(255, 255, 255, 0.75)', fontSize: '13px', lineHeight: '1.5', margin: '0.5rem 0' }}>
+            {simulation.description}
+          </p>
+
+          {/* PhET Attribution */}
+          {simulation.category && (simulation.category.includes('physics') || simulation.category.includes('chemistry')) && (
+            <div
+              style={{
+                marginTop: '0.75rem',
+                paddingTop: '0.75rem',
+                borderTop: '1px solid rgba(100, 181, 246, 0.2)',
+                fontSize: '11px',
+                color: 'rgba(255, 255, 255, 0.5)',
+                lineHeight: '1.3',
+              }}
+            >
+              <span style={{ display: 'block', fontWeight: '500', color: 'rgba(100, 181, 246, 0.7)' }}>
+                📚 PhET Interactive Simulations
+              </span>
+              <span style={{ display: 'block' }}>University of Colorado Boulder</span>
+              <span style={{ display: 'block' }}>Creative Commons BY 4.0</span>
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Back button */}
       <button
         onClick={handleBackClick}
