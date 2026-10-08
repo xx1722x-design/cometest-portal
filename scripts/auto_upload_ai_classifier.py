@@ -363,8 +363,10 @@ def generate_game_description(filename: str, category: str) -> str:
     return descriptions.get(category, f"🎮 Interactive {filename} game. Engage with dynamic gameplay mechanics.")
 
 def move_to_category_folder(html_path: Path, category_key: str) -> bool:
-    """Move HTML file to appropriate category folder in Dropzone"""
+    """Archive HTML file to appropriate category folder in Dropzone (reference only, not for data re-import)"""
     try:
+        # NOTE: This is for archival reference only
+        # We DO NOT re-read from Dropzone - only PhET HTML from Inbox is processed
         folder_path = CATEGORY_FOLDER_MAPPING.get(category_key)
         if not folder_path:
             print(f"⚠ Unknown category folder: {category_key}")
@@ -376,11 +378,11 @@ def move_to_category_folder(html_path: Path, category_key: str) -> bool:
         target_path = target_dir / html_path.name
         shutil.copy2(str(html_path), str(target_path))
 
-        print(f"✓ Copied to: {target_dir}")
+        print(f"✓ Archived to Dropzone: {target_dir.name}")
         return True
     except Exception as e:
-        print(f"✗ Failed to copy HTML: {e}")
-        return False
+        print(f"⚠ Warning: Could not archive to Dropzone (non-critical): {e}")
+        return True  # Non-critical, continue anyway
 
 def copy_html_to_simulations(html_path: Path) -> bool:
     """Copy HTML file to public/simulations/ folder"""
@@ -443,10 +445,15 @@ def update_games_data_phet(
     seo_keywords: list = None,
     occult_theme: str = "cosmic-horror"
 ) -> bool:
-    """Add new PhET simulation to gamesData.ts with occult metadata"""
+    """Add new PhET simulation to gamesData.ts with occult metadata (skip if already exists)"""
     try:
         with open(GAMES_DATA_FILE, 'r', encoding='utf-8') as f:
             content = f.read()
+
+        # CHECK: Skip if game_id already exists (prevent duplicates)
+        if f"id: '{game_id}'" in content:
+            print(f"⚠ PhET simulation already registered: {game_id} (skipping duplicate)")
+            return True
 
         if seo_keywords is None:
             seo_keywords = []
@@ -503,8 +510,10 @@ def update_games_data_phet(
             print("✗ Could not find GAMES_DATA array")
             return False
 
-        # Insert at beginning of array
-        insert_pos = content.find("{", array_start)
+        # Insert at beginning of array (after opening bracket and comment lines)
+        array_start_pos = content.find("[", array_start)
+        # Skip to first actual item line or create new line
+        insert_pos = content.find("\n", array_start_pos) + 1
         new_content = content[:insert_pos] + new_game + "\n  " + content[insert_pos:]
 
         with open(GAMES_DATA_FILE, 'w', encoding='utf-8') as f:
@@ -615,11 +624,38 @@ def find_inbox_html_files() -> list:
     return html_files
 
 def main():
-    """Main function"""
-    print("="*60)
-    print("🚀 PhET HTML AI Auto-Curation & Occult Theme Factory")
+    """Main function - PhET HTML ONLY processing (no legacy data re-import)"""
+    print("="*70)
+    print("🚀 PhET HTML AI Auto-Curation & Occult Theme Factory (HTML ONLY)")
     print("   (AI-powered occult transformation & auto-registration)")
-    print("="*60)
+    print("   ⚠️  CRITICAL: This script processes ONLY new PhET HTML files")
+    print("   ⚠️  Legacy ZIP/game data from Dropzone is NOT re-imported")
+    print("="*70)
+
+    # SAFETY CHECK: Verify Dropzone folders are empty (no legacy data)
+    print("\n🔍 Pre-flight safety check: Verifying no legacy data in Dropzone...")
+    dropzone_has_legacy = False
+
+    for folder in [
+        "Occult_Classified/Abyssal_Frequencies",
+        "Occult_Classified/Cosmic_Horror",
+        "Science/Web_Games",
+        "Science/Puzzle",
+    ]:
+        check_path = DROPZONE_BASE / folder
+        if check_path.exists():
+            file_count = len(list(check_path.iterdir()))
+            if file_count > 0:
+                print(f"   ⚠️  WARNING: {folder} contains {file_count} files (should be empty)")
+                dropzone_has_legacy = True
+
+    if dropzone_has_legacy:
+        print("\n⚠️  LEGACY DATA DETECTED IN DROPZONE!")
+        print("   Please run cleanup: Delete all files in Occult_Classified/* and Science/*")
+        print("   This prevents accidental re-import of old game data.")
+        return
+
+    print("   ✅ Dropzone folders are clean (no legacy data detected)\n")
 
     # Check required directories
     if not INBOX_FOLDER.exists():
@@ -641,9 +677,10 @@ def main():
     if not html_files:
         print(f"\n📭 No HTML files in Inbox")
         print(f"Upload PhET HTML files to: {INBOX_FOLDER}")
+        print(f"\n✅ Script ready and waiting for PhET HTML files...")
         return
 
-    print(f"\n📦 Found HTML files in Inbox: {len(html_files)}\n")
+    print(f"\n📦 Found PhET HTML files in Inbox: {len(html_files)}\n")
 
     # Process each HTML file
     success_count = 0
@@ -655,14 +692,16 @@ def main():
             print(f"❌ Failed")
 
     # Final summary and deployment
-    print("\n" + "="*60)
+    print("\n" + "="*70)
     print(f"✅ Processing complete: {success_count}/{len(html_files)} successful")
-    print("="*60)
+    print("="*70)
 
     if success_count > 0:
         print("\n📤 Running Git deployment...")
         run_git_commands()
         print("\n🎉 All PhET simulations processed and deployed to Vercel!")
+    else:
+        print("\n⚠️  No files were processed.")
 
 if __name__ == "__main__":
     main()
