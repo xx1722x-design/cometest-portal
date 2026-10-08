@@ -3,7 +3,7 @@
 /*
 
 SP13KTRA by Frank Force
-An anti-gravity grand prix in 13 kilobytes, made for js13kGames
+An anti-gravity grand prix in 13 kilobytes, made for removed
 
 Controls
 - Arrows or Mouse = Drive (a click enters mouse mode: the pointer's offset from the

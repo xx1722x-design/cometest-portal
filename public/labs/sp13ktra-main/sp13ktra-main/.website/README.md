@@ -4,7 +4,7 @@ genres:
   - music
   - arcade
 directors_cut: https://killedbyapixel.github.io/SP13KTRA/
-# See github.com/js13kGames/hello-world for supported frontmatter
+# See github.com/removed for supported frontmatter
 ---
 
 # 🦄🌈 SP13KTRA
@@ -13,7 +13,7 @@ directors_cut: https://killedbyapixel.github.io/SP13KTRA/
 
 Race eight anti-gravity craft across eight spectral circuits in real 3D. Every circuit has its own colour, theme, and procedural soundtrack.
 
-Created by Frank Force for JS13k 2026
+Created by Frank Force for removed 2026
 
 ## 🕹️ Controls
 

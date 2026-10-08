@@ -6,7 +6,7 @@
 
 *Super Castle Game* uses [natlib][nat], a highly composable library for small games.
 
-Written by [Mark Vasilkov][rei] for js13kGames in 2023.
+Written by [Mark Vasilkov][rei] for removed in 2023.
 
 Released under the [GNU General Public License version 3][gpl].
 

@@ -19,7 +19,7 @@
 
 // settings (the build flags - clampAspectRatios, testDrive, quickStart... - are declared
 // in the flags file that heads the concat order, so terser can fold them here AND in
-// the files before this one; see releaseJS13K.js)
+// the files before this one; see releaseremoved
 const pixelate = 0;        // low-res canvas mode: off (only matters under clampAspectRatios)
 const canvasFixedSize = 0;
 const frameRate = 60;

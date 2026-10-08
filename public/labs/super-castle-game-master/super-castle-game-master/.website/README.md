@@ -2,8 +2,8 @@
 genres:
   - sandbox
   - management
-post: https://mvasilkov.animuchan.net/super-castle-game-js13kgames2023
-# See github.com/js13kGames/hello-world for supported frontmatter
+post: https://mvasilkov.animuchan.net/super-castle-game-removed
+# See github.com/removed for supported frontmatter
 ---
 
 This is a game about building a castle. Magnificent and sempiternal, the fortress of the mind will rise — and it begins with a single block.

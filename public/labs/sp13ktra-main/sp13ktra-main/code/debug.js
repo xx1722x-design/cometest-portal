@@ -4,7 +4,7 @@
 // debug.js - build flags and the dev-only tools
 //
 // Loads FIRST. In a release build this whole file is replaced by release.js
-// (enhanced) or releaseJS13K.js (13k), which declare the same names as `const 0`
+// (enhanced) or releaseremoved (13k), which declare the same names as `const 0`
 // plus empty stubs for every function below, so terser folds every `debug &&`,
 // `devMode` and `freeCamMode` branch out of the shipped game. The names and the
 // stub list in those two files must stay in step with this one.
@@ -22,7 +22,7 @@
 // everything behind devMode lives here.
 
 const debug = 1;
-let enhancedMode = 1; // the enhanced build: gamepad, WASD, aspect clamp (const 0 in releaseJS13K.js)
+let enhancedMode = 1; // the enhanced build: gamepad, WASD, aspect clamp (const 0 in releaseremoved
 let enableAsserts = 1;
 let devMode = 0; // Home toggles it, F and T turn it on; unlocks the keys marked * in the legend. Saved in localStorage.SP13KDEV (devSet), so a reload stays in dev mode
 let topDownMode = 0, topDownZoom = 1, topDownPan; // T: an orthographic map view straight down over the loop (glPreRender, updateCamera); the wheel zooms, WASD pans
