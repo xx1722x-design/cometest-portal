@@ -270,6 +270,57 @@ export function Game() {
         </div>
       )}
 
+      {/* Story Description Panel - Bottom overlay */}
+      {game?.storyDescription && (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 50,
+            backgroundColor: 'rgba(10, 10, 26, 0.95)',
+            backdropFilter: 'blur(10px)',
+            borderTop: '2px solid rgba(100, 181, 246, 0.3)',
+            padding: '1.5rem 2rem',
+            maxHeight: '200px',
+            overflowY: 'auto',
+          }}
+        >
+          <div
+            style={{
+              color: 'rgba(255, 255, 255, 0.9)',
+              fontSize: '14px',
+              lineHeight: '1.6',
+              fontStyle: 'italic',
+              maxWidth: '1200px',
+              margin: '0 auto',
+            }}
+          >
+            <span style={{ color: 'rgba(100, 181, 246, 0.8)', marginRight: '0.5rem' }}>✦</span>
+            {game.storyDescription}
+          </div>
+          {game.seoKeywords && game.seoKeywords.length > 0 && (
+            <div
+              style={{
+                marginTop: '1rem',
+                fontSize: '12px',
+                color: 'rgba(255, 255, 255, 0.5)',
+                display: 'flex',
+                flexWrap: 'wrap',
+                gap: '0.75rem',
+              }}
+            >
+              {game.seoKeywords.map((keyword, idx) => (
+                <span key={idx} style={{ display: 'inline-block', padding: '0.25rem 0.5rem' }}>
+                  #{keyword}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Back Button - Overlay on top of game */}
       <button
         onClick={() => navigate('/game')}

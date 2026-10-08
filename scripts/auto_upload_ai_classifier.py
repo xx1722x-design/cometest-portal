@@ -90,9 +90,10 @@ def analyze_zip_content(zip_path: Path) -> dict:
         print(f"⚠ Error analyzing ZIP: {e}")
         return {"filename": zip_path.stem, "error": str(e)}
 
-def classify_genre_with_ai(zip_info: dict) -> Tuple[str, str, str]:
+def classify_genre_with_ai(zip_info: dict) -> dict:
     """
-    Use Groq AI to classify game genre and return (category_key, display_name, description)
+    Use Groq AI to classify game genre and generate SEO metadata
+    Returns: {category_key, display_name, description, storyDescription, seoKeywords}
     """
     try:
         from groq import Groq
@@ -109,49 +110,49 @@ def classify_genre_with_ai(zip_info: dict) -> Tuple[str, str, str]:
         files = ", ".join(zip_info.get("file_list", [])[:10])
         content_snippet = zip_info.get("content_preview", "")[:500]
 
-        prompt = f"""Analyze this game/simulation and classify it into ONE category from this exact list:
-- web_games (arcade, action, casual web games)
-- puzzle (puzzle, brain teasers)
-- space_universe (astronomy, planets, space)
-- physics_chemistry (physics, chemistry, states of matter)
-- optics_waves (light, optics, waves)
-- occult_abyssal (deep sea, abyss, mysterious depths)
-- occult_alchemy (alchemy, potion, magic)
-- occult_anomalous (anomalies, strange phenomena)
-- occult_cosmic (cosmic horror, space horror)
-- occult_forbidden (forbidden, restricted)
-- occult_sacred (sacred geometry, mysticism)
-- occult_necromancy (death, spirits, undead)
-- occult_artifacts (artifacts, ancient items)
-- occult_breach (breach, dimension rifts)
-- occult_illusions (illusions, mind-bending)
+        prompt = f"""Analyze this game/simulation and classify it. You are curating content for a mysterious experimental portal blending science and occult mysteries.
 
 Game info:
 - Filename: {filename}
 - Files: {files}
 - Content: {content_snippet}
 
-Respond ONLY with:
-CATEGORY: [one category key from above]
-REASON: [one sentence explaining]
+Respond with EXACTLY these 4 lines (no more, no less):
 
-Do not include any other text."""
+CATEGORY: [one category key: web_games/puzzle/space_universe/physics_chemistry/optics_waves/occult_abyssal/occult_alchemy/occult_anomalous/occult_cosmic/occult_forbidden/occult_sacred/occult_necromancy/occult_artifacts/occult_breach/occult_illusions]
+STORY: [3-4 sentence immersive story description about mysterious/scientific phenomena. Make it sound like an occult/science mystery experience. Write in English.]
+KEYWORDS: [keyword1, keyword2, keyword3, keyword4, keyword5] (comma-separated SEO keywords for niche search optimization - use terms like "anomaly", "dimension", "experiment", "phenomenon", etc.)
+REASON: [one sentence explaining classification]
+
+Example format:
+CATEGORY: occult_cosmic
+STORY: A probe detects signals from a black hole that defy all known physics. Anomalous gravitational patterns suggest consciousness itself may bend spacetime. Journey through the cosmic unknown and decode the universe's darkest secrets.
+KEYWORDS: black hole anomaly, quantum consciousness simulator, cosmic entity detector, gravitational phenomenon game, dimensional physics explorer
+REASON: Space-themed with cosmic horror elements and scientific mystery tone."""
 
         response = client.messages.create(
             model="mixtral-8x7b-32768",
-            max_tokens=200,
+            max_tokens=500,
             messages=[{"role": "user", "content": prompt}]
         )
 
         response_text = response.content[0].text
-        lines = response_text.strip().split('\n')
+        lines = [line.strip() for line in response_text.strip().split('\n') if line.strip()]
 
-        category_key = "web_games"  # default
+        category_key = "web_games"
+        story_description = ""
+        seo_keywords = []
         reason = "Default classification"
 
         for line in lines:
             if line.startswith("CATEGORY:"):
                 category_key = line.replace("CATEGORY:", "").strip()
+            elif line.startswith("STORY:"):
+                story_description = line.replace("STORY:", "").strip()
+            elif line.startswith("KEYWORDS:"):
+                keywords_str = line.replace("KEYWORDS:", "").strip()
+                # Parse comma-separated keywords
+                seo_keywords = [kw.strip() for kw in keywords_str.split(",")]
             elif line.startswith("REASON:"):
                 reason = line.replace("REASON:", "").strip()
 
@@ -163,9 +164,17 @@ Do not include any other text."""
         description = generate_game_description(filename, category_key)
 
         print(f"✅ AI Classification: {category_key} ({display_name})")
+        print(f"   Story: {story_description[:60]}...")
+        print(f"   Keywords: {', '.join(seo_keywords[:3])}")
         print(f"   Reason: {reason}")
 
-        return category_key, display_name, description
+        return {
+            "category_key": category_key,
+            "display_name": display_name,
+            "description": description,
+            "storyDescription": story_description,
+            "seoKeywords": seo_keywords
+        }
 
     except ImportError:
         print("⚠ Groq library not installed, using heuristic classification")
@@ -174,12 +183,12 @@ Do not include any other text."""
         print(f"⚠ AI classification error: {e}, using heuristic")
         return classify_genre_heuristic(zip_info)
 
-def classify_genre_heuristic(zip_info: dict) -> Tuple[str, str, str]:
-    """Fallback heuristic genre classification"""
+def classify_genre_heuristic(zip_info: dict) -> dict:
+    """Fallback heuristic genre classification with SEO data"""
     filename = zip_info.get("filename", "").lower()
     content = zip_info.get("content_preview", "").lower()
 
-    keywords = {
+    keywords_map = {
         "web_games": ["game", "arcade", "phaser", "player", "score", "level"],
         "puzzle": ["puzzle", "match", "tetris", "sliding"],
         "space_universe": ["space", "planet", "orbit", "solar", "moon", "astronomy"],
@@ -192,7 +201,7 @@ def classify_genre_heuristic(zip_info: dict) -> Tuple[str, str, str]:
     best_category = "web_games"
     best_score = 0
 
-    for category, kws in keywords.items():
+    for category, kws in keywords_map.items():
         score = sum(1 for kw in kws if kw in filename or kw in content)
         if score > best_score:
             best_score = score
@@ -201,8 +210,35 @@ def classify_genre_heuristic(zip_info: dict) -> Tuple[str, str, str]:
     display_name = CATEGORY_DISPLAY_NAMES.get(best_category, "Web Games")
     description = generate_game_description(filename, best_category)
 
+    # Generate default SEO data for heuristic classification
+    default_stories = {
+        "web_games": "An experimental interactive environment defying conventional game design. Immerse yourself in mechanics that blur the line between simulation and reality.",
+        "puzzle": "Solve cryptic patterns that hint at deeper cosmic truths. Each puzzle piece reveals an anomaly in the fabric of logic itself.",
+        "space_universe": "Cosmic phenomena observable only through interdimensional measurement devices. Explore the void and its impossible geometries.",
+        "physics_chemistry": "Matter behaves unexpectedly in this controlled laboratory. Witness reactions that shouldn't exist under known physical laws.",
+        "occult_cosmic": "An encounter with forces beyond our dimensional understanding. The universe whispers secrets through this interactive gateway.",
+    }
+
+    story = default_stories.get(best_category, f"A mysterious {best_category} experience awaits your discovery.")
+    default_keywords = {
+        "web_games": ["interactive game simulation", "reality-bending mechanics", "experimental gameplay"],
+        "puzzle": ["cosmic puzzle solver", "dimensional logic game", "reality anomaly puzzle"],
+        "space_universe": ["cosmic phenomena explorer", "interdimensional space simulator", "void explorer game"],
+        "physics_chemistry": ["anomalous physics lab", "impossible reaction simulator", "experimental matter game"],
+        "occult_cosmic": ["cosmic horror experience", "dimensional entity encounter", "universe mystery game"],
+    }
+
+    seo_keywords = default_keywords.get(best_category, ["experimental game", "mystery simulator"])
+
     print(f"📊 Heuristic Classification: {best_category} ({display_name})")
-    return best_category, display_name, description
+
+    return {
+        "category_key": best_category,
+        "display_name": display_name,
+        "description": description,
+        "storyDescription": story,
+        "seoKeywords": seo_keywords
+    }
 
 def generate_game_description(filename: str, category: str) -> str:
     """Generate professional English game description based on category"""
@@ -293,11 +329,22 @@ def capture_screenshot_with_playwright(game_id: str, game_folder: Path) -> Optio
         print(f"⚠ Screenshot error: {e}")
         return None
 
-def update_games_data(game_id: str, game_title: str, description: str, image_path: Optional[str], category: str) -> bool:
-    """Add new game to gamesData.ts"""
+def update_games_data(
+    game_id: str,
+    game_title: str,
+    description: str,
+    image_path: Optional[str],
+    category: str,
+    story_description: str = "",
+    seo_keywords: list = None
+) -> bool:
+    """Add new game to gamesData.ts with SEO metadata"""
     try:
         with open(GAMES_DATA_FILE, 'r', encoding='utf-8') as f:
             content = f.read()
+
+        if seo_keywords is None:
+            seo_keywords = []
 
         emoji_map = {
             "web_games": "🎮",
@@ -319,6 +366,13 @@ def update_games_data(game_id: str, game_title: str, description: str, image_pat
 
         emoji = emoji_map.get(category, "🎮")
         image_attr = f'    image: "{image_path}",' if image_path else ""
+        story_attr = f'    storyDescription: "{story_description}",' if story_description else ""
+
+        # Format SEO keywords as array
+        keywords_array = ""
+        if seo_keywords:
+            keywords_str = ", ".join([f"'{kw}'" for kw in seo_keywords])
+            keywords_array = f'    seoKeywords: [{keywords_str}],'
 
         # Determine if simulation or game
         category_type = "simulation" if "physics_chemistry" in category or "space_universe" in category or "optics_waves" in category else "web_games"
@@ -327,11 +381,11 @@ def update_games_data(game_id: str, game_title: str, description: str, image_pat
     id: '{game_id}',
     title: '{game_title}',
     description: '{description}',
+{story_attr}{image_attr}{keywords_array}
     thumbnail: '{emoji}',
     category: '{category_type}',
     icon: '{emoji}',
     path: '/game/{game_id}',
-{image_attr}
     tags: ['auto-classified', '{category}'],
     play_count: 0,
   }},'''
@@ -389,9 +443,14 @@ def process_inbox_zip(zip_path: Path) -> bool:
         # Step 1: Analyze ZIP content
         zip_info = analyze_zip_content(zip_path)
 
-        # Step 2: AI Genre Classification
+        # Step 2: AI Genre Classification with SEO metadata
         print("\n🤖 AI Classification in progress...")
-        category_key, display_name, description = classify_genre_with_ai(zip_info)
+        ai_result = classify_genre_with_ai(zip_info)
+        category_key = ai_result["category_key"]
+        display_name = ai_result["display_name"]
+        description = ai_result["description"]
+        story_description = ai_result["storyDescription"]
+        seo_keywords = ai_result["seoKeywords"]
 
         # Step 3: Move to appropriate category folder
         print(f"\n📁 Moving to category folder...")
@@ -420,9 +479,17 @@ def process_inbox_zip(zip_path: Path) -> bool:
         print("\n📸 Automatic screenshot capture...")
         image_path = capture_screenshot_with_playwright(game_id, extract_path)
 
-        # Step 6: Register in gamesData.ts with category
-        print("\n📝 Registering game data...")
-        if not update_games_data(game_id, zip_name, description, image_path, category_key):
+        # Step 6: Register in gamesData.ts with SEO metadata
+        print("\n📝 Registering game data with SEO metadata...")
+        if not update_games_data(
+            game_id,
+            zip_name,
+            description,
+            image_path,
+            category_key,
+            story_description,
+            seo_keywords
+        ):
             return False
 
         # Step 7: Move to Completed
