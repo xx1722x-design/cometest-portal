@@ -118,6 +118,7 @@ export function Index() {
                 display: 'flex',
                 alignItems: 'center',
                 gap: '4px',
+                flexShrink: 0,
               }}
               onMouseEnter={(e) => {
                 if (activeSecondaryCategory !== cat.id) {
@@ -134,6 +135,8 @@ export function Index() {
               {cat.name}
             </button>
           ))}
+          {/* Spacer to prevent last item clipping */}
+          <div style={{ width: '16px', flexShrink: 0 }} />
         </div>
       </div>
 
