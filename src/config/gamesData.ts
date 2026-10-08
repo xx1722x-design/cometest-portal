@@ -32,18 +32,6 @@ export const GAMES_DATA: GameItem[] = [
     play_count: 0,
   },
   {
-    id: 'plinko-probability_sample',
-    title: 'PhET 시뮬레이션',
-    description: '',
-    occultTheme: "cosmic-horror",    image: "/thumbnails/plinko-probability_sample.png",
-    thumbnail: '🌀',
-    category: 'simulation',
-    icon: '🌀',
-    path: '/game/phet-plinko-probability_sample',
-    tags: ['phet', 'simulation', 'occult_cosmic'],
-    play_count: 0,
-  },
-  {
     id: 'plinko-probability_ko',
     title: 'PhET 시뮬레이션',
     description: '',
