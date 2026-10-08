@@ -67,8 +67,9 @@ export function Index() {
           backgroundColor: 'rgba(var(--bg-rgb), 0.95)',
           backdropFilter: 'blur(10px)',
           borderBottom: '1px solid var(--border-color)',
-          padding: '16px 20px',
+          padding: '0',
           marginBottom: '20px',
+          overflow: 'hidden',
         }}
       >
         {/* Secondary Categories Row - Occult Themes */}
@@ -77,11 +78,9 @@ export function Index() {
             display: 'flex',
             gap: '8px',
             overflowX: 'auto',
+            overflowY: 'hidden',
             scrollBehavior: 'smooth',
-            maxWidth: '1600px',
-            margin: '0 auto',
-            paddingBottom: '0',
-            paddingTop: '0',
+            padding: '16px 20px',
             // Hide scrollbar for all browsers
             scrollbarWidth: 'none' as any,
             msOverflowStyle: 'none' as any,

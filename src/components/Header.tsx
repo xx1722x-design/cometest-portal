@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { createPortal } from 'react-dom'
 import { FreshLangMenu } from './FreshLangMenu'
 import { useDarkMode } from '../theme'
 import { searchPortal, type SearchItem } from '../config/searchData'
@@ -36,7 +37,9 @@ export function Header() {
   const [searchResults, setSearchResults] = useState<SearchItem[]>([])
   const [showDropdown, setShowDropdown] = useState(false)
   const [menuOpen, setMenuOpen] = useState(false)
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0, width: 0 })
   const searchInputRef = useRef<HTMLInputElement>(null)
+  const searchContainerRef = useRef<HTMLDivElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
   // 페이지 이동 시 모바일 메뉴 닫기
@@ -65,6 +68,18 @@ export function Header() {
     document.addEventListener('keydown', onKey)
     return () => document.removeEventListener('keydown', onKey)
   }, [])
+
+  // Update dropdown position when it shows
+  useEffect(() => {
+    if (showDropdown && searchContainerRef.current) {
+      const rect = searchContainerRef.current.getBoundingClientRect()
+      setDropdownPos({
+        top: rect.bottom + 4,
+        left: rect.left,
+        width: rect.width,
+      })
+    }
+  }, [showDropdown])
 
   // 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
@@ -116,39 +131,62 @@ export function Header() {
           </span>
         </a>
 
-        <form className="site-search" role="search" onSubmit={handleSearch} style={{ position: 'relative' }}>
-          <input
-            ref={searchInputRef}
-            type="search"
-            placeholder={t('search_placeholder')}
-            aria-label={t('search_placeholder')}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            autoComplete="off"
-          />
-          <button type="submit">{t('search_button')}</button>
+        <div ref={searchContainerRef} style={{ position: 'relative' }}>
+          <form className="site-search" role="search" onSubmit={handleSearch} style={{ position: 'relative' }}>
+            <input
+              ref={searchInputRef}
+              type="search"
+              placeholder={t('search_placeholder')}
+              aria-label={t('search_placeholder')}
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              autoComplete="off"
+            />
+            <button type="submit">{t('search_button')}</button>
+          </form>
 
-          {/* Search Results Dropdown */}
-          {showDropdown && (
-            <div
-              ref={dropdownRef}
-              className="search-dropdown"
-              style={{
-                position: 'absolute',
-                top: '100%',
-                left: 0,
-                right: 0,
-                backgroundColor: isDarkMode ? '#1a1a1a' : '#ffffff',
-                border: `1px solid ${isDarkMode ? '#333333' : '#e0e0e0'}`,
-                borderTop: 'none',
-                borderRadius: '0 0 8px 8px',
-                maxHeight: '500px',
-                overflowY: 'auto',
-                zIndex: 1000,
-                boxShadow: isDarkMode ? '0 4px 16px rgba(0,0,0,0.5)' : '0 4px 16px rgba(0,0,0,0.12)',
-              }}
-            >
-              {searchResults.length > 0 ? (
+          {/* Search Results Dropdown - Rendered via React Portal */}
+          {showDropdown && typeof document !== 'undefined' && createPortal(
+            <>
+              {/* Invisible Overlay */}
+              <div
+                onClick={() => setShowDropdown(false)}
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  left: 0,
+                  width: '100%',
+                  height: '100%',
+                  zIndex: 99998,
+                  backgroundColor: 'transparent',
+                  cursor: 'default',
+                }}
+              />
+
+              {/* Dropdown Menu */}
+              <div
+                ref={dropdownRef}
+                className="search-dropdown"
+                onClick={(e) => e.stopPropagation()}
+                style={{
+                  position: 'fixed',
+                  top: `${dropdownPos.top}px`,
+                  left: `${dropdownPos.left}px`,
+                  width: `${dropdownPos.width}px`,
+                  maxWidth: `calc(100vw - ${dropdownPos.left}px - 8px)`,
+                  backgroundColor: isDarkMode ? '#0f172a' : '#ffffff',
+                  border: `1px solid ${isDarkMode ? '#333333' : '#e0e0e0'}`,
+                  borderRadius: '8px',
+                  maxHeight: '500px',
+                  overflowY: 'auto',
+                  zIndex: 99999,
+                  boxShadow: isDarkMode ? '0 4px 16px rgba(0,0,0,0.5)' : '0 4px 16px rgba(0,0,0,0.12)',
+                  backdropFilter: 'none',
+                  WebkitMaskImage: 'none',
+                  maskImage: 'none',
+                }}
+              >
+                {searchResults.length > 0 ? (
                 <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
                   {searchResults.map((result) => (
                     <li
@@ -159,15 +197,15 @@ export function Header() {
                         cursor: 'pointer',
                         borderBottom: `1px solid ${isDarkMode ? '#2a2a2a' : '#f0f0f0'}`,
                         transition: 'all 0.15s ease',
-                        backgroundColor: isDarkMode ? '#1a1a1a' : '#ffffff',
+                        backgroundColor: isDarkMode ? '#0f172a' : '#ffffff',
                         color: isDarkMode ? '#ffffff' : '#1a1a1a',
                       }}
                       onMouseEnter={(e) => {
-                        e.currentTarget.style.backgroundColor = isDarkMode ? '#2a2a2a' : '#f5f5f5'
+                        e.currentTarget.style.backgroundColor = isDarkMode ? '#1a2332' : '#f5f5f5'
                         e.currentTarget.style.transform = 'translateX(2px)'
                       }}
                       onMouseLeave={(e) => {
-                        e.currentTarget.style.backgroundColor = isDarkMode ? '#1a1a1a' : '#ffffff'
+                        e.currentTarget.style.backgroundColor = isDarkMode ? '#0f172a' : '#ffffff'
                         e.currentTarget.style.transform = 'translateX(0)'
                       }}
                     >
@@ -231,9 +269,11 @@ export function Header() {
                   </div>
                 </div>
               )}
-            </div>
+              </div>
+            </>,
+            document.body
           )}
-        </form>
+        </div>
 
         <div className="site-header__actions">
           <button
