@@ -403,7 +403,8 @@ def process_inbox_zip(zip_path: Path) -> bool:
 
         # Step 4: Extract and process
         zip_name = zip_path.stem
-        game_id = zip_name.lower().replace(" ", "_").replace("-", "_")
+        # Use exact folder name as game_id (no character replacement) to match physical folder
+        game_id = zip_name
         extract_path = LABS_DIR / zip_name
 
         if extract_path.exists():

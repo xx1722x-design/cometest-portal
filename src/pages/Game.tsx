@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
-import { lazy, Suspense } from 'react'
+import { lazy, Suspense, useEffect, useState } from 'react'
 import { SpaceRacer } from '../components/games/SpaceRacer'
 import { DriftBossV2Safe } from '../components/games/DriftBoss/DriftBossV2Safe'
 import { CatchGamePhaser } from '../components/games/CatchGamePhaser'
@@ -21,8 +21,106 @@ export function Game() {
   const navigate = useNavigate()
   const { gameId } = useParams<{ gameId: string }>()
   const { t } = useTranslation()
+  const [saveExists, setSaveExists] = useState(false)
 
   const game = gameId ? getGameById(gameId) : null
+
+  // Portal save keys
+  const PORTAL_SAVE_KEY = `PORTAL_SAVE_${gameId}`
+  const PORTAL_SETTINGS_KEY = 'PORTAL_SETTINGS'
+
+  // Clear game cache on mount and unmount
+  useEffect(() => {
+    if (!gameId) return
+
+    // Backup portal settings
+    const portalSettings: Record<string, string> = {}
+    const keys = Object.keys(localStorage)
+    keys.forEach((key) => {
+      if (key.includes('i18next') || key.includes('_i18next') || key === PORTAL_SETTINGS_KEY) {
+        portalSettings[key] = localStorage.getItem(key) || ''
+      }
+    })
+
+    // Clear all game cache on entry (fresh start)
+    localStorage.clear()
+
+    // Restore portal settings
+    Object.entries(portalSettings).forEach(([key, value]) => {
+      localStorage.setItem(key, value)
+    })
+
+    // Check if save exists
+    const existingSave = localStorage.getItem(PORTAL_SAVE_KEY)
+    setSaveExists(!!existingSave)
+
+    // Cleanup: Clear game cache on exit
+    return () => {
+      const finalSettings: Record<string, string> = {}
+      const finalKeys = Object.keys(localStorage)
+      finalKeys.forEach((key) => {
+        if (key.includes('i18next') || key.includes('_i18next') || key === PORTAL_SETTINGS_KEY) {
+          finalSettings[key] = localStorage.getItem(key) || ''
+        }
+      })
+
+      localStorage.clear()
+
+      Object.entries(finalSettings).forEach(([key, value]) => {
+        localStorage.setItem(key, value)
+      })
+    }
+  }, [gameId, PORTAL_SAVE_KEY])
+
+  const handleSaveGame = () => {
+    if (!gameId) return
+
+    // Get all game-related cache except portal settings
+    const gameData: Record<string, string> = {}
+    const keys = Object.keys(localStorage)
+    keys.forEach((key) => {
+      if (!key.includes('i18next') && !key.includes('_i18next') && key !== PORTAL_SETTINGS_KEY) {
+        gameData[key] = localStorage.getItem(key) || ''
+      }
+    })
+
+    // Save to portal save storage
+    localStorage.setItem(PORTAL_SAVE_KEY, JSON.stringify(gameData))
+    setSaveExists(true)
+    alert(`✅ Game progress saved for ${gameId}`)
+  }
+
+  const handleLoadGame = () => {
+    if (!gameId) return
+
+    const saved = localStorage.getItem(PORTAL_SAVE_KEY)
+    if (!saved) {
+      alert('No save found')
+      return
+    }
+
+    try {
+      const gameData = JSON.parse(saved)
+
+      // Clear current game cache
+      const keys = Object.keys(localStorage)
+      keys.forEach((key) => {
+        if (!key.includes('i18next') && !key.includes('_i18next') && key !== PORTAL_SETTINGS_KEY && key !== PORTAL_SAVE_KEY) {
+          localStorage.removeItem(key)
+        }
+      })
+
+      // Restore saved data
+      Object.entries(gameData).forEach(([key, value]) => {
+        localStorage.setItem(key, value as string)
+      })
+
+      alert('✅ Save loaded! Reloading game...')
+      window.location.reload()
+    } catch (e) {
+      alert('Error loading save')
+    }
+  }
 
   const renderGame = () => {
     switch (gameId) {
@@ -97,6 +195,80 @@ export function Game() {
     >
       {/* Game Rendering */}
       {renderGame()}
+
+      {/* Floating Save/Load HUD */}
+      {gameId && (gameId.includes('-') || gameId === 'ninja-vs-evilcorp' || gameId === '13th-floor') && (
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '2rem',
+            left: '2rem',
+            zIndex: 101,
+            display: 'flex',
+            gap: '0.75rem',
+            flexDirection: 'column',
+          }}
+        >
+          <button
+            onClick={handleSaveGame}
+            style={{
+              padding: '0.75rem 1rem',
+              backgroundColor: 'rgba(76, 175, 80, 0.9)',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              fontSize: '13px',
+              fontWeight: '600',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
+              transition: 'all 0.3s ease',
+              backdropFilter: 'blur(5px)',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(76, 175, 80, 1)'
+              e.currentTarget.style.transform = 'translateY(-2px)'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.backgroundColor = 'rgba(76, 175, 80, 0.9)'
+              e.currentTarget.style.transform = 'translateY(0)'
+            }}
+          >
+            💾 Save Progress
+          </button>
+          <button
+            onClick={handleLoadGame}
+            disabled={!saveExists}
+            style={{
+              padding: '0.75rem 1rem',
+              backgroundColor: saveExists ? 'rgba(33, 150, 243, 0.9)' : 'rgba(128, 128, 128, 0.5)',
+              color: '#fff',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: saveExists ? 'pointer' : 'not-allowed',
+              fontSize: '13px',
+              fontWeight: '600',
+              boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
+              transition: 'all 0.3s ease',
+              backdropFilter: 'blur(5px)',
+              opacity: saveExists ? 1 : 0.5,
+            }}
+            onMouseEnter={(e) => {
+              if (saveExists) {
+                e.currentTarget.style.backgroundColor = 'rgba(33, 150, 243, 1)'
+                e.currentTarget.style.transform = 'translateY(-2px)'
+              }
+            }}
+            onMouseLeave={(e) => {
+              if (saveExists) {
+                e.currentTarget.style.backgroundColor = 'rgba(33, 150, 243, 0.9)'
+                e.currentTarget.style.transform = 'translateY(0)'
+              }
+            }}
+          >
+            📂 Load Save {saveExists ? '✓' : ''}
+          </button>
+        </div>
+      )}
 
       {/* Back Button - Overlay on top of game */}
       <button
