@@ -1,10 +1,9 @@
 # Cometest AdSense Configuration
-# This file is prepared for Google AdSense publisher ID injection
 # Format: https://iabtechlab.com/ads-txt/
+# Last Updated: 2026-10-08
 
-# Google AdSense
-# Replace pub-XXXXXXXXXXXXXXXX with your actual Google AdSense Publisher ID
-google.com, pub-XXXXXXXXXXXXXXXX, DIRECT, f08c47fec0942fa0
+# Google AdSense - Official Publisher ID
+google.com, pub-5062199785258571, DIRECT, f08c47fec0942fa0
 
 # Additional ad networks can be added here as needed
 # Example format:
