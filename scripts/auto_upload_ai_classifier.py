@@ -139,12 +139,15 @@ CONTROLS: ⌨️ [Arrow Keys] or [WASD] Navigate | [Space] Fire/Interact | 🖱�
 REASON: Space-themed with cosmic horror elements and scientific mystery tone."""
 
         response = client.chat.completions.create(
-            model="llama3-8b-8192",
+            model="llama-3.1-8b-instant",
             max_tokens=500,
             messages=[{"role": "user", "content": prompt}]
         )
 
         response_text = response.choices[0].message.content
+
+        # Rate limit protection: prevent 429 Too Many Requests errors during bulk uploads
+        time.sleep(3)
         lines = [line.strip() for line in response_text.strip().split('\n') if line.strip()]
 
         category_key = "web_games"
