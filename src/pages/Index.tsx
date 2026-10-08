@@ -58,7 +58,7 @@ export function Index() {
     >
       <Header />
 
-      {/* Sticky Category Filter Bar - Primary Row */}
+      {/* Sticky Occult Sub-Themes Filter Bar */}
       <div
         style={{
           position: 'sticky',
@@ -68,73 +68,9 @@ export function Index() {
           backdropFilter: 'blur(10px)',
           borderBottom: '1px solid var(--border-color)',
           padding: '16px 20px',
-          marginBottom: '0',
+          marginBottom: '20px',
         }}
       >
-        {/* Primary Categories Row */}
-        <div
-          style={{
-            display: 'flex',
-            gap: '8px',
-            overflowX: 'auto',
-            scrollBehavior: 'smooth',
-            maxWidth: '1600px',
-            margin: '0 auto',
-            paddingBottom: '12px',
-            // Hide scrollbar for all browsers
-            scrollbarWidth: 'none' as any,
-            msOverflowStyle: 'none' as any,
-          }}
-          className="hide-scrollbar"
-        >
-          {PRIMARY_CATEGORIES.map(cat => (
-            <button
-              key={cat.id}
-              onClick={() => {
-                setActiveCategory(cat.id)
-                setActiveSecondaryCategory(null)
-              }}
-              style={{
-                padding: '8px 16px',
-                borderRadius: '20px',
-                border: 'none',
-                backgroundColor:
-                  activeCategory === cat.id && !activeSecondaryCategory
-                    ? 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)'
-                    : 'rgba(100, 181, 246, 0.1)',
-                color:
-                  activeCategory === cat.id && !activeSecondaryCategory
-                    ? '#fff'
-                    : 'var(--text-primary)',
-                cursor: 'pointer',
-                fontSize: '14px',
-                fontWeight:
-                  activeCategory === cat.id && !activeSecondaryCategory
-                    ? '600'
-                    : '500',
-                whiteSpace: 'nowrap',
-                transition: 'all 0.3s ease',
-                display: 'flex',
-                alignItems: 'center',
-                gap: '6px',
-              }}
-              onMouseEnter={(e) => {
-                if (activeCategory !== cat.id || activeSecondaryCategory) {
-                  e.currentTarget.style.backgroundColor = 'rgba(100, 181, 246, 0.2)'
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (activeCategory !== cat.id || activeSecondaryCategory) {
-                  e.currentTarget.style.backgroundColor = 'rgba(100, 181, 246, 0.1)'
-                }
-              }}
-            >
-              <span>{cat.icon}</span>
-              {cat.name}
-            </button>
-          ))}
-        </div>
-
         {/* Secondary Categories Row - Occult Themes */}
         <div
           style={{
@@ -144,9 +80,8 @@ export function Index() {
             scrollBehavior: 'smooth',
             maxWidth: '1600px',
             margin: '0 auto',
-            paddingBottom: '8px',
-            paddingTop: '12px',
-            borderTop: '1px solid rgba(100, 181, 246, 0.2)',
+            paddingBottom: '0',
+            paddingTop: '0',
             // Hide scrollbar for all browsers
             scrollbarWidth: 'none' as any,
             msOverflowStyle: 'none' as any,

@@ -245,6 +245,25 @@ export function Header() {
         </div>
       </div>
 
+      <nav id="site-nav" className={`site-nav${menuOpen ? ' is-open' : ''}`} aria-label={t('menu_toggle')}>
+        <div className="site-nav__list">
+          {CATEGORIES.map((cat) => (
+            <a
+              key={cat.key}
+              href={cat.path}
+              className={`nav-tab${pathname === cat.path ? ' is-active' : ''}`}
+              aria-current={pathname === cat.path ? 'page' : undefined}
+              onClick={(e) => {
+                e.preventDefault()
+                navigate(cat.path)
+                setMenuOpen(false)
+              }}
+            >
+              {t(cat.i18nKey)}
+            </a>
+          ))}
+        </div>
+      </nav>
     </header>
   )
 }
