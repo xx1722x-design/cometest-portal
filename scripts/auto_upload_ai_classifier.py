@@ -139,7 +139,7 @@ CONTROLS: ⌨️ [Arrow Keys] or [WASD] Navigate | [Space] Fire/Interact | 🖱�
 REASON: Space-themed with cosmic horror elements and scientific mystery tone."""
 
         response = client.chat.completions.create(
-            model="llama3-8b-8192",
+            model="openai/gpt-oss-20b",
             max_tokens=500,
             messages=[{"role": "user", "content": prompt}]
         )
