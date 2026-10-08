@@ -151,12 +151,14 @@ export function Game() {
       case 'neon-space-shooter':
         return <NeonSpaceShooter />
       default:
-        // PhET Interactive Simulations (force English locale)
+        // PhET Interactive Simulations (force English locale globally)
         if (gameId?.startsWith('phet-')) {
           const simName = gameId.replace('phet-', '')
+          // Force English locale regardless of source file language
+          const iframeSrc = `/simulations/${simName}.html?locale=en`
           return (
             <iframe
-              src={`/simulations/${simName}.html?locale=en`}
+              src={iframeSrc}
               style={{
                 width: '100%',
                 height: '100%',

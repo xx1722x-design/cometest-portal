@@ -176,9 +176,13 @@ REASON: Orbital mechanics simulation maps to cosmic horror and gravitational mys
 
         response_text = response.choices[0].message.content
 
-        # Rate limit protection
+        # Clean markdown formatting if present
+        response_text_cleaned = response_text.replace('```json', '').replace('```', '').strip()
+
+        # Rate limit protection (3 second delay between API calls)
         time.sleep(3)
-        lines = [line.strip() for line in response_text.strip().split('\n') if line.strip()]
+
+        lines = [line.strip() for line in response_text_cleaned.split('\n') if line.strip()]
 
         category_key = "occult_cosmic"
         occult_theme = "cosmic-horror"
@@ -188,22 +192,26 @@ REASON: Orbital mechanics simulation maps to cosmic horror and gravitational mys
         seo_keywords = []
         reason = "Default classification"
 
-        for line in lines:
-            if line.startswith("CATEGORY:"):
-                category_key = line.replace("CATEGORY:", "").strip()
-            elif line.startswith("OCCULT_THEME:"):
-                occult_theme = line.replace("OCCULT_THEME:", "").strip()
-            elif line.startswith("OCCULT_TITLE:"):
-                occult_title = line.replace("OCCULT_TITLE:", "").strip()
-            elif line.startswith("OCCULT_DESCRIPTION:"):
-                occult_description = line.replace("OCCULT_DESCRIPTION:", "").strip()
-            elif line.startswith("STORY:"):
-                story_description = line.replace("STORY:", "").strip()
-            elif line.startswith("KEYWORDS:"):
-                keywords_str = line.replace("KEYWORDS:", "").strip()
-                seo_keywords = [kw.strip() for kw in keywords_str.split(",") if kw.strip()]
-            elif line.startswith("REASON:"):
-                reason = line.replace("REASON:", "").strip()
+        try:
+            for line in lines:
+                if line.startswith("CATEGORY:"):
+                    category_key = line.replace("CATEGORY:", "").strip()
+                elif line.startswith("OCCULT_THEME:"):
+                    occult_theme = line.replace("OCCULT_THEME:", "").strip()
+                elif line.startswith("OCCULT_TITLE:"):
+                    occult_title = line.replace("OCCULT_TITLE:", "").strip()
+                elif line.startswith("OCCULT_DESCRIPTION:"):
+                    occult_description = line.replace("OCCULT_DESCRIPTION:", "").strip()
+                elif line.startswith("STORY:"):
+                    story_description = line.replace("STORY:", "").strip()
+                elif line.startswith("KEYWORDS:"):
+                    keywords_str = line.replace("KEYWORDS:", "").strip()
+                    seo_keywords = [kw.strip() for kw in keywords_str.split(",") if kw.strip()]
+                elif line.startswith("REASON:"):
+                    reason = line.replace("REASON:", "").strip()
+        except Exception as parse_error:
+            print(f"   ⚠️ Parse error: {parse_error}")
+            print(f"   📋 Raw AI Response:\n{response_text_cleaned[:500]}")
 
         # Validate category
         if category_key not in CATEGORY_FOLDER_MAPPING:
