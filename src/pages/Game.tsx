@@ -270,8 +270,8 @@ export function Game() {
         </div>
       )}
 
-      {/* Story Description Panel - Bottom overlay */}
-      {game?.storyDescription && (
+      {/* Controls & Story Description Panel - Bottom overlay */}
+      {(game?.controls || game?.storyDescription) && (
         <div
           style={{
             position: 'absolute',
@@ -283,36 +283,61 @@ export function Game() {
             backdropFilter: 'blur(10px)',
             borderTop: '2px solid rgba(100, 181, 246, 0.3)',
             padding: '1.5rem 2rem',
-            maxHeight: '200px',
+            maxHeight: '240px',
             overflowY: 'auto',
           }}
         >
-          <div
-            style={{
-              color: 'rgba(255, 255, 255, 0.9)',
-              fontSize: '14px',
-              lineHeight: '1.6',
-              fontStyle: 'italic',
-              maxWidth: '1200px',
-              margin: '0 auto',
-            }}
-          >
-            <span style={{ color: 'rgba(100, 181, 246, 0.8)', marginRight: '0.5rem' }}>✦</span>
-            {game.storyDescription}
-          </div>
-          {game.seoKeywords && game.seoKeywords.length > 0 && (
+          {/* Controls Section - PROMINENT */}
+          {game?.controls && (
             <div
               style={{
-                marginTop: '1rem',
+                color: 'rgba(100, 181, 246, 1)',
+                fontSize: '15px',
+                fontWeight: '700',
+                lineHeight: '1.8',
+                marginBottom: '1rem',
+                padding: '0.75rem 1rem',
+                backgroundColor: 'rgba(100, 181, 246, 0.1)',
+                borderLeft: '4px solid rgba(100, 181, 246, 0.8)',
+                borderRadius: '4px',
+                maxWidth: '1200px',
+              }}
+            >
+              <span style={{ marginRight: '0.5rem' }}>⌨️ CONTROLS:</span>
+              {game.controls}
+            </div>
+          )}
+
+          {/* Story Description Section */}
+          {game?.storyDescription && (
+            <div
+              style={{
+                color: 'rgba(255, 255, 255, 0.85)',
+                fontSize: '14px',
+                lineHeight: '1.6',
+                fontStyle: 'italic',
+                maxWidth: '1200px',
+              }}
+            >
+              <span style={{ color: 'rgba(100, 181, 246, 0.8)', marginRight: '0.5rem' }}>✦</span>
+              {game.storyDescription}
+            </div>
+          )}
+
+          {/* SEO Keywords */}
+          {game?.seoKeywords && game.seoKeywords.length > 0 && (
+            <div
+              style={{
+                marginTop: '0.75rem',
                 fontSize: '12px',
-                color: 'rgba(255, 255, 255, 0.5)',
+                color: 'rgba(255, 255, 255, 0.4)',
                 display: 'flex',
                 flexWrap: 'wrap',
-                gap: '0.75rem',
+                gap: '0.5rem',
               }}
             >
               {game.seoKeywords.map((keyword, idx) => (
-                <span key={idx} style={{ display: 'inline-block', padding: '0.25rem 0.5rem' }}>
+                <span key={idx} style={{ display: 'inline-block' }}>
                   #{keyword}
                 </span>
               ))}

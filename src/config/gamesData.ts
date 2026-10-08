@@ -2,6 +2,7 @@ export interface GameItem {
   id: string
   title: string
   description: string
+  controls?: string
   storyDescription?: string
   seoKeywords?: string[]
   thumbnail: string
@@ -18,6 +19,7 @@ export const GAMES_DATA: GameItem[] = [
     id: '13th-floor',
     title: '13th-floor',
     description: '🎮 Engaging web-based game featuring interactive gameplay. Enjoy addictive mechanics and challenging levels.',
+    controls: '⌨️ [W][A][S][D] or [Arrow Keys] to Navigate | 🖱️ [Click] to Interact with Objects | [E] to Examine',
     storyDescription: 'An anomalous energy signature detected on floor 13 of the classified research facility. Traverse through mysterious corridors where reality bends and time loops collapse. Uncover the truth hidden between dimensions.',
     seoKeywords: ['13th floor mystery', 'dimensional anomaly game', 'classified facility simulator', 'reality bending puzzle'],
     thumbnail: '🎮',
@@ -32,6 +34,7 @@ export const GAMES_DATA: GameItem[] = [
     id: 'ninja-vs-evilcorp',
     title: 'ninja-vs-evilcorp',
     description: '🎮 Engaging web-based game featuring interactive gameplay. Enjoy addictive mechanics and challenging levels.',
+    controls: '⌨️ [W][A][S][D] to Move | [Space] to Jump/Dodge | 🖱️ [Left Click] Attack | [Shift] Stealth Mode',
     storyDescription: 'A classified operative infiltrates the darkest corners of EvilCorp headquarters. Armed with ancient ninja techniques and experimental weapons, navigate through shadowy corridors. Every shadow conceals a secret. Every corner holds a trap.',
     seoKeywords: ['ninja stealth game', 'espionage action game', 'classified operative mission', 'dark corporate infiltration'],
     thumbnail: '🎮',
@@ -46,6 +49,7 @@ export const GAMES_DATA: GameItem[] = [
     id: 'dante',
     title: 'Dante - Dimensional Puzzle',
     description: '🔮 A gripping puzzle adventure through mysterious dimensions. Navigate surreal environments, solve cryptic puzzles, and uncover the secrets of forgotten realms.',
+    controls: '🖱️ [Click/Drag] Objects to Solve Puzzles | [WASD/Arrows] to Move | [Mouse] to Explore | [R] to Reset Room',
     storyDescription: 'Dante awakens in a labyrinth of fractured realities. Each room defies the laws of physics, each puzzle whispers of a forgotten civilization. Solve dimensional anomalies to escape the ever-shifting depths of parallel existence.',
     seoKeywords: ['dimensional puzzle game', 'surreal reality simulator', 'quantum maze adventure', 'metaphysical puzzle solver'],
     thumbnail: '🔮',
@@ -60,6 +64,7 @@ export const GAMES_DATA: GameItem[] = [
     id: 'clawstrike',
     title: 'Clawstrike - Battle Arena',
     description: '⚔️ Intense combat against mysterious entities. Master intuitive controls, dodge deadly attacks, and emerge victorious in this action-packed arena battle.',
+    controls: '🖱️ [Click] to Attack | [WASD/Arrows] to Dodge | [Space] Defend | Hold [Q] for Power Attack',
     storyDescription: 'Face unknown entities in an interdimensional battle arena. Their claws crackle with exotic energy. Your reflexes are your only defense. Survive the gauntlet and discover the source of their power.',
     seoKeywords: ['interdimensional combat', 'exotic entity battle game', 'arena action simulator', 'alien creature fighter'],
     thumbnail: '⚔️',
@@ -74,6 +79,7 @@ export const GAMES_DATA: GameItem[] = [
     id: 'neon-platformer',
     title: 'Neon Platformer - Premium Edition',
     description: '🎮 Jump through neon-lit maze levels in this premium 2D platformer. Collect coins, dodge enemies, and master progressively challenging stages with addictive gameplay.',
+    controls: '⌨️ [Arrow Keys] or [A][D] to Move | [Space] or [W] to Jump | [Double Jump] for Extra Height',
     storyDescription: 'Venture into a cyberpunk maze where neon highways twist through digital canyons. Electrified platforms await. Collect the scattered data nodes before the system collapse spreads further. Your journey through the neon void begins now.',
     seoKeywords: ['cyberpunk platformer game', 'neon maze adventure', 'digital arcade challenge', 'glitch world platformer'],
     thumbnail: '🎮',
@@ -88,6 +94,7 @@ export const GAMES_DATA: GameItem[] = [
     id: 'neon-space-shooter',
     title: 'Neon Space Shooter',
     description: '💥 Battle through neon-glowing space in this arcade shooter. Navigate with arrow keys, fire with SPACE, and destroy waves of enemies in a glowing void.',
+    controls: '⌨️ [Arrow Keys] or [WASD] to Navigate | [Space] to Fire | [Q] Power Shot | Collect Items for Powerups',
     storyDescription: 'Your starfighter pierces through an anomalous neon nebula. Hostile signatures surround you—manifestations of an electromagnetic storm made conscious. Evade. Fire. Survive the cosmic convergence.',
     seoKeywords: ['space shooter game', 'neon space arcade', 'electromagnetic anomaly game', 'cosmic encounter shooter'],
     thumbnail: '💥',
@@ -102,6 +109,7 @@ export const GAMES_DATA: GameItem[] = [
     id: 'catch-game',
     title: 'Fruit Catch - Classic Arcade',
     description: '🎮 Catch falling fruits in this classic arcade game. Move your basket with precision, test your reflexes, and rack up high scores in addictive casual gameplay.',
+    controls: '🖱️ [Mouse] Move Basket | [Click] Catch | Avoid Bombs | Collect Combos for Multiplier',
     storyDescription: 'A mysterious orchard glitches in and out of reality, raining fruits through dimensional fissures. Catch what falls before it vanishes. Time your reflexes perfectly as the harvest accelerates toward cosmic convergence.',
     seoKeywords: ['fruit catch arcade', 'reflex challenge game', 'casual arcade classic', 'dimensional harvest simulator'],
     thumbnail: '🎮',

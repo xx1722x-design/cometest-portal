@@ -117,17 +117,19 @@ Game info:
 - Files: {files}
 - Content: {content_snippet}
 
-Respond with EXACTLY these 4 lines (no more, no less):
+Respond with EXACTLY these 5 lines (no more, no less):
 
 CATEGORY: [one category key: web_games/puzzle/space_universe/physics_chemistry/optics_waves/occult_abyssal/occult_alchemy/occult_anomalous/occult_cosmic/occult_forbidden/occult_sacred/occult_necromancy/occult_artifacts/occult_breach/occult_illusions]
 STORY: [3-4 sentence immersive story description about mysterious/scientific phenomena. Make it sound like an occult/science mystery experience. Write in English.]
 KEYWORDS: [keyword1, keyword2, keyword3, keyword4, keyword5] (comma-separated SEO keywords for niche search optimization - use terms like "anomaly", "dimension", "experiment", "phenomenon", etc.)
+CONTROLS: [1-2 sentence concise game controls. Example: "⌨️ [Arrow Keys] to Move | [Space] Jump | 🖱️ [Click] Interact | [R] Reset"]
 REASON: [one sentence explaining classification]
 
 Example format:
 CATEGORY: occult_cosmic
 STORY: A probe detects signals from a black hole that defy all known physics. Anomalous gravitational patterns suggest consciousness itself may bend spacetime. Journey through the cosmic unknown and decode the universe's darkest secrets.
 KEYWORDS: black hole anomaly, quantum consciousness simulator, cosmic entity detector, gravitational phenomenon game, dimensional physics explorer
+CONTROLS: ⌨️ [Arrow Keys] or [WASD] Navigate | [Space] Fire/Interact | 🖱️ [Click] Confirm | [R] Reset
 REASON: Space-themed with cosmic horror elements and scientific mystery tone."""
 
         response = client.messages.create(
@@ -142,6 +144,7 @@ REASON: Space-themed with cosmic horror elements and scientific mystery tone."""
         category_key = "web_games"
         story_description = ""
         seo_keywords = []
+        controls = ""
         reason = "Default classification"
 
         for line in lines:
@@ -153,6 +156,8 @@ REASON: Space-themed with cosmic horror elements and scientific mystery tone."""
                 keywords_str = line.replace("KEYWORDS:", "").strip()
                 # Parse comma-separated keywords
                 seo_keywords = [kw.strip() for kw in keywords_str.split(",")]
+            elif line.startswith("CONTROLS:"):
+                controls = line.replace("CONTROLS:", "").strip()
             elif line.startswith("REASON:"):
                 reason = line.replace("REASON:", "").strip()
 
@@ -165,6 +170,7 @@ REASON: Space-themed with cosmic horror elements and scientific mystery tone."""
 
         print(f"✅ AI Classification: {category_key} ({display_name})")
         print(f"   Story: {story_description[:60]}...")
+        print(f"   Controls: {controls[:50]}...")
         print(f"   Keywords: {', '.join(seo_keywords[:3])}")
         print(f"   Reason: {reason}")
 
@@ -172,6 +178,7 @@ REASON: Space-themed with cosmic horror elements and scientific mystery tone."""
             "category_key": category_key,
             "display_name": display_name,
             "description": description,
+            "controls": controls,
             "storyDescription": story_description,
             "seoKeywords": seo_keywords
         }
@@ -230,12 +237,24 @@ def classify_genre_heuristic(zip_info: dict) -> dict:
 
     seo_keywords = default_keywords.get(best_category, ["experimental game", "mystery simulator"])
 
+    # Default controls for heuristic classification
+    default_controls = {
+        "web_games": "⌨️ [Arrow Keys/WASD] Move | [Space] Jump/Action | 🖱️ [Click] Interact",
+        "puzzle": "🖱️ [Click/Drag] Solve | [R] Reset | [Esc] Menu",
+        "space_universe": "⌨️ [Arrow Keys] Navigate | 🖱️ [Click] Select | [Space] Zoom",
+        "physics_chemistry": "🖱️ [Click/Drag] Manipulate | [Space] Play/Pause | [R] Reset",
+        "occult_cosmic": "⌨️ [WASD] Explore | 🖱️ [Click] Investigate | [Space] Interact",
+    }
+
+    controls = default_controls.get(best_category, "⌨️ Keyboard/🖱️ Mouse controls available")
+
     print(f"📊 Heuristic Classification: {best_category} ({display_name})")
 
     return {
         "category_key": best_category,
         "display_name": display_name,
         "description": description,
+        "controls": controls,
         "storyDescription": story,
         "seoKeywords": seo_keywords
     }
@@ -336,9 +355,10 @@ def update_games_data(
     image_path: Optional[str],
     category: str,
     story_description: str = "",
-    seo_keywords: list = None
+    seo_keywords: list = None,
+    controls: str = ""
 ) -> bool:
-    """Add new game to gamesData.ts with SEO metadata"""
+    """Add new game to gamesData.ts with SEO metadata and controls"""
     try:
         with open(GAMES_DATA_FILE, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -366,6 +386,7 @@ def update_games_data(
 
         emoji = emoji_map.get(category, "🎮")
         image_attr = f'    image: "{image_path}",' if image_path else ""
+        controls_attr = f'    controls: "{controls}",' if controls else ""
         story_attr = f'    storyDescription: "{story_description}",' if story_description else ""
 
         # Format SEO keywords as array
@@ -381,7 +402,7 @@ def update_games_data(
     id: '{game_id}',
     title: '{game_title}',
     description: '{description}',
-{story_attr}{image_attr}{keywords_array}
+{controls_attr}{story_attr}{image_attr}{keywords_array}
     thumbnail: '{emoji}',
     category: '{category_type}',
     icon: '{emoji}',
@@ -443,12 +464,13 @@ def process_inbox_zip(zip_path: Path) -> bool:
         # Step 1: Analyze ZIP content
         zip_info = analyze_zip_content(zip_path)
 
-        # Step 2: AI Genre Classification with SEO metadata
+        # Step 2: AI Genre Classification with SEO metadata & controls
         print("\n🤖 AI Classification in progress...")
         ai_result = classify_genre_with_ai(zip_info)
         category_key = ai_result["category_key"]
         display_name = ai_result["display_name"]
         description = ai_result["description"]
+        controls = ai_result.get("controls", "")
         story_description = ai_result["storyDescription"]
         seo_keywords = ai_result["seoKeywords"]
 
@@ -480,7 +502,7 @@ def process_inbox_zip(zip_path: Path) -> bool:
         image_path = capture_screenshot_with_playwright(game_id, extract_path)
 
         # Step 6: Register in gamesData.ts with SEO metadata
-        print("\n📝 Registering game data with SEO metadata...")
+        print("\n📝 Registering game data with controls & SEO metadata...")
         if not update_games_data(
             game_id,
             zip_name,
@@ -488,7 +510,8 @@ def process_inbox_zip(zip_path: Path) -> bool:
             image_path,
             category_key,
             story_description,
-            seo_keywords
+            seo_keywords,
+            controls
         ):
             return False
 
