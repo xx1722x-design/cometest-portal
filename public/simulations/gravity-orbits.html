@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>중력의 속박 - Cometest Portal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1a3e 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(0,0,0,0.8);
+            border: 2px solid #ff1493;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(255,20,147,0.3);
+        }
+        h1 {
+            color: #ff1493;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(255,20,147,0.5);
+        }
+        .simulator {
+            background: linear-gradient(135deg, #1a0a2e 0%, #16213e 100%);
+            border: 1px solid #ff1493;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+        }
+        canvas {
+            border: 2px solid #ff1493;
+            border-radius: 8px;
+            margin: 20px 0;
+            background: radial-gradient(ellipse at center, #0a0a1a 0%, #000000 100%);
+            display: block;
+            max-width: 100%;
+        }
+        .control-group {
+            margin: 15px 0;
+        }
+        label {
+            display: inline-block;
+            margin-right: 20px;
+            color: #ff1493;
+        }
+        button {
+            background: #ff1493;
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            margin: 10px 5px;
+            transition: all 0.3s;
+        }
+        button:hover {
+            box-shadow: 0 0 15px rgba(255,20,147,0.8);
+            transform: scale(1.05);
+        }
+        p {
+            line-height: 1.6;
+            color: #ccc;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌀 중력의 속박</h1>
+        <p>우주의 검은 심연 속에서 거대한 물체들이 서로를 끌어당긴다. 중력이라는 무명의 힘이 천체들을 노예처럼 묶어놓는다.</p>
+
+        <div class="simulator">
+            <h3>암흑 천체 시뮬레이터</h3>
+            <canvas id="orbitCanvas" width="600" height="400"></canvas>
+
+            <div class="control-group">
+                <label>
+                    <input type="checkbox" id="trails" checked>
+                    궤적 표시
+                </label>
+            </div>
+
+            <div class="control-group">
+                <button onclick="startAnimation()">궤도 시뮬레이션 시작</button>
+                <button onclick="resetAnimation()">초기화</button>
+            </div>
+
+            <p style="font-size: 12px; color: #888; margin-top: 20px;">
+                중력에 묶인 천체들의 영원한 춤 | PhET Interactive Simulations
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('orbitCanvas');
+        const ctx = canvas.getContext('2d');
+        const trailsCheckbox = document.getElementById('trails');
+
+        const sun = { x: canvas.width / 2, y: canvas.height / 2, mass: 100, radius: 15, color: '#ffaa00' };
+        const planet = {
+            x: canvas.width / 2 + 120,
+            y: canvas.height / 2,
+            vx: 0,
+            vy: 2.5,
+            mass: 1,
+            radius: 8,
+            color: '#00ff88',
+            trail: []
+        };
+
+        function drawObject(obj) {
+            ctx.beginPath();
+            ctx.arc(obj.x, obj.y, obj.radius, 0, Math.PI * 2);
+            ctx.fillStyle = obj.color;
+            ctx.fill();
+            ctx.strokeStyle = obj.color;
+            ctx.lineWidth = 2;
+            ctx.stroke();
+
+            if (obj.trail && trailsCheckbox.checked) {
+                ctx.strokeStyle = obj.color;
+                ctx.globalAlpha = 0.3;
+                ctx.lineWidth = 1;
+                ctx.beginPath();
+                if (obj.trail.length > 0) {
+                    ctx.moveTo(obj.trail[0].x, obj.trail[0].y);
+                    for (let point of obj.trail) {
+                        ctx.lineTo(point.x, point.y);
+                    }
+                    ctx.stroke();
+                }
+                ctx.globalAlpha = 1;
+            }
+        }
+
+        function updateOrbit() {
+            const dx = sun.x - planet.x;
+            const dy = sun.y - planet.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const force = (6.67 * sun.mass * planet.mass) / (distance * distance * 100);
+            const ax = (force * dx / distance) / planet.mass;
+            const ay = (force * dy / distance) / planet.mass;
+
+            planet.vx += ax;
+            planet.vy += ay;
+            planet.x += planet.vx;
+            planet.y += planet.vy;
+
+            planet.trail.push({ x: planet.x, y: planet.y });
+            if (planet.trail.length > 200) planet.trail.shift();
+        }
+
+        function draw() {
+            if (!trailsCheckbox.checked) planet.trail = [];
+
+            ctx.fillStyle = 'rgba(10, 10, 26, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            updateOrbit();
+            drawObject(sun);
+            drawObject(planet);
+        }
+
+        let animationId;
+        function startAnimation() {
+            if (animationId) cancelAnimationFrame(animationId);
+            function animate() {
+                draw();
+                animationId = requestAnimationFrame(animate);
+            }
+            animate();
+        }
+
+        function resetAnimation() {
+            cancelAnimationFrame(animationId);
+            planet.x = canvas.width / 2 + 120;
+            planet.y = canvas.height / 2;
+            planet.vx = 0;
+            planet.vy = 2.5;
+            planet.trail = [];
+            ctx.fillStyle = 'rgba(10, 10, 26, 0.5)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            drawObject(sun);
+            drawObject(planet);
+        }
+
+        resetAnimation();
+    </script>
+</body>
+</html>

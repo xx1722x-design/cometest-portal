@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>파동의 속삭임 - Cometest Portal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a0033 0%, #330066 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(0,0,0,0.8);
+            border: 2px solid #9933ff;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 0 30px rgba(153,51,255,0.3);
+        }
+        h1 {
+            color: #9933ff;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(153,51,255,0.5);
+        }
+        .simulator {
+            background: radial-gradient(ellipse at center, #2a0a4e 0%, #1a0033 100%);
+            border: 1px solid #9933ff;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+        }
+        canvas {
+            border: 2px solid #9933ff;
+            border-radius: 8px;
+            margin: 20px 0;
+            display: block;
+            max-width: 100%;
+            background: #0a0a1a;
+        }
+        p {
+            line-height: 1.6;
+            color: #ccc;
+        }
+        .info {
+            font-size: 12px;
+            color: #888;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌊 파동의 속삭임</h1>
+        <p>현실의 경계에서 울려 퍼지는 신비한 진동. 두 파동이 만날 때 일어나는 공명과 간섭의 마법적 현상을 목격하라.</p>
+
+        <div class="simulator">
+            <h3>간섭 체험 중심</h3>
+            <canvas id="waveCanvas" width="700" height="300"></canvas>
+
+            <p>파동이 서로 만날 때: 보강간섭(증폭)과 상쇄간섭(소멸)의 신비</p>
+            <p class="info">
+                파동의 중첩 원리 | PhET Interactive Simulations | Cometest Portal Archive
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('waveCanvas');
+        const ctx = canvas.getContext('2d');
+
+        let time = 0;
+
+        function drawWave() {
+            ctx.fillStyle = 'rgba(10, 10, 26, 0.1)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            const centerY = canvas.height / 2;
+            const wavelength = 60;
+            const amplitude = 40;
+            const speed = 0.1;
+
+            // 첫 번째 파동
+            ctx.strokeStyle = '#9933ff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let x = 0; x < canvas.width; x++) {
+                const y = centerY + amplitude * Math.sin((x - time * speed) / wavelength * Math.PI * 2);
+                if (x === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // 두 번째 파동 (다른 방향)
+            ctx.strokeStyle = '#ff33ff';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            for (let x = 0; x < canvas.width; x++) {
+                const y = centerY + amplitude * Math.sin((canvas.width - x - time * speed) / wavelength * Math.PI * 2);
+                if (x === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            // 간섭 결과
+            ctx.strokeStyle = '#00ffff';
+            ctx.lineWidth = 3;
+            ctx.globalAlpha = 0.7;
+            ctx.beginPath();
+            for (let x = 0; x < canvas.width; x++) {
+                const y1 = amplitude * Math.sin((x - time * speed) / wavelength * Math.PI * 2);
+                const y2 = amplitude * Math.sin((canvas.width - x - time * speed) / wavelength * Math.PI * 2);
+                const y = centerY + (y1 + y2) / 2;
+                if (x === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+            ctx.globalAlpha = 1;
+
+            time++;
+        }
+
+        function animate() {
+            drawWave();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+    </script>
+</body>
+</html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>시각의 왜곡 - Cometest Portal</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            color: #fff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+        .container {
+            max-width: 900px;
+            width: 100%;
+            background: rgba(0,0,0,0.7);
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 0 20px rgba(0,255,136,0.3);
+        }
+        h1 {
+            color: #00ff88;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(0,255,136,0.5);
+        }
+        .simulator {
+            background: linear-gradient(135deg, #0f3460 0%, #1a1a2e 100%);
+            border: 1px solid #00ff88;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .control-group {
+            margin: 20px 0;
+        }
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #00ff88;
+            font-weight: bold;
+        }
+        input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: linear-gradient(to right, #ff0000, #00ff00, #0000ff);
+            outline: none;
+            -webkit-appearance: none;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #00ff88;
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0,255,136,0.8);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #00ff88;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(0,255,136,0.8);
+        }
+        .color-display {
+            width: 200px;
+            height: 200px;
+            border-radius: 10px;
+            margin: 20px auto;
+            border: 2px solid #00ff88;
+            box-shadow: 0 0 20px rgba(0,255,136,0.5);
+        }
+        p {
+            line-height: 1.6;
+            color: #ccc;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🌈 시각의 왜곡</h1>
+        <p>색채의 경계를 초월하는 신비로운 광선의 장난. RGB 파장을 조종하며 인간의 시각을 왜곡시켜라.</p>
+
+        <div class="simulator">
+            <h3>색채 마법사의 체험실</h3>
+
+            <div class="control-group">
+                <label>Red (적색 파장): <span id="redValue">128</span></label>
+                <input type="range" id="redSlider" min="0" max="255" value="128">
+            </div>
+
+            <div class="control-group">
+                <label>Green (녹색 파장): <span id="greenValue">128</span></label>
+                <input type="range" id="greenSlider" min="0" max="255" value="128">
+            </div>
+
+            <div class="control-group">
+                <label>Blue (청색 파장): <span id="blueValue">128</span></label>
+                <input type="range" id="blueSlider" min="0" max="255" value="128">
+            </div>
+
+            <div class="color-display" id="colorDisplay"></div>
+
+            <p id="colorInfo">RGB(128, 128, 128) - 회색의 중립</p>
+            <p style="font-size: 12px; color: #888; margin-top: 20px;">
+                PhET Interactive Simulations | 오컬트 테마 변환 | Cometest Portal Archive
+            </p>
+        </div>
+    </div>
+
+    <script>
+        const redSlider = document.getElementById('redSlider');
+        const greenSlider = document.getElementById('greenSlider');
+        const blueSlider = document.getElementById('blueSlider');
+        const colorDisplay = document.getElementById('colorDisplay');
+        const redValue = document.getElementById('redValue');
+        const greenValue = document.getElementById('greenValue');
+        const blueValue = document.getElementById('blueValue');
+        const colorInfo = document.getElementById('colorInfo');
+
+        function updateColor() {
+            const r = parseInt(redSlider.value);
+            const g = parseInt(greenSlider.value);
+            const b = parseInt(blueSlider.value);
+
+            colorDisplay.style.background = `rgb(${r}, ${g}, ${b})`;
+            redValue.textContent = r;
+            greenValue.textContent = g;
+            blueValue.textContent = b;
+            colorInfo.textContent = `RGB(${r}, ${g}, ${b}) - 파장의 조합`;
+        }
+
+        redSlider.addEventListener('input', updateColor);
+        greenSlider.addEventListener('input', updateColor);
+        blueSlider.addEventListener('input', updateColor);
+
+        updateColor();
+    </script>
+</body>
+</html>

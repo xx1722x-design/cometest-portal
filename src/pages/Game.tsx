@@ -151,6 +151,23 @@ export function Game() {
       case 'neon-space-shooter':
         return <NeonSpaceShooter />
       default:
+        // PhET Interactive Simulations
+        if (gameId?.startsWith('phet-')) {
+          const simName = gameId.replace('phet-', '')
+          return (
+            <iframe
+              src={`/simulations/${simName}.html`}
+              style={{
+                width: '100%',
+                height: '100%',
+                border: 'none',
+                borderRadius: '0',
+              }}
+              sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-pointer-lock"
+              title={gameId}
+            />
+          )
+        }
         // Auto-uploaded games from /public/labs/
         return (
           <iframe
