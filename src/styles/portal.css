@@ -1298,3 +1298,14 @@ html, body { background-color: var(--page-bg); }
   animation: static-flicker 0.1s infinite;
 }
 
+
+
+/* ---------- Hide Scrollbar for Tab Rows ---------- */
+.hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}

@@ -81,7 +81,11 @@ export function Index() {
             maxWidth: '1600px',
             margin: '0 auto',
             paddingBottom: '12px',
+            // Hide scrollbar for all browsers
+            scrollbarWidth: 'none' as any,
+            msOverflowStyle: 'none' as any,
           }}
+          className="hide-scrollbar"
         >
           {PRIMARY_CATEGORIES.map(cat => (
             <button
@@ -140,10 +144,14 @@ export function Index() {
             scrollBehavior: 'smooth',
             maxWidth: '1600px',
             margin: '0 auto',
-            paddingBottom: '0',
-            paddingTop: '8px',
+            paddingBottom: '8px',
+            paddingTop: '12px',
             borderTop: '1px solid rgba(100, 181, 246, 0.2)',
+            // Hide scrollbar for all browsers
+            scrollbarWidth: 'none' as any,
+            msOverflowStyle: 'none' as any,
           }}
+          className="hide-scrollbar"
         >
           {SECONDARY_CATEGORIES.map(cat => (
             <button
