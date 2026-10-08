@@ -205,6 +205,7 @@ export function Simulation() {
           zIndex: 100,
           padding: '0.75rem 1.5rem',
           backgroundColor: 'rgba(255, 255, 255, 0.9)',
+          color: '#000000',
           border: 'none',
           borderRadius: '8px',
           cursor: 'pointer',
@@ -215,11 +216,13 @@ export function Simulation() {
         }}
         onMouseEnter={(e) => {
           e.currentTarget.style.backgroundColor = '#ffffff'
+          e.currentTarget.style.color = '#000000'
           e.currentTarget.style.transform = 'translateY(-2px)'
           e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.4)'
         }}
         onMouseLeave={(e) => {
           e.currentTarget.style.backgroundColor = 'rgba(255, 255, 255, 0.9)'
+          e.currentTarget.style.color = '#000000'
           e.currentTarget.style.transform = 'translateY(0)'
           e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.3)'
         }}
