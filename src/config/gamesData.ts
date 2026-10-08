@@ -19,6 +19,42 @@ export const GAMES_DATA: GameItem[] = [
   // ==================== PhET Interactive Simulations ====================
   // CC BY 4.0 License - University of Colorado Boulder
 
+        {
+    id: 'quantum-measurement_ko',
+    title: '심연의 양자 심지: 혼돈의 스펙트럼',
+    description: '양자 세계의 불확정 마법이 심연을 가로지른다',
+    occultTheme: "anomalous-physics",    image: "/thumbnails/quantum-measurement_ko.png",
+    thumbnail: '⚡',
+    category: 'simulation',
+    icon: '⚡',
+    path: '/game/phet-quantum-measurement_ko',
+    tags: ['phet', 'simulation', 'occult_anomalous'],
+    play_count: 0,
+  },
+  {
+    id: 'plinko-probability_sample',
+    title: 'PhET 시뮬레이션',
+    description: '',
+    occultTheme: "cosmic-horror",    image: "/thumbnails/plinko-probability_sample.png",
+    thumbnail: '🌀',
+    category: 'simulation',
+    icon: '🌀',
+    path: '/game/phet-plinko-probability_sample',
+    tags: ['phet', 'simulation', 'occult_cosmic'],
+    play_count: 0,
+  },
+  {
+    id: 'plinko-probability_ko',
+    title: 'PhET 시뮬레이션',
+    description: '',
+    occultTheme: "cosmic-horror",    image: "/thumbnails/plinko-probability_ko.png",
+    thumbnail: '🌀',
+    category: 'simulation',
+    icon: '🌀',
+    path: '/game/phet-plinko-probability_ko',
+    tags: ['phet', 'simulation', 'occult_cosmic'],
+    play_count: 0,
+  },
   {
     id: 'solar-system',
     title: 'Solar System Simulator',

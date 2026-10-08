@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 """
-AI-Powered Automatic Genre Classification & Upload Factory
-Inbox → AI Genre Detection → Auto-categorization → Auto-registration → Vercel deployment
+AI-Powered PhET HTML Simulation Auto-Curation & Occult Theme Factory
+Inbox → HTML Metadata Extraction → AI Occult Transformation → Auto-categorization → Auto-registration → Vercel deployment
 """
 
 import os
 import json
-import zipfile
 import shutil
 import time
 from pathlib import Path
@@ -16,6 +15,17 @@ import re
 from typing import Tuple, Optional
 from dotenv import load_dotenv
 
+try:
+    from bs4 import BeautifulSoup
+    HAS_BEAUTIFULSOUP = True
+except ImportError:
+    HAS_BEAUTIFULSOUP = False
+
+# UTF-8 Support for Windows Console
+if os.sys.platform == 'win32':
+    import io
+    os.sys.stdout = io.TextIOWrapper(os.sys.stdout.buffer, encoding='utf-8')
+
 # Load environment variables from .env file
 load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env")
 
@@ -23,10 +33,8 @@ load_dotenv(dotenv_path=Path(__file__).parent.parent / ".env")
 INBOX_FOLDER = Path(r"D:\Cometest_Dropzone\Inbox")
 DROPZONE_BASE = Path(r"D:\Cometest_Dropzone")
 PROJECT_ROOT = Path(r"D:\cometest_portal")
-LABS_DIR = PROJECT_ROOT / "public" / "labs"
 THUMBNAILS_DIR = PROJECT_ROOT / "public" / "thumbnails"
 GAMES_DATA_FILE = PROJECT_ROOT / "src" / "config" / "gamesData.ts"
-SIMULATIONS_DATA_FILE = PROJECT_ROOT / "src" / "config" / "simulationsData.ts"
 COMPLETED_DIR = DROPZONE_BASE / "Completed"
 
 # Category to folder path mapping
@@ -67,37 +75,47 @@ CATEGORY_DISPLAY_NAMES = {
     "occult_illusions": "Illusions & Hallucinations",
 }
 
-def analyze_zip_content(zip_path: Path) -> dict:
-    """Extract and analyze ZIP content to determine genre"""
+def analyze_html_content(html_path: Path) -> dict:
+    """Extract and analyze HTML file metadata for PhET simulation"""
     try:
-        content_preview = ""
-        file_list = []
+        with open(html_path, 'r', encoding='utf-8', errors='ignore') as f:
+            content = f.read()
 
-        with zipfile.ZipFile(zip_path, 'r') as zf:
-            file_list = zf.namelist()
+        title = "PhET Simulation"
+        description = ""
 
-            # Read HTML files for analysis
-            for fname in file_list:
-                if fname.lower().endswith(('.html', '.htm')):
-                    try:
-                        content_preview += zf.read(fname).decode('utf-8', errors='ignore')[:2000]
-                    except:
-                        pass
+        # Extract title from <title> tag
+        title_match = re.search(r'<title>([^<]+)</title>', content, re.IGNORECASE)
+        if title_match:
+            title = title_match.group(1).strip()
+
+        # Extract description from meta tags
+        og_desc_match = re.search(r'<meta\s+(?:name|property)=["\'](?:description|og:description)["\']\s+content=["\']([^"\']+)["\']', content, re.IGNORECASE)
+        if og_desc_match:
+            description = og_desc_match.group(1).strip()
+
+        # Extract h1 or first meaningful text
+        if not description:
+            h1_match = re.search(r'<h1[^>]*>([^<]+)</h1>', content, re.IGNORECASE)
+            if h1_match:
+                description = h1_match.group(1).strip()
 
         return {
-            "filename": zip_path.stem,
-            "file_list": file_list,
-            "content_preview": content_preview,
-            "file_count": len(file_list)
+            "filename": html_path.stem,
+            "filepath": str(html_path),
+            "title": title,
+            "description": description,
+            "content_preview": content[:3000],
+            "file_size": html_path.stat().st_size
         }
     except Exception as e:
-        print(f"⚠ Error analyzing ZIP: {e}")
-        return {"filename": zip_path.stem, "error": str(e)}
+        print(f"⚠ Error analyzing HTML: {e}")
+        return {"filename": html_path.stem, "error": str(e)}
 
-def classify_genre_with_ai(zip_info: dict) -> dict:
+def classify_phet_with_ai(html_info: dict) -> dict:
     """
-    Use Groq AI to classify game genre and generate SEO metadata
-    Returns: {category_key, display_name, description, storyDescription, seoKeywords}
+    Use Groq AI to analyze PhET simulation and generate occult-themed metadata
+    Returns: {category_key, display_name, occult_title, occult_description, storyDescription, seoKeywords}
     """
     try:
         from groq import Groq
@@ -105,56 +123,66 @@ def classify_genre_with_ai(zip_info: dict) -> dict:
         api_key = os.getenv("GROQ_API_KEY")
         if not api_key:
             print("⚠ GROQ_API_KEY not set, using default classification")
-            return classify_genre_heuristic(zip_info)
+            return classify_phet_heuristic(html_info)
 
         client = Groq(api_key=api_key)
 
-        # Build analysis prompt
-        filename = zip_info.get("filename", "unknown")
-        files = ", ".join(zip_info.get("file_list", [])[:10])
-        content_snippet = zip_info.get("content_preview", "")[:500]
+        # Build analysis prompt for PhET HTML
+        filename = html_info.get("filename", "unknown")
+        original_title = html_info.get("title", "PhET Simulation")
+        original_desc = html_info.get("description", "")
+        content_snippet = html_info.get("content_preview", "")[:800]
 
-        prompt = f"""Analyze this game/simulation and classify it. You are curating content for a mysterious experimental portal blending science and occult mysteries.
+        prompt = f"""You are an AI curator transforming educational PhET simulations into an occult/dark science experimental portal. Your task is to analyze the original PhET content and create an ENTIRELY NEW occult/mysterious persona for it.
 
-Game info:
+ORIGINAL PhET INFO:
 - Filename: {filename}
-- Files: {files}
-- Content: {content_snippet}
+- Original Title: {original_title}
+- Original Description: {original_desc}
 
-Respond with EXACTLY these 6 lines (no more, no less):
+Analysis: Infer the scientific topic from the filename and content. Examples:
+  - "plinko-probability" → probability/statistics → CATEGORY: occult_cosmic
+  - "quantum-measurement" → quantum physics → CATEGORY: occult_anomalous
+  - "gravity-orbits" → orbital mechanics → CATEGORY: occult_cosmic
+  - "color-vision" → optics/light → CATEGORY: occult_alchemy
 
-CATEGORY: [one category key: web_games/puzzle/space_universe/physics_chemistry/optics_waves/occult_abyssal/occult_alchemy/occult_anomalous/occult_cosmic/occult_forbidden/occult_sacred/occult_necromancy/occult_artifacts/occult_breach/occult_illusions]
-OCCULT_THEME: [if CATEGORY starts with 'occult_', use the theme name like 'abyssal-frequencies'/'alchemy-dark-magic'/'anomalous-physics'/'breach-anomalies'/'cosmic-horror'/'forbidden-specimens'/'illusions-hallucinations'/'necromancy-spirits'/'sacred-geometry'/'unidentified-artifacts', otherwise use 'none']
-STORY: [3-4 sentence immersive story description about mysterious/scientific phenomena. Make it sound like an occult/science mystery experience. Write in English.]
-KEYWORDS: [keyword1, keyword2, keyword3, keyword4, keyword5] (comma-separated SEO keywords for niche search optimization - use terms like "anomaly", "dimension", "experiment", "phenomenon", etc.)
-CONTROLS: [1-2 sentence concise game controls. Example: "⌨️ [Arrow Keys] to Move | [Space] Jump | 🖱️ [Click] Interact | [R] Reset"]
-REASON: [one sentence explaining classification]
+RESPOND WITH EXACTLY 7 LINES (no more, no less):
 
-Example format:
+CATEGORY: [CHOOSE ONE: occult_abyssal/occult_alchemy/occult_anomalous/occult_cosmic/occult_forbidden/occult_sacred/occult_necromancy/occult_artifacts/occult_breach/occult_illusions - based on scientific topic]
+OCCULT_THEME: [theme name matching category: abyssal-frequencies/alchemy-dark-magic/anomalous-physics/breach-anomalies/cosmic-horror/forbidden-specimens/illusions-hallucinations/necromancy-spirits/sacred-geometry/unidentified-artifacts]
+OCCULT_TITLE: [Create an ENTIRELY NEW 4-7 word occult/mysterious Korean title like "심연의 측정기" or "[기밀] 우주의 속박" - Must be Korean with dark/mystical tone]
+OCCULT_DESCRIPTION: [Create a 2-3 sentence occult reimagining of the PhET content - dark, mysterious, scientific, immersive - Example: "마리아나 해구 바닥에서 수집된 미지의 구체를 떨어뜨려 확률의 경계에서 우주 운명을 측정한다."]
+KEYWORDS: [keyword1, keyword2, keyword3, keyword4, keyword5] (comma-separated keywords - use Korean and English mix, terms like "비정상 현상", "차원", "실험실", "anomaly", "dimension", etc.)
+STORY: [2-3 sentence immersive story description in Korean - situate the simulation in occult context. Example: "금지된 실험실에서 양자 측정 도구로 차원의 경계를 탐사한다. 각 측정마다 다른 현실이 펼쳐진다."]
+REASON: [one sentence explaining why this mapping makes sense]
+
+Example Perfect Response:
 CATEGORY: occult_cosmic
 OCCULT_THEME: cosmic-horror
-STORY: A probe detects signals from a black hole that defy all known physics. Anomalous gravitational patterns suggest consciousness itself may bend spacetime. Journey through the cosmic unknown and decode the universe's darkest secrets.
-KEYWORDS: black hole anomaly, quantum consciousness simulator, cosmic entity detector, gravitational phenomenon game, dimensional physics explorer
-CONTROLS: ⌨️ [Arrow Keys] or [WASD] Navigate | [Space] Fire/Interact | 🖱️ [Click] Confirm | [R] Reset
-REASON: Space-themed with cosmic horror elements and scientific mystery tone."""
+OCCULT_TITLE: 🌀 우주의 감옥
+OCCULT_DESCRIPTION: 암흑 천체들이 보이지 않는 힘으로 서로를 묶어놓는다. 중력의 마법 속에서 영원한 궤도에 갇힌 세계를 경험하라.
+KEYWORDS: 중력 마법, 우주 감옥, 천체 운동, 차원 물리학, cosmic-horror-simulator
+STORY: 밤하늘을 지배하는 검은 힘을 경험하는 금지된 천문 실험. 별들은 중력의 속박에서 벗어날 수 없다.
+REASON: Orbital mechanics simulation maps to cosmic horror and gravitational mysteries in occult classification."""
 
         response = client.chat.completions.create(
             model="openai/gpt-oss-20b",
-            max_tokens=500,
+            max_tokens=600,
             messages=[{"role": "user", "content": prompt}]
         )
 
         response_text = response.choices[0].message.content
 
-        # Rate limit protection: prevent 429 Too Many Requests errors during bulk uploads
+        # Rate limit protection
         time.sleep(3)
         lines = [line.strip() for line in response_text.strip().split('\n') if line.strip()]
 
-        category_key = "web_games"
-        occult_theme = "none"
+        category_key = "occult_cosmic"
+        occult_theme = "cosmic-horror"
+        occult_title = "PhET 시뮬레이션"
+        occult_description = ""
         story_description = ""
         seo_keywords = []
-        controls = ""
         reason = "Default classification"
 
         for line in lines:
@@ -162,29 +190,29 @@ REASON: Space-themed with cosmic horror elements and scientific mystery tone."""
                 category_key = line.replace("CATEGORY:", "").strip()
             elif line.startswith("OCCULT_THEME:"):
                 occult_theme = line.replace("OCCULT_THEME:", "").strip()
+            elif line.startswith("OCCULT_TITLE:"):
+                occult_title = line.replace("OCCULT_TITLE:", "").strip()
+            elif line.startswith("OCCULT_DESCRIPTION:"):
+                occult_description = line.replace("OCCULT_DESCRIPTION:", "").strip()
             elif line.startswith("STORY:"):
                 story_description = line.replace("STORY:", "").strip()
             elif line.startswith("KEYWORDS:"):
                 keywords_str = line.replace("KEYWORDS:", "").strip()
-                # Parse comma-separated keywords
-                seo_keywords = [kw.strip() for kw in keywords_str.split(",")]
-            elif line.startswith("CONTROLS:"):
-                controls = line.replace("CONTROLS:", "").strip()
+                seo_keywords = [kw.strip() for kw in keywords_str.split(",") if kw.strip()]
             elif line.startswith("REASON:"):
                 reason = line.replace("REASON:", "").strip()
 
         # Validate category
         if category_key not in CATEGORY_FOLDER_MAPPING:
-            category_key = "web_games"
+            category_key = "occult_cosmic"
 
-        display_name = CATEGORY_DISPLAY_NAMES.get(category_key, "Web Games")
-        description = generate_game_description(filename, category_key)
+        display_name = CATEGORY_DISPLAY_NAMES.get(category_key, "Cosmic Horror")
 
-        print(f"✅ AI Classification: {category_key} ({display_name})")
-        if occult_theme != "none":
-            print(f"   Occult Theme: {occult_theme}")
+        print(f"✅ AI Occult Transformation: {category_key} ({display_name})")
+        print(f"   Occult Title: {occult_title}")
+        print(f"   Occult Theme: {occult_theme}")
+        print(f"   Description: {occult_description[:60]}...")
         print(f"   Story: {story_description[:60]}...")
-        print(f"   Controls: {controls[:50]}...")
         print(f"   Keywords: {', '.join(seo_keywords[:3])}")
         print(f"   Reason: {reason}")
 
@@ -192,78 +220,99 @@ REASON: Space-themed with cosmic horror elements and scientific mystery tone."""
             "category_key": category_key,
             "occult_theme": occult_theme,
             "display_name": display_name,
-            "description": description,
-            "controls": controls,
+            "occult_title": occult_title,
+            "occult_description": occult_description,
             "storyDescription": story_description,
             "seoKeywords": seo_keywords
         }
 
     except ImportError:
         print("⚠ Groq library not installed, using heuristic classification")
-        return classify_genre_heuristic(zip_info)
+        return classify_phet_heuristic(html_info)
     except Exception as e:
         print(f"⚠ AI classification error: {e}, using heuristic")
-        return classify_genre_heuristic(zip_info)
+        return classify_phet_heuristic(html_info)
 
-def classify_genre_heuristic(zip_info: dict) -> dict:
-    """Fallback heuristic genre classification with SEO data"""
-    filename = zip_info.get("filename", "").lower()
-    content = zip_info.get("content_preview", "").lower()
+def classify_phet_heuristic(html_info: dict) -> dict:
+    """Fallback heuristic PhET classification with occult theme"""
+    filename = html_info.get("filename", "").lower()
+    title = html_info.get("title", "").lower()
+    content = html_info.get("content_preview", "").lower()
 
+    # Map PhET simulations to occult categories based on keywords
     keywords_map = {
-        "web_games": ["game", "arcade", "phaser", "player", "score", "level"],
-        "puzzle": ["puzzle", "match", "tetris", "sliding"],
-        "space_universe": ["space", "planet", "orbit", "solar", "moon", "astronomy"],
-        "physics_chemistry": ["physics", "chemistry", "atom", "molecule", "reaction", "matter"],
-        "optics_waves": ["light", "refraction", "optics", "laser", "wave"],
-        "occult_cosmic": ["cosmic", "horror", "universe", "strange", "alien"],
-        "occult_alchemy": ["alchemy", "potion", "magic", "spell"],
+        "occult_cosmic": ["gravity", "orbit", "planet", "moon", "space", "solar", "galaxy"],
+        "occult_alchemy": ["color", "light", "refraction", "optics", "laser", "prism"],
+        "occult_anomalous": ["quantum", "atom", "particle", "wave", "photon", "electron"],
+        "occult_forbidden": ["genetic", "dna", "molecule", "biology", "cell"],
+        "occult_breach": ["energy", "force", "physics", "acceleration", "momentum"],
+        "occult_illusions": ["illusion", "perception", "vision", "mirror", "lens"],
+        "occult_sacred": ["geometry", "symmetry", "pattern", "structure", "proportion"],
+        "occult_necromancy": ["decay", "radioactive", "nuclear", "antimatter"],
+        "occult_abyssal": ["pressure", "depth", "ocean", "underwater", "abyss"],
     }
 
-    best_category = "web_games"
+    best_category = "occult_cosmic"
     best_score = 0
 
+    full_text = filename + " " + title + " " + content
     for category, kws in keywords_map.items():
-        score = sum(1 for kw in kws if kw in filename or kw in content)
+        score = sum(1 for kw in kws if kw in full_text)
         if score > best_score:
             best_score = score
             best_category = category
 
-    display_name = CATEGORY_DISPLAY_NAMES.get(best_category, "Web Games")
-    description = generate_game_description(filename, best_category)
+    display_name = CATEGORY_DISPLAY_NAMES.get(best_category, "Cosmic Horror")
 
-    # Generate default SEO data for heuristic classification
+    # Generate occult title from filename
+    occult_title = filename.replace("-", " ").title()
+    if not occult_title.startswith("🌀") and not occult_title.startswith("🌈"):
+        emoji_map = {
+            "occult_cosmic": "🌀",
+            "occult_alchemy": "🌈",
+            "occult_anomalous": "⚡",
+            "occult_forbidden": "🧬",
+            "occult_breach": "🌌",
+            "occult_illusions": "🎭",
+            "occult_sacred": "✨",
+            "occult_necromancy": "💀",
+            "occult_abyssal": "🔮",
+        }
+        emoji = emoji_map.get(best_category, "🌀")
+        occult_title = f"{emoji} {occult_title}"
+
+    # Default occult descriptions
     default_stories = {
-        "web_games": "An experimental interactive environment defying conventional game design. Immerse yourself in mechanics that blur the line between simulation and reality.",
-        "puzzle": "Solve cryptic patterns that hint at deeper cosmic truths. Each puzzle piece reveals an anomaly in the fabric of logic itself.",
-        "space_universe": "Cosmic phenomena observable only through interdimensional measurement devices. Explore the void and its impossible geometries.",
-        "physics_chemistry": "Matter behaves unexpectedly in this controlled laboratory. Witness reactions that shouldn't exist under known physical laws.",
-        "occult_cosmic": "An encounter with forces beyond our dimensional understanding. The universe whispers secrets through this interactive gateway.",
+        "occult_cosmic": "우주의 미지의 힘이 천체들을 지배한다. 중력이라는 무명의 속박 속에서 영원한 궤도를 탐사하라.",
+        "occult_alchemy": "빛의 삼원색을 조종하며 시각의 경계를 초월한다. 파장을 뒤틀 때마다 새로운 현실이 펼쳐진다.",
+        "occult_anomalous": "물질의 기본 단위들이 보이지 않는 법칙에 지배된다. 양자의 미스터리를 해제하는 금지된 실험.",
+        "occult_forbidden": "생명의 비밀 암호가 숨겨진 분자들을 관찰하라. 창조주의 의도를 능가하는 유전적 변이.",
+        "occult_breach": "현실을 지배하는 보이지 않는 에너지를 감지하라. 차원의 경계에서 일어나는 이상 현상.",
+        "occult_illusions": "인간의 지각은 하나의 환상에 불과하다. 의식의 한계를 시험하는 심리 실험실.",
+        "occult_sacred": "우주의 기하학적 질서가 모든 것을 지배한다. 신성한 비례 속에 숨겨진 진실을 발견하라.",
+        "occult_necromancy": "물질은 무한한 변형의 순환 속에서 죽음을 맞이한다. 소멸과 재탄생의 무한 고리.",
+        "occult_abyssal": "심연의 압력 속에서만 진실이 드러난다. 물의 심연에서 수집된 비밀 데이터.",
     }
 
-    story = default_stories.get(best_category, f"A mysterious {best_category} experience awaits your discovery.")
+    story = default_stories.get(best_category, "PhET 시뮬레이션의 신비를 경험하라.")
+    occult_description = f"금지된 {display_name} 실험실에서의 이상 현상 관찰."
+
+    # Default keywords
     default_keywords = {
-        "web_games": ["interactive game simulation", "reality-bending mechanics", "experimental gameplay"],
-        "puzzle": ["cosmic puzzle solver", "dimensional logic game", "reality anomaly puzzle"],
-        "space_universe": ["cosmic phenomena explorer", "interdimensional space simulator", "void explorer game"],
-        "physics_chemistry": ["anomalous physics lab", "impossible reaction simulator", "experimental matter game"],
-        "occult_cosmic": ["cosmic horror experience", "dimensional entity encounter", "universe mystery game"],
+        "occult_cosmic": ["우주 운명", "중력 마법", "천체 감옥", "차원 물리학", "cosmic-horror"],
+        "occult_alchemy": ["색채 마법", "광선 조종", "파동 변형", "빛의 속성", "light-alchemy"],
+        "occult_anomalous": ["양자 미스터리", "입자 운동", "파동 현상", "이상 물리", "quantum-anomaly"],
+        "occult_forbidden": ["유전자 비밀", "생명 암호", "분자 조작", "금지 생물학", "genetic-forbidden"],
+        "occult_breach": ["에너지 현상", "차원 이상", "힘의 속박", "현실 균열", "energy-breach"],
+        "occult_illusions": ["지각 환상", "의식 실험", "심리 환상", "현실 경계", "perception-illusion"],
+        "occult_sacred": ["신성 기하", "우주 질서", "비례의 진실", "기하 패턴", "sacred-geometry"],
+        "occult_necromancy": ["물질 순환", "소멸 과정", "재탄생", "무한 고리", "matter-cycles"],
+        "occult_abyssal": ["심연 압력", "깊은 진실", "물의 비밀", "심해 데이터", "abyssal-pressure"],
     }
 
-    seo_keywords = default_keywords.get(best_category, ["experimental game", "mystery simulator"])
+    seo_keywords = default_keywords.get(best_category, ["phet simulation", "occult mystery"])
 
-    # Default controls for heuristic classification
-    default_controls = {
-        "web_games": "⌨️ [Arrow Keys/WASD] Move | [Space] Jump/Action | 🖱️ [Click] Interact",
-        "puzzle": "🖱️ [Click/Drag] Solve | [R] Reset | [Esc] Menu",
-        "space_universe": "⌨️ [Arrow Keys] Navigate | 🖱️ [Click] Select | [Space] Zoom",
-        "physics_chemistry": "🖱️ [Click/Drag] Manipulate | [Space] Play/Pause | [R] Reset",
-        "occult_cosmic": "⌨️ [WASD] Explore | 🖱️ [Click] Investigate | [Space] Interact",
-    }
-
-    controls = default_controls.get(best_category, "⌨️ Keyboard/🖱️ Mouse controls available")
-
-    # Map category to occult theme if applicable
+    # Map to occult theme
     occult_theme_map = {
         "occult_abyssal": "abyssal-frequencies",
         "occult_alchemy": "alchemy-dark-magic",
@@ -276,16 +325,17 @@ def classify_genre_heuristic(zip_info: dict) -> dict:
         "occult_breach": "breach-anomalies",
         "occult_illusions": "illusions-hallucinations",
     }
-    occult_theme = occult_theme_map.get(best_category, "none")
+    occult_theme = occult_theme_map.get(best_category, "cosmic-horror")
 
-    print(f"📊 Heuristic Classification: {best_category} ({display_name})")
+    print(f"📊 Heuristic PhET Classification: {best_category} ({display_name})")
+    print(f"   Occult Title: {occult_title}")
 
     return {
         "category_key": best_category,
         "occult_theme": occult_theme,
         "display_name": display_name,
-        "description": description,
-        "controls": controls,
+        "occult_title": occult_title,
+        "occult_description": occult_description,
         "storyDescription": story,
         "seoKeywords": seo_keywords
     }
@@ -312,8 +362,8 @@ def generate_game_description(filename: str, category: str) -> str:
 
     return descriptions.get(category, f"🎮 Interactive {filename} game. Engage with dynamic gameplay mechanics.")
 
-def move_to_category_folder(zip_path: Path, category_key: str) -> bool:
-    """Move ZIP file to appropriate category folder"""
+def move_to_category_folder(html_path: Path, category_key: str) -> bool:
+    """Move HTML file to appropriate category folder in Dropzone"""
     try:
         folder_path = CATEGORY_FOLDER_MAPPING.get(category_key)
         if not folder_path:
@@ -323,44 +373,48 @@ def move_to_category_folder(zip_path: Path, category_key: str) -> bool:
         target_dir = DROPZONE_BASE / folder_path
         target_dir.mkdir(parents=True, exist_ok=True)
 
-        target_path = target_dir / zip_path.name
-        shutil.move(str(zip_path), str(target_path))
+        target_path = target_dir / html_path.name
+        shutil.copy2(str(html_path), str(target_path))
 
-        print(f"✓ Moved to: {target_dir}")
+        print(f"✓ Copied to: {target_dir}")
         return True
     except Exception as e:
-        print(f"✗ Failed to move ZIP: {e}")
+        print(f"✗ Failed to copy HTML: {e}")
         return False
 
-def extract_zip(zip_path: Path, extract_to: Path) -> bool:
-    """Extract ZIP file"""
+def copy_html_to_simulations(html_path: Path) -> bool:
+    """Copy HTML file to public/simulations/ folder"""
     try:
-        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-            zip_ref.extractall(extract_to)
-        print(f"✓ Extraction complete: {extract_to}")
+        simulations_dir = PROJECT_ROOT / "public" / "simulations"
+        simulations_dir.mkdir(parents=True, exist_ok=True)
+
+        target_path = simulations_dir / html_path.name
+        shutil.copy2(str(html_path), str(target_path))
+        print(f"✓ Copied to simulations: {target_path}")
         return True
     except Exception as e:
-        print(f"✗ Extraction failed: {e}")
+        print(f"✗ Failed to copy HTML to simulations: {e}")
         return False
 
-def capture_screenshot_with_playwright(game_id: str, game_folder: Path) -> Optional[str]:
-    """Capture game screenshot with Playwright"""
+def capture_screenshot_with_playwright(html_file: str, html_path: Path) -> Optional[str]:
+    """Capture PhET HTML simulation screenshot with Playwright"""
     try:
         from playwright.sync_api import sync_playwright
 
-        print(f"🎥 Starting screenshot capture: {game_id}")
+        print(f"🎥 Starting screenshot capture: {html_file}")
 
         THUMBNAILS_DIR.mkdir(parents=True, exist_ok=True)
+        game_id = html_path.stem
         screenshot_path = THUMBNAILS_DIR / f"{game_id}.png"
 
-        game_url = f"file:///{game_folder}/index.html".replace("\\", "/")
+        html_url = f"file:///{html_path}".replace("\\", "/")
 
         with sync_playwright() as p:
             browser = p.chromium.launch(headless=True)
             page = browser.new_page(viewport={"width": 1280, "height": 720})
 
             try:
-                page.goto(game_url, wait_until="domcontentloaded", timeout=10000)
+                page.goto(html_url, wait_until="domcontentloaded", timeout=10000)
                 time.sleep(2)
                 page.screenshot(path=str(screenshot_path), full_page=False)
                 print(f"✓ Screenshot saved: {screenshot_path}")
@@ -373,24 +427,23 @@ def capture_screenshot_with_playwright(game_id: str, game_folder: Path) -> Optio
                 browser.close()
 
     except ImportError:
-        print("⚠ Playwright not installed")
+        print("⚠ Playwright not installed, using emoji thumbnail")
         return None
     except Exception as e:
         print(f"⚠ Screenshot error: {e}")
         return None
 
-def update_games_data(
+def update_games_data_phet(
     game_id: str,
-    game_title: str,
-    description: str,
+    occult_title: str,
+    occult_description: str,
     image_path: Optional[str],
     category: str,
     story_description: str = "",
     seo_keywords: list = None,
-    controls: str = "",
-    occult_theme: str = "none"
+    occult_theme: str = "cosmic-horror"
 ) -> bool:
-    """Add new game to gamesData.ts with SEO metadata and controls"""
+    """Add new PhET simulation to gamesData.ts with occult metadata"""
     try:
         with open(GAMES_DATA_FILE, 'r', encoding='utf-8') as f:
             content = f.read()
@@ -399,15 +452,10 @@ def update_games_data(
             seo_keywords = []
 
         emoji_map = {
-            "web_games": "🎮",
-            "puzzle": "🧩",
-            "space_universe": "🌌",
-            "physics_chemistry": "⚛️",
-            "optics_waves": "🔬",
             "occult_abyssal": "🔮",
             "occult_alchemy": "⚗️",
             "occult_anomalous": "⚡",
-            "occult_cosmic": "👁️",
+            "occult_cosmic": "🌀",
             "occult_forbidden": "🧬",
             "occult_sacred": "✨",
             "occult_necromancy": "💀",
@@ -416,11 +464,17 @@ def update_games_data(
             "occult_illusions": "🎭",
         }
 
-        emoji = emoji_map.get(category, "🎮")
+        # Extract emoji from title or use category default
+        emoji = "🌀"
+        title_emoji_match = re.search(r'^([🌀🌈⚡🧬✨💀📿🔮🎭🌌])\s', occult_title)
+        if title_emoji_match:
+            emoji = title_emoji_match.group(1)
+        else:
+            emoji = emoji_map.get(category, "🌀")
+
         image_attr = f'    image: "{image_path}",' if image_path else ""
-        controls_attr = f'    controls: "{controls}",' if controls else ""
         story_attr = f'    storyDescription: "{story_description}",' if story_description else ""
-        occult_theme_attr = f'    occultTheme: "{occult_theme}",' if occult_theme and occult_theme != "none" else ""
+        occult_theme_attr = f'    occultTheme: "{occult_theme}",'
 
         # Format SEO keywords as array
         keywords_array = ""
@@ -428,19 +482,19 @@ def update_games_data(
             keywords_str = ", ".join([f"'{kw}'" for kw in seo_keywords])
             keywords_array = f'    seoKeywords: [{keywords_str}],'
 
-        # Determine if simulation or game
-        category_type = "simulation" if "physics_chemistry" in category or "space_universe" in category or "optics_waves" in category else "web_games"
+        # Escape quotes in descriptions for TypeScript
+        occult_description_escaped = occult_description.replace('"', '\\"')
 
         new_game = f'''  {{
     id: '{game_id}',
-    title: '{game_title}',
-    description: '{description}',
-{controls_attr}{story_attr}{occult_theme_attr}{image_attr}{keywords_array}
+    title: '{occult_title}',
+    description: '{occult_description_escaped}',
+{story_attr}{occult_theme_attr}{image_attr}{keywords_array}
     thumbnail: '{emoji}',
-    category: '{category_type}',
+    category: 'simulation',
     icon: '{emoji}',
-    path: '/game/{game_id}',
-    tags: ['auto-classified', '{category}'],
+    path: '/game/phet-{game_id}',
+    tags: ['phet', 'simulation', '{category}'],
     play_count: 0,
   }},'''
 
@@ -449,14 +503,14 @@ def update_games_data(
             print("✗ Could not find GAMES_DATA array")
             return False
 
-        # Prepend: Insert new game at the VERY BEGINNING of array (right after opening bracket)
+        # Insert at beginning of array
         insert_pos = content.find("{", array_start)
         new_content = content[:insert_pos] + new_game + "\n  " + content[insert_pos:]
 
         with open(GAMES_DATA_FILE, 'w', encoding='utf-8') as f:
             f.write(new_content)
 
-        print(f"✓ Game added to gamesData.ts: {game_id}")
+        print(f"✓ PhET simulation added to gamesData.ts: {game_id}")
         return True
     except Exception as e:
         print(f"✗ Failed to update gamesData.ts: {e}")
@@ -488,92 +542,83 @@ def run_git_commands() -> bool:
         print(f"✗ Git command failed: {e}")
         return False
 
-def process_inbox_zip(zip_path: Path) -> bool:
-    """Process single ZIP file from Inbox with AI classification"""
+def process_inbox_html(html_path: Path) -> bool:
+    """Process single PhET HTML file from Inbox with AI occult transformation"""
     try:
-        print(f"\n🔍 Analyzing: {zip_path.name}")
+        print(f"\n🔍 Analyzing: {html_path.name}")
         print("-" * 60)
 
-        # Step 1: Analyze ZIP content
-        zip_info = analyze_zip_content(zip_path)
+        # Step 1: Analyze HTML content
+        html_info = analyze_html_content(html_path)
+        if "error" in html_info:
+            print(f"✗ Failed to analyze HTML: {html_info['error']}")
+            return False
 
-        # Step 2: AI Genre Classification with SEO metadata & controls
-        print("\n🤖 AI Classification in progress...")
-        ai_result = classify_genre_with_ai(zip_info)
+        # Step 2: AI Occult Transformation
+        print("\n🤖 AI Occult Transformation in progress...")
+        ai_result = classify_phet_with_ai(html_info)
         category_key = ai_result["category_key"]
-        occult_theme = ai_result.get("occult_theme", "none")
-        display_name = ai_result["display_name"]
-        description = ai_result["description"]
-        controls = ai_result.get("controls", "")
+        occult_theme = ai_result.get("occult_theme", "cosmic-horror")
+        occult_title = ai_result.get("occult_title", "PhET Simulation")
+        occult_description = ai_result.get("occult_description", "")
         story_description = ai_result["storyDescription"]
         seo_keywords = ai_result["seoKeywords"]
 
-        # Step 3: Move to appropriate category folder
-        print(f"\n📁 Moving to category folder...")
-        if not move_to_category_folder(zip_path, category_key):
+        # Step 3: Copy HTML to public/simulations/
+        print(f"\n📁 Copying to simulations folder...")
+        if not copy_html_to_simulations(html_path):
             return False
 
-        # Get updated zip path (now in category folder)
-        new_zip_path = DROPZONE_BASE / CATEGORY_FOLDER_MAPPING[category_key] / zip_path.name
-
-        # Step 4: Extract and process
-        zip_name = zip_path.stem
-        # Use exact folder name as game_id (no character replacement) to match physical folder
-        game_id = zip_name
-        extract_path = LABS_DIR / zip_name
-
-        if extract_path.exists():
-            print(f"⚠ {extract_path} already exists, skipping")
-            return False
-
-        extract_path.mkdir(parents=True, exist_ok=True)
-
-        if not extract_zip(new_zip_path, extract_path):
-            return False
+        # Step 4: Move to appropriate category folder in Dropzone
+        print(f"\n📁 Moving to category folder in Dropzone...")
+        if not move_to_category_folder(html_path, category_key):
+            print("⚠ Warning: Could not move to category folder, continuing...")
 
         # Step 5: Capture screenshot
         print("\n📸 Automatic screenshot capture...")
-        image_path = capture_screenshot_with_playwright(game_id, extract_path)
+        html_filename = html_path.name
+        image_path = capture_screenshot_with_playwright(html_filename, html_path)
 
-        # Step 6: Register in gamesData.ts with SEO metadata
-        print("\n📝 Registering game data with controls & SEO metadata...")
-        if not update_games_data(
+        # Step 6: Register in gamesData.ts with occult metadata
+        print("\n📝 Registering PhET data with occult metadata...")
+        game_id = html_path.stem
+        if not update_games_data_phet(
             game_id,
-            zip_name,
-            description,
+            occult_title,
+            occult_description,
             image_path,
             category_key,
             story_description,
             seo_keywords,
-            controls,
             occult_theme
         ):
             return False
 
-        # Step 7: Move to Completed
-        completed_zip = COMPLETED_DIR / new_zip_path.name
-        shutil.move(str(new_zip_path), str(completed_zip))
-        print(f"✓ Completed file moved: {completed_zip}")
+        # Step 7: Move source HTML to Completed
+        completed_html = COMPLETED_DIR / html_path.name
+        completed_html.parent.mkdir(parents=True, exist_ok=True)
+        shutil.move(str(html_path), str(completed_html))
+        print(f"✓ Source file moved to Completed: {completed_html}")
 
         return True
     except Exception as e:
         print(f"✗ Processing error: {e}")
         return False
 
-def find_inbox_zips() -> list:
-    """Find all ZIP files in Inbox folder"""
+def find_inbox_html_files() -> list:
+    """Find all HTML files in Inbox folder"""
     if not INBOX_FOLDER.exists():
         print(f"✗ Inbox folder not found: {INBOX_FOLDER}")
         return []
 
-    zip_files = list(INBOX_FOLDER.glob("*.zip"))
-    return zip_files
+    html_files = list(INBOX_FOLDER.glob("*.html")) + list(INBOX_FOLDER.glob("*.htm"))
+    return html_files
 
 def main():
     """Main function"""
     print("="*60)
-    print("🚀 Inbox AI Auto-Classification & Upload Factory")
-    print("   (AI-powered genre detection & auto-categorization)")
+    print("🚀 PhET HTML AI Auto-Curation & Occult Theme Factory")
+    print("   (AI-powered occult transformation & auto-registration)")
     print("="*60)
 
     # Check required directories
@@ -586,24 +631,24 @@ def main():
         print(f"✗ Project path not found: {PROJECT_ROOT}")
         return
 
-    LABS_DIR.mkdir(parents=True, exist_ok=True)
     THUMBNAILS_DIR.mkdir(parents=True, exist_ok=True)
     COMPLETED_DIR.mkdir(parents=True, exist_ok=True)
+    (PROJECT_ROOT / "public" / "simulations").mkdir(parents=True, exist_ok=True)
 
-    # Find ZIP files in Inbox
-    zip_files = find_inbox_zips()
+    # Find HTML files in Inbox
+    html_files = find_inbox_html_files()
 
-    if not zip_files:
-        print(f"\n📭 No ZIP files in Inbox")
-        print(f"Upload ZIP files to: {INBOX_FOLDER}")
+    if not html_files:
+        print(f"\n📭 No HTML files in Inbox")
+        print(f"Upload PhET HTML files to: {INBOX_FOLDER}")
         return
 
-    print(f"\n📦 Found ZIP files in Inbox: {len(zip_files)}\n")
+    print(f"\n📦 Found HTML files in Inbox: {len(html_files)}\n")
 
-    # Process each ZIP file
+    # Process each HTML file
     success_count = 0
-    for zip_file in zip_files:
-        if process_inbox_zip(zip_file):
+    for html_file in html_files:
+        if process_inbox_html(html_file):
             success_count += 1
             print(f"✅ Complete")
         else:
@@ -611,13 +656,13 @@ def main():
 
     # Final summary and deployment
     print("\n" + "="*60)
-    print(f"✅ Processing complete: {success_count}/{len(zip_files)} successful")
+    print(f"✅ Processing complete: {success_count}/{len(html_files)} successful")
     print("="*60)
 
     if success_count > 0:
         print("\n📤 Running Git deployment...")
         run_git_commands()
-        print("\n🎉 All games processed and deployed to Vercel!")
+        print("\n🎉 All PhET simulations processed and deployed to Vercel!")
 
 if __name__ == "__main__":
     main()
