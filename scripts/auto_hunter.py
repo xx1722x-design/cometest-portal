@@ -66,17 +66,18 @@ def load_existing_game_ids():
 
 
 def find_game_repo(skip_ids=None):
-    """Find HIGH-QUALITY HTML5 games on GitHub (stars >200, vetted projects only)"""
+    """Find INDIE MASTERPIECE HTML5 games on GitHub (50+ stars, playable games only)"""
     skip_ids = skip_ids or set()
-    print("🔍 Searching GitHub for MASTERPIECE HTML5 games (stars >200)...")
+    print("🔍 Searching GitHub for indie HTML5 games (stars >50, no engines)...")
     print(f"   (Skipping {len(skip_ids)} previously processed repos)")
 
     try:
         response = requests.get(
             "https://api.github.com/search/repositories",
             params={
-                # Premium quality filter: 200+ stars (globally vetted), exclude templates/boilerplate
-                "q": "topic:html5-game language:html stars:>200 -template -boilerplate -awesome -list -portfolio size:>1000",
+                # Optimized hunt: 50+ stars (catches both legends & indie gems),
+                # exclude game engines/frameworks/templates/courses
+                "q": "topic:html5-game language:html stars:>50 -engine -framework -library -template -boilerplate -awesome -list -portfolio -course",
                 "sort": "stars",
                 "order": "desc",
                 "per_page": 30  # Get more results to avoid duplicates
