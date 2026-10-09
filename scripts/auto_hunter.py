@@ -46,6 +46,25 @@ PUBLIC_GAMES_PATH.mkdir(parents=True, exist_ok=True)
 THUMBNAILS_PATH.mkdir(parents=True, exist_ok=True)
 
 
+def load_existing_game_ids():
+    """Extract all existing game IDs from gamesData.ts to prevent duplicates"""
+    existing_ids = set()
+
+    try:
+        if GAMES_DATA_PATH.exists():
+            content = GAMES_DATA_PATH.read_text(encoding='utf-8')
+            # Find all id: 'xxx' patterns
+            id_matches = re.findall(r"id:\s*['\"]([^'\"]+)['\"]", content)
+            existing_ids = set(id_matches)
+            print(f"📚 Loaded {len(existing_ids)} existing game IDs from gamesData.ts")
+            if existing_ids:
+                print(f"   Protecting: {', '.join(sorted(list(existing_ids)[:5]))}..." if len(existing_ids) > 5 else f"   Protecting: {', '.join(sorted(existing_ids))}")
+    except Exception as e:
+        print(f"⚠️  Could not load existing IDs: {e}")
+
+    return existing_ids
+
+
 def find_game_repo(skip_ids=None):
     """Find an HTML5 game on GitHub that's not already in our collection"""
     skip_ids = skip_ids or set()
@@ -320,7 +339,7 @@ def generate_fallback_metadata(repo_name, repo_description):
 
 
 def capture_screenshot(game_folder, repo_id):
-    """Capture screenshot of game using Playwright"""
+    """Capture screenshot of game using Playwright with improved timeout handling"""
     print("📸 Capturing screenshot...")
 
     try:
@@ -340,7 +359,11 @@ def capture_screenshot(game_folder, repo_id):
             page = browser.new_page(viewport={"width": 1280, "height": 720})
 
             try:
-                page.goto(f"file:///{index_html.resolve()}", wait_until="networkidle", timeout=10000)
+                # Use "load" instead of "networkidle" to avoid timeout on games with background requests
+                page.goto(f"file:///{index_html.resolve()}", wait_until="load", timeout=15000)
+                # Give the page 2 seconds to render after load event
+                page.wait_for_timeout(2000)
+
                 screenshot_path = THUMBNAILS_PATH / f"{repo_id}.jpg"
                 page.screenshot(path=str(screenshot_path), type="jpeg", quality=80)
 
@@ -350,7 +373,7 @@ def capture_screenshot(game_folder, repo_id):
                 browser.close()
 
     except Exception as e:
-        print(f"⚠️  Screenshot failed: {e}")
+        print(f"⚠️  Screenshot failed: {str(e)[:150]}")
         return None
 
 
@@ -478,7 +501,8 @@ def main():
     print("=" * 70)
     print()
 
-    skip_ids = set()  # Use set for O(1) lookup
+    # Load existing game IDs to prevent duplicates across program restarts (영구 기억 장치)
+    skip_ids = load_existing_game_ids()
     max_attempts = 3
 
     for attempt in range(max_attempts):
