@@ -549,7 +549,22 @@ export const GAMES_DATA: GameItem[] = [
       path: '/game/ojaswy_blastar',
       image: '/thumbnails/default.jpg',
       tags: ['html5', 'game', 'auto-hunter'],
+      seoKeywords: ['html5', 'game', 'interactive',
+  {
+      id: 'arcadejhs_html5-space-invaders',
+      title: '🦇 Voidborne Invasion',
+      description: 'A nightmarish invasion of star‑bound horrors descends upon the mortal realm. Players must rally cursed fire and forbidden codes to repel the celestial',
+      thumbnail: '🎮',
+      category: 'web_games',
+      icon: '🎮',
+      path: '/game/arcadejhs_html5-space-invaders',
+      image: '/thumbnails/arcadejhs_html5-space-invaders.jpg',
+      tags: ['html5', 'game', 'auto-hunter'],
       seoKeywords: ['html5', 'game', 'interactive'],
+      occultTheme: 'dark-fantasy',
+      play_count: 0,
+    }
+],
       occultTheme: 'dark-fantasy',
       play_count: 0,
     }
