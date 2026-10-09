@@ -74,7 +74,9 @@ def find_game_repo(skip_ids=None):
     # Forbidden keywords that indicate non-game repos
     forbidden_keywords = ['engine', 'framework', 'library', 'template', 'boilerplate',
                           'awesome', 'list', 'portfolio', 'course', 'tutorial', 'bot',
-                          'cheatsheet', 'cli', 'webpack', 'rollup', 'parcel', 'bundler']
+                          'cheatsheet', 'cli', 'webpack', 'rollup', 'parcel', 'bundler',
+                          'challenge', 'demo', 'example', 'sample', 'test', 'collection',
+                          'resource', 'assets']
 
     try:
         page = 1
@@ -196,46 +198,20 @@ def download_and_extract_game(repo):
 
 
 def find_and_move_game(source_dir, target_dir):
-    """Find index.html and move game files, with flexible HTML file handling"""
+    """Find index.html at root level - strict requirement for web games"""
 
     try:
-        # First, try to find index.html
+        # STRICT: index.html MUST exist at root level
         index_path = source_dir / "index.html"
         if index_path.exists():
             shutil.copytree(source_dir, target_dir, dirs_exist_ok=True)
             return True
 
-        # Fallback: find ANY .html file
-        html_files = list(source_dir.rglob("*.html"))
-        if html_files:
-            print(f"   ℹ️  No index.html found, using {html_files[0].name}")
-
-            # Copy with error handling for encoding issues
-            try:
-                shutil.copytree(source_dir, target_dir, dirs_exist_ok=True)
-            except Exception as e:
-                print(f"   ⚠️  Copy error: {e}, attempting fallback...")
-                # If full copy fails, try copying just the HTML file
-                target_dir.mkdir(parents=True, exist_ok=True)
-                try:
-                    content = html_files[0].read_text(encoding='utf-8', errors='ignore')
-                    (target_dir / "index.html").write_text(content)
-                    return True
-                except Exception:
-                    return False
-
-            # Rename the found HTML file to index.html
-            found_html = target_dir / html_files[0].name
-            if found_html.exists():
-                try:
-                    content = found_html.read_text(encoding='utf-8', errors='ignore')
-                    (target_dir / "index.html").write_text(content)
-                except Exception:
-                    pass
-
-            return True
-
+        # No index.html at root = not a simple web game
+        # (Complex projects like AncientBeast require special handling we don't support)
+        print(f"   ❌ No index.html at root, rejecting complex project")
         return False
+
     except Exception as e:
         print(f"   ❌ find_and_move_game error: {e}")
         return False
