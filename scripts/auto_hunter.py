@@ -215,6 +215,36 @@ def download_and_extract_game(repo):
         shutil.rmtree(temp_dir, ignore_errors=True)
 
 
+def check_game_size(game_folder):
+    """Check if game folder exceeds size limits (GitHub 100MB file limit)"""
+    try:
+        total_size = 0
+        max_file_size = 40 * 1024 * 1024  # 40MB max per file
+        max_folder_size = 80 * 1024 * 1024  # 80MB max per folder
+
+        for root, dirs, files in os.walk(game_folder):
+            for file in files:
+                file_path = os.path.join(root, file)
+                file_size = os.path.getsize(file_path)
+                total_size += file_size
+
+                # Check individual file size
+                if file_size > max_file_size:
+                    print(f"   ❌ File too large: {file} ({file_size / 1024 / 1024:.1f}MB > 40MB)")
+                    return False
+
+        # Check total folder size
+        if total_size > max_folder_size:
+            print(f"   ❌ Folder too large: {total_size / 1024 / 1024:.1f}MB > 80MB")
+            return False
+
+        return True
+
+    except Exception as e:
+        print(f"   ⚠️  Size check error: {e}")
+        return True  # Allow on error
+
+
 def find_and_move_game(source_dir, target_dir):
     """Find index.html at root level - strict requirement for web games"""
 
@@ -222,11 +252,15 @@ def find_and_move_game(source_dir, target_dir):
         # STRICT: index.html MUST exist at root level
         index_path = source_dir / "index.html"
         if index_path.exists():
+            # Check size before copying
+            if not check_game_size(source_dir):
+                print(f"   ❌ Game rejected due to size constraints")
+                return False
+
             shutil.copytree(source_dir, target_dir, dirs_exist_ok=True)
             return True
 
         # No index.html at root = not a simple web game
-        # (Complex projects like AncientBeast require special handling we don't support)
         print(f"   ❌ No index.html at root, rejecting complex project")
         return False
 
@@ -523,15 +557,21 @@ def check_vercel_deployment_status(repo_full_name, commit_sha, max_wait_seconds=
 
 
 def git_commit_and_push(repo_full_name, repo_id, title):
-    """Git commit and push to Vercel with Vercel status verification"""
+    """Git commit and push to Vercel with selective staging and auto-rollback"""
     print("📤 Git commit and push...")
 
     try:
         os.chdir(PROJECT_ROOT)
 
-        # Stage all changes
-        subprocess.run(["git", "add", "."], check=True, capture_output=True)
-        print("✅ git add")
+        # Stage ONLY the files we just added (selective git add to prevent trash)
+        files_to_add = [
+            f"public/games/{repo_id}",
+            f"public/thumbnails/{repo_id}.jpg",
+            "src/config/gamesData.ts"
+        ]
+
+        subprocess.run(["git", "add"] + files_to_add, check=True, capture_output=True)
+        print(f"✅ git add (selective: {repo_id} + gamesData.ts)")
 
         # Commit
         commit_msg = f"Auto-Hunter: Added '{title}' game ({repo_id})"
@@ -567,29 +607,65 @@ def git_commit_and_push(repo_full_name, repo_id, title):
             except subprocess.CalledProcessError:
                 print("⚠️  Pull failed, skipping sync")
 
-        # Push with retry
+        # Push with retry and auto-rollback on failure
         for attempt in range(2):
             try:
-                subprocess.run(
+                result = subprocess.run(
                     ["git", "push", "origin", "main"],
-                    check=True,
+                    check=False,
                     capture_output=True,
+                    text=True,
                     timeout=30
                 )
-                print("✅ git push → Vercel deployment triggered")
 
-                # Get the commit SHA and check Vercel status
-                commit_sha = get_latest_commit_sha()
-                deployment_success = check_vercel_deployment_status(repo_full_name, commit_sha)
-                return deployment_success
+                if result.returncode == 0:
+                    print("✅ git push → Vercel deployment triggered")
 
-            except subprocess.CalledProcessError as e:
-                if attempt == 0:
-                    print(f"⚠️  Push failed (attempt 1), retrying...")
-                    continue
+                    # Get the commit SHA and check Vercel status
+                    commit_sha = get_latest_commit_sha()
+                    deployment_success = check_vercel_deployment_status(repo_full_name, commit_sha)
+                    return deployment_success
                 else:
-                    print(f"❌ Push failed after retries")
-                    return False
+                    # Push failed - print error details
+                    print(f"❌ Push failed:")
+                    if "GH008" in result.stderr or "100MB" in result.stderr:
+                        print(f"   File size limit exceeded (GitHub 100MB limit)")
+                    print(f"   Error: {result.stderr[:200]}")
+
+                    if attempt == 0:
+                        print(f"⚠️  Attempting auto-rollback...")
+                        # Rollback: undo commit, delete game folder, remove from gamesData
+                        try:
+                            subprocess.run(["git", "reset", "--hard", "HEAD~1"], check=True, capture_output=True)
+                            print(f"   ✅ Rolled back commit")
+
+                            # Delete game folder
+                            game_folder = PUBLIC_GAMES_PATH / repo_id
+                            if game_folder.exists():
+                                shutil.rmtree(game_folder)
+                                print(f"   ✅ Deleted game folder")
+
+                            # Delete thumbnail
+                            thumbnail_file = THUMBNAILS_PATH / f"{repo_id}.jpg"
+                            if thumbnail_file.exists():
+                                thumbnail_file.unlink()
+                                print(f"   ✅ Deleted thumbnail")
+
+                            print(f"⚠️  Auto-rollback complete, skipping game")
+                            continue
+                        except Exception as e:
+                            print(f"   ❌ Rollback failed: {e}")
+                            return False
+                    else:
+                        print(f"❌ Push failed after retries, auto-rollback already attempted")
+                        return False
+
+            except subprocess.TimeoutExpired:
+                print(f"❌ Push timeout")
+                return False
+            except Exception as e:
+                print(f"❌ Push error: {e}")
+                return False
 
     except subprocess.TimeoutExpired:
         print("❌ Git operation timeout")
