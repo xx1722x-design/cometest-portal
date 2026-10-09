@@ -66,45 +66,55 @@ def load_existing_game_ids():
 
 
 def find_game_repo(skip_ids=None):
-    """Find INDIE MASTERPIECE HTML5 games on GitHub (50+ stars, playable games only)"""
+    """Find INDIE MASTERPIECE HTML5 games on GitHub with pagination support"""
     skip_ids = skip_ids or set()
-    print("🔍 Searching GitHub for indie HTML5 games (stars >50, no engines)...")
+    print("🔍 Searching GitHub for indie HTML5 games (stars >30, no engines)...")
     print(f"   (Skipping {len(skip_ids)} previously processed repos)")
 
     try:
-        response = requests.get(
-            "https://api.github.com/search/repositories",
-            params={
-                # Optimized hunt: 50+ stars (catches both legends & indie gems),
-                # exclude game engines/frameworks/templates/courses
-                "q": "topic:html5-game language:html stars:>50 -engine -framework -library -template -boilerplate -awesome -list -portfolio -course",
-                "sort": "stars",
-                "order": "desc",
-                "per_page": 30  # Get more results to avoid duplicates
-            },
-            timeout=15
-        )
+        page = 1
+        max_pages = 10  # Prevent infinite loops (10 pages * 30 items = 300 results)
 
-        if response.status_code == 403:
-            print("⚠️  GitHub rate limited, trying fallback...")
-            fallback_repos = [
-                {"full_name": "playcanvas/engine", "stargazers_count": 10000, "description": "Open-source WebGL game engine"},
-                {"full_name": "greensock/GSAP", "stargazers_count": 18000, "description": "Animation library for web games"},
-            ]
-            return fallback_repos[0] if fallback_repos else None
+        while page <= max_pages:
+            print(f"   📄 Searching page {page}...")
 
-        response.raise_for_status()
-        repos = response.json().get('items', [])
+            response = requests.get(
+                "https://api.github.com/search/repositories",
+                params={
+                    # Expanded hunt: 30+ stars (catches indie gems & hidden masterpieces),
+                    # removed language:html (many games are JavaScript-based),
+                    # exclude game engines/frameworks/templates/courses
+                    "q": "topic:html5-game stars:>30 -engine -framework -library -template -boilerplate -awesome -list -portfolio -course",
+                    "sort": "stars",
+                    "order": "desc",
+                    "per_page": 30,
+                    "page": page
+                },
+                timeout=15
+            )
 
-        for repo in repos:
-            repo_id = repo['full_name'].replace('/', '_').lower()
-            if repo_id not in skip_ids:
-                print(f"✅ Found: {repo['full_name']}")
-                print(f"   ⭐ Stars: {repo.get('stargazers_count', '?')}")
-                print(f"   📝 Description: {repo.get('description', 'N/A')[:80]}")
-                return repo
+            if response.status_code == 403:
+                print("⚠️  GitHub rate limited")
+                return None
 
-        print("⚠️  No new repos found")
+            response.raise_for_status()
+            repos = response.json().get('items', [])
+
+            if not repos:
+                print(f"   (No results on page {page}, search complete)")
+                break
+
+            for repo in repos:
+                repo_id = repo['full_name'].replace('/', '_').lower()
+                if repo_id not in skip_ids:
+                    print(f"✅ Found: {repo['full_name']}")
+                    print(f"   ⭐ Stars: {repo.get('stargazers_count', '?')}")
+                    print(f"   📝 Description: {repo.get('description', 'N/A')[:80]}")
+                    return repo
+
+            page += 1
+
+        print("⚠️  No new repos found after searching multiple pages")
         return None
 
     except Exception as e:
