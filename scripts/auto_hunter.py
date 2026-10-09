@@ -66,28 +66,31 @@ def load_existing_game_ids():
 
 
 def find_game_repo(skip_ids=None):
-    """Find INDIE MASTERPIECE HTML5 games on GitHub with pagination support"""
+    """Find INDIE MASTERPIECE HTML5 games on GitHub with smart internal filtering"""
     skip_ids = skip_ids or set()
-    print("🔍 Searching GitHub for indie HTML5 games (stars >30, no engines)...")
+    print("🔍 Searching GitHub for HTML5 games (stars >10)...")
     print(f"   (Skipping {len(skip_ids)} previously processed repos)")
+
+    # Forbidden keywords that indicate non-game repos
+    forbidden_keywords = ['engine', 'framework', 'library', 'template', 'boilerplate',
+                          'awesome', 'list', 'portfolio', 'course', 'tutorial', 'bot',
+                          'cheatsheet', 'cli', 'webpack', 'rollup', 'parcel', 'bundler']
 
     try:
         page = 1
-        max_pages = 10  # Prevent infinite loops (10 pages * 30 items = 300 results)
+        max_pages = 5  # 5 pages * 100 per_page = 500 candidates to filter from
 
         while page <= max_pages:
-            print(f"   📄 Searching page {page}...")
+            print(f"   📄 Fetching page {page}...")
 
             response = requests.get(
                 "https://api.github.com/search/repositories",
                 params={
-                    # Expanded hunt: 30+ stars (catches indie gems & hidden masterpieces),
-                    # removed language:html (many games are JavaScript-based),
-                    # exclude game engines/frameworks/templates/courses
-                    "q": "topic:html5-game stars:>30 -engine -framework -library -template -boilerplate -awesome -list -portfolio -course",
+                    # Ultra-simple query: just topic and minimum stars, let Python filter
+                    "q": "topic:html5-game stars:>10",
                     "sort": "stars",
                     "order": "desc",
-                    "per_page": 30,
+                    "per_page": 100,  # Max results per page
                     "page": page
                 },
                 timeout=15
@@ -104,13 +107,27 @@ def find_game_repo(skip_ids=None):
                 print(f"   (No results on page {page}, search complete)")
                 break
 
+            # Internal smart filtering: check repo name and description
             for repo in repos:
                 repo_id = repo['full_name'].replace('/', '_').lower()
-                if repo_id not in skip_ids:
-                    print(f"✅ Found: {repo['full_name']}")
-                    print(f"   ⭐ Stars: {repo.get('stargazers_count', '?')}")
-                    print(f"   📝 Description: {repo.get('description', 'N/A')[:80]}")
-                    return repo
+                repo_name = repo.get('name', '').lower()
+                repo_desc = repo.get('description', '').lower() if repo.get('description') else ''
+
+                # Skip if already processed
+                if repo_id in skip_ids:
+                    continue
+
+                # Skip if matches forbidden keywords
+                is_forbidden = any(keyword in repo_name or keyword in repo_desc
+                                  for keyword in forbidden_keywords)
+                if is_forbidden:
+                    continue
+
+                # Found a candidate!
+                print(f"✅ Found: {repo['full_name']}")
+                print(f"   ⭐ Stars: {repo.get('stargazers_count', '?')}")
+                print(f"   📝 Description: {repo.get('description', 'N/A')[:80]}")
+                return repo
 
             page += 1
 
