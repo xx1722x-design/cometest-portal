@@ -549,7 +549,22 @@ export const GAMES_DATA: GameItem[] = [
       path: '/game/ojaswy_blastar',
       image: '/thumbnails/default.jpg',
       tags: ['html5', 'game', 'auto-hunter'],
+      seoKeywords: ['html5', 'game', 'interactive',
+  {
+      id: 'metroxe_one-html-page-challenge',
+      title: '🕸️ One-Page Necromancy',
+      description: 'Summon a single cursed page that binds the web of fate. Craft rituals with ancient syntax, forsaking modern tools for eldritch power.',
+      thumbnail: '🎮',
+      category: 'web_games',
+      icon: '🎮',
+      path: '/game/metroxe_one-html-page-challenge',
+      image: '/thumbnails/metroxe_one-html-page-challenge.jpg',
+      tags: ['html5', 'game', 'auto-hunter'],
       seoKeywords: ['html5', 'game', 'interactive'],
+      occultTheme: 'dark-fantasy',
+      play_count: 0,
+    }
+],
       occultTheme: 'dark-fantasy',
       play_count: 0,
     }
