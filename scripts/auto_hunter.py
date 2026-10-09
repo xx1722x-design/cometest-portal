@@ -48,8 +48,9 @@ THUMBNAILS_PATH.mkdir(parents=True, exist_ok=True)
 
 def find_game_repo(skip_ids=None):
     """Find an HTML5 game on GitHub that's not already in our collection"""
-    skip_ids = skip_ids or []
+    skip_ids = skip_ids or set()
     print("🔍 Searching GitHub for HTML5 games...")
+    print(f"   (Skipping {len(skip_ids)} previously processed repos)")
 
     try:
         response = requests.get(
@@ -58,7 +59,7 @@ def find_game_repo(skip_ids=None):
                 "q": "topic:html5-game language:html stars:>10",
                 "sort": "stars",
                 "order": "desc",
-                "per_page": 10
+                "per_page": 30  # Get more results to avoid duplicates
             },
             timeout=15
         )
@@ -193,7 +194,7 @@ def find_and_move_game(source_dir, target_dir):
 
 
 def generate_occult_metadata(repo_name, repo_description):
-    """Generate English occult game metadata with 3-retry logic"""
+    """Generate English occult game metadata with 3-retry logic and JSON stability"""
     if not GROQ_API_KEY:
         print("⚠️  GROQ_API_KEY not set, using fallback")
         return generate_fallback_metadata(repo_name, repo_description)
@@ -206,26 +207,34 @@ def generate_occult_metadata(repo_name, repo_description):
         try:
             client = Groq(api_key=GROQ_API_KEY)
 
-            prompt = f"""Transform this game into an Occult/Dark Fantasy theme with ENGLISH text ONLY.
+            # System prompt to force complete JSON responses
+            system_prompt = """You are a dark fantasy game metadata generator. Your task is to transform game names and descriptions into occult/dark fantasy themed metadata.
 
-Original Game: {repo_name}
-Description: {repo_description or 'Unknown'}
+CRITICAL RULES:
+1. ALWAYS respond ONLY with a complete, valid JSON object
+2. NEVER include markdown code fences (```) or any other text
+3. ALWAYS close all brackets and quotes properly
+4. ALWAYS respond in ENGLISH ONLY - no other languages
+5. The JSON MUST be parseable - no incomplete strings or unterminated brackets
+6. Include emoji in the title field
+7. Keep descriptions to 2-3 sentences maximum
 
-Return ONLY valid JSON (no markdown) with these EXACT fields:
-{{
-  "title": "A dark, mysterious English title (4-7 words, include emoji prefix like 🎮 or 🔮)",
-  "description": "A 2-3 sentence ominous English description of the game in dark fantasy context"
-}}
+EXAMPLE OUTPUT (copy this format exactly):
+{"title":"🔮 The Abyss Engine","description":"A cursed digital realm where reality bends to dark forces. Navigate through impossible geometries and confront entities beyond comprehension."}"""
 
-Example:
-{{"title": "🎮 The Abyss Simulator", "description": "Enter the digital abyss where..."}}
+            prompt = f"""Game Name: {repo_name}
+Description: {repo_description or 'An unknown game from the depths'}
 
-CRITICAL: Everything MUST be in ENGLISH. No Korean, no other languages. Return ONLY the JSON object."""
+Generate a dark occult/fantasy transformation of this game with a title and description."""
 
             response = client.chat.completions.create(
                 model="openai/gpt-oss-20b",
-                messages=[{"role": "user", "content": prompt}],
-                max_tokens=300
+                messages=[
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt}
+                ],
+                max_tokens=1024,  # Increased from 300 to prevent cutoff
+                temperature=0.7
             )
 
             response_text = response.choices[0].message.content.strip()
@@ -239,23 +248,52 @@ CRITICAL: Everything MUST be in ENGLISH. No Korean, no other languages. Return O
                 else:
                     return generate_fallback_metadata(repo_name, repo_description)
 
-            # Remove markdown code fences
+            # Remove markdown code fences and extra whitespace
             response_text = response_text.replace("```json", "").replace("```", "").strip()
+            if response_text.startswith("json"):
+                response_text = response_text[4:].strip()
 
-            # Extract JSON object using regex
+            # Validate and repair incomplete JSON
+            if response_text.endswith(','):
+                response_text = response_text[:-1]  # Remove trailing comma
+
+            # Extract JSON object using greedy regex
             json_match = re.search(r'\{[\s\S]*\}', response_text)
             if json_match:
                 response_text = json_match.group(0)
+            else:
+                print(f"⚠️  No JSON object found in response (attempt {attempt + 1}/{max_retries})")
+                if attempt < max_retries - 1:
+                    time.sleep(2)
+                    continue
+                else:
+                    return generate_fallback_metadata(repo_name, repo_description)
 
-            # Parse JSON
+            # Ensure proper JSON closure
+            brace_count = response_text.count('{') - response_text.count('}')
+            if brace_count > 0:
+                response_text += '}' * brace_count
+                print(f"   (Fixed {brace_count} unclosed braces)")
+
+            # Parse JSON with strict validation
             metadata = json.loads(response_text)
+
+            # Validate required fields
+            if not metadata.get('title') or not metadata.get('description'):
+                print(f"⚠️  Missing required fields (attempt {attempt + 1}/{max_retries})")
+                if attempt < max_retries - 1:
+                    time.sleep(2)
+                    continue
+                else:
+                    return generate_fallback_metadata(repo_name, repo_description)
+
             print(f"✅ Title: {metadata.get('title', 'N/A')}")
             print(f"✅ Description: {metadata.get('description', 'N/A')[:80]}...")
 
             return metadata
 
         except json.JSONDecodeError as e:
-            print(f"⚠️  Groq JSON decode error (attempt {attempt + 1}/{max_retries}): {e}")
+            print(f"⚠️  Groq JSON decode error (attempt {attempt + 1}/{max_retries}): {str(e)[:100]}")
             if attempt < max_retries - 1:
                 time.sleep(2)
                 continue
@@ -263,7 +301,7 @@ CRITICAL: Everything MUST be in ENGLISH. No Korean, no other languages. Return O
                 return generate_fallback_metadata(repo_name, repo_description)
 
         except Exception as e:
-            print(f"⚠️  Groq Error (attempt {attempt + 1}/{max_retries}): {e}")
+            print(f"⚠️  Groq Error (attempt {attempt + 1}/{max_retries}): {str(e)[:100]}")
             if attempt < max_retries - 1:
                 time.sleep(2)
                 continue
@@ -440,7 +478,7 @@ def main():
     print("=" * 70)
     print()
 
-    skip_ids = []
+    skip_ids = set()  # Use set for O(1) lookup
     max_attempts = 3
 
     for attempt in range(max_attempts):
@@ -453,12 +491,13 @@ def main():
             break
 
         repo_id = repo['full_name'].replace('/', '_').lower()
+        print(f"   Target ID: {repo_id}")
 
         # Download and extract
         game_folder, extracted_id = download_and_extract_game(repo)
         if not game_folder:
-            skip_ids.append(repo_id)
-            print("⚠️  Download failed, skipping to next game")
+            skip_ids.add(repo_id)  # Add to skip list for real-time tracking
+            print(f"⚠️  Download failed, adding {repo_id} to skip list (total: {len(skip_ids)})")
             time.sleep(2)
             continue
 
@@ -474,13 +513,18 @@ def main():
         # Update gamesData.ts
         if not update_games_data(extracted_id, metadata, thumbnail_path):
             print("⚠️  gamesData update failed")
-            skip_ids.append(repo_id)
+            skip_ids.add(repo_id)  # Add to skip list on failure
+            print(f"   Added {repo_id} to skip list (total: {len(skip_ids)})")
             continue
 
         # Git commit and push
         title = metadata.get('title', '🎮 Unknown Game')
         if not git_commit_and_push(extracted_id, title):
             print("⚠️  Game added but deployment failed. Check git status.")
+
+        # Success! Add to skip list to prevent re-processing
+        skip_ids.add(repo_id)
+        print(f"✅ Successfully added! {repo_id} added to skip list (total: {len(skip_ids)})")
 
         time.sleep(3)  # Rate limiting
 
