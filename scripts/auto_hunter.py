@@ -499,35 +499,44 @@ def git_commit_and_push(repo_id, title):
 
 
 def main():
-    """Main pipeline"""
+    """Main pipeline - hunt until 3 games are successfully deployed"""
     print("=" * 70)
     print("🚀 Ultimate Auto-Hunter & Deployment Pipeline")
-    print("   (GitHub HTML5 Games → Occult Theme → Auto-Deploy)")
+    print("   (Hunt until 3 games are successfully deployed)")
     print("=" * 70)
     print()
 
     # Load existing game IDs to prevent duplicates across program restarts (영구 기억 장치)
     skip_ids = load_existing_game_ids()
-    max_attempts = 3
+    success_count = 0
+    target_success = 3
+    failed_attempts = 0
+    max_consecutive_failures = 10  # Prevent infinite loops on bad API
 
-    for attempt in range(max_attempts):
-        print(f"\n🔄 Attempt {attempt + 1}/{max_attempts}...")
+    while success_count < target_success:
+        print(f"\n🔄 Hunting... ({success_count}/{target_success} secured)")
 
         # Find a game
         repo = find_game_repo(skip_ids=skip_ids)
         if not repo:
-            print("⚠️  No game found, stopping pipeline")
-            break
+            failed_attempts += 1
+            if failed_attempts >= max_consecutive_failures:
+                print(f"⚠️  Too many consecutive failures, stopping")
+                break
+            print(f"⚠️  No new repos found, retrying... ({failed_attempts}/{max_consecutive_failures})")
+            time.sleep(2)
+            continue
 
+        failed_attempts = 0  # Reset on finding a repo
         repo_id = repo['full_name'].replace('/', '_').lower()
-        print(f"   Target ID: {repo_id}")
+        print(f"   Candidate: {repo_id}")
 
         # Download and extract
         game_folder, extracted_id = download_and_extract_game(repo)
         if not game_folder:
             skip_ids.add(repo_id)  # Add to skip list for real-time tracking
-            print(f"⚠️  Download failed, adding {repo_id} to skip list (total: {len(skip_ids)})")
-            time.sleep(2)
+            print(f"   ❌ Download/extraction failed, skipping (total protected: {len(skip_ids)})")
+            time.sleep(1)
             continue
 
         # Generate metadata
@@ -541,9 +550,10 @@ def main():
 
         # Update gamesData.ts
         if not update_games_data(extracted_id, metadata, thumbnail_path):
-            print("⚠️  gamesData update failed")
+            print(f"   ❌ gamesData update failed, skipping")
             skip_ids.add(repo_id)  # Add to skip list on failure
-            print(f"   Added {repo_id} to skip list (total: {len(skip_ids)})")
+            print(f"      Added to skip list (total protected: {len(skip_ids)})")
+            time.sleep(1)
             continue
 
         # Git commit and push
@@ -553,9 +563,13 @@ def main():
 
         # Success! Add to skip list to prevent re-processing
         skip_ids.add(repo_id)
-        print(f"✅ Successfully added! {repo_id} added to skip list (total: {len(skip_ids)})")
+        success_count += 1
+        print(f"✅ SUCCESS #{success_count}: {repo_id}")
+        print(f"   Protected from re-hunt: {len(skip_ids)} total")
 
         time.sleep(3)  # Rate limiting
+
+    print(f"\n🏆 Pipeline complete: {success_count}/{target_success} games deployed")
 
 
 if __name__ == "__main__":
