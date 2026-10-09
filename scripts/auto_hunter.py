@@ -446,8 +446,84 @@ def update_games_data(repo_id, metadata, thumbnail_path, original_author=None, s
         return False
 
 
-def git_commit_and_push(repo_id, title):
-    """Git commit and push to Vercel with conflict prevention"""
+def get_latest_commit_sha():
+    """Get the latest commit SHA from the current branch"""
+    try:
+        result = subprocess.run(
+            ["git", "rev-parse", "HEAD"],
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=10
+        )
+        return result.stdout.strip()
+    except Exception as e:
+        print(f"⚠️  Could not get commit SHA: {e}")
+        return None
+
+
+def check_vercel_deployment_status(repo_full_name, commit_sha, max_wait_seconds=300):
+    """Poll GitHub API to check Vercel build status"""
+    if not commit_sha:
+        return False
+
+    owner, repo = repo_full_name.split('/')
+    api_url = f"https://api.github.com/repos/{owner}/{repo}/commits/{commit_sha}/check-runs"
+
+    print(f"\n🔍 Polling Vercel build status (max {max_wait_seconds}s wait)...")
+
+    start_time = time.time()
+    poll_interval = 12  # 12 seconds between polls
+
+    while time.time() - start_time < max_wait_seconds:
+        try:
+            response = requests.get(api_url, timeout=15)
+            response.raise_for_status()
+            data = response.json()
+
+            check_runs = data.get('check_runs', [])
+            vercel_run = None
+
+            # Find Vercel check-run
+            for run in check_runs:
+                if 'vercel' in run.get('name', '').lower():
+                    vercel_run = run
+                    break
+
+            if not vercel_run:
+                print("   ⏳ Waiting for Vercel check-run to appear...")
+                time.sleep(poll_interval)
+                continue
+
+            status = vercel_run.get('status', '')
+            conclusion = vercel_run.get('conclusion', '')
+
+            print(f"   Status: {status} | Conclusion: {conclusion}")
+
+            if status == 'completed':
+                if conclusion == 'success':
+                    print(f"✅ Vercel Deployment SUCCESS")
+                    return True
+                else:
+                    print(f"❌ Vercel Deployment FAILED ({conclusion})")
+                    return False
+
+            # Still running
+            elapsed = int(time.time() - start_time)
+            print(f"   ⏳ Build in progress... ({elapsed}s elapsed)")
+            time.sleep(poll_interval)
+
+        except Exception as e:
+            print(f"   ⚠️  API error (will retry): {str(e)[:100]}")
+            time.sleep(poll_interval)
+            continue
+
+    print(f"❌ Deployment timeout (exceeded {max_wait_seconds}s)")
+    return False
+
+
+def git_commit_and_push(repo_full_name, repo_id, title):
+    """Git commit and push to Vercel with Vercel status verification"""
     print("📤 Git commit and push...")
 
     try:
@@ -501,13 +577,18 @@ def git_commit_and_push(repo_id, title):
                     timeout=30
                 )
                 print("✅ git push → Vercel deployment triggered")
-                return True
+
+                # Get the commit SHA and check Vercel status
+                commit_sha = get_latest_commit_sha()
+                deployment_success = check_vercel_deployment_status(repo_full_name, commit_sha)
+                return deployment_success
+
             except subprocess.CalledProcessError as e:
                 if attempt == 0:
                     print(f"⚠️  Push failed (attempt 1), retrying...")
                     continue
                 else:
-                    print(f"❌ Push failed after retries: {e}")
+                    print(f"❌ Push failed after retries")
                     return False
 
     except subprocess.TimeoutExpired:
@@ -580,16 +661,23 @@ def main():
             time.sleep(1)
             continue
 
-        # Git commit and push
+        # Git commit and push with Vercel status verification
         title = metadata.get('title', '🎮 Unknown Game')
-        if not git_commit_and_push(extracted_id, title):
-            print("⚠️  Game added but deployment failed. Check git status.")
+        deployment_success = git_commit_and_push(repo['full_name'], extracted_id, title)
 
-        # Success! Add to skip list to prevent re-processing
+        # Add to skip list (regardless of deployment result)
         skip_ids.add(repo_id)
-        success_count += 1
-        print(f"✅ SUCCESS #{success_count}: {repo_id}")
-        print(f"   Protected from re-hunt: {len(skip_ids)} total")
+
+        if deployment_success:
+            # True success: game added + Vercel deployment confirmed
+            success_count += 1
+            print(f"✅ SUCCESS #{success_count}: {repo_id}")
+            print(f"   Protected from re-hunt: {len(skip_ids)} total")
+        else:
+            # Deployment failed
+            print(f"❌ Deployment failed for {repo_id} - not counting toward success quota")
+            print(f"   Game metadata added but Vercel build failed")
+            print(f"   Protected from re-hunt: {len(skip_ids)} total")
 
         time.sleep(3)  # Rate limiting
 
