@@ -549,7 +549,10 @@ export const GAMES_DATA: GameItem[] = [
       path: '/game/ojaswy_blastar',
       image: '/thumbnails/default.jpg',
       tags: ['html5', 'game', 'auto-hunter'],
-      seoKeywords: ['html5', 'game', 'interactive',
+      seoKeywords: ['html5', 'game', 'interactive'],
+      occultTheme: 'dark-fantasy',
+      play_count: 0,
+    },
   {
       id: 'arcadejhs_html5-space-invaders',
       title: '🦇 Voidborne Invasion',
@@ -578,14 +581,10 @@ export const GAMES_DATA: GameItem[] = [
       occultTheme: 'dark-fantasy',
       play_count: 0,
     }
-],
-      occultTheme: 'dark-fantasy',
-      play_count: 0,
-    }
 ]
 
-  // ==================== HTML-based PhET Simulations (Awaiting AI Reprocessing) ====================
-  // These will be populated with English metadata after script re-run
+// ==================== HTML-based PhET Simulations (Awaiting AI Reprocessing) ====================
+// These will be populated with English metadata after script re-run
 
 export const getGameById = (gameId: string): GameItem | undefined => {
   return GAMES_DATA.find((game) => game.id === gameId)

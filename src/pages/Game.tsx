@@ -151,6 +151,24 @@ export function Game() {
       case 'neon-space-shooter':
         return <NeonSpaceShooter />
       default:
+        // Web games category - route to /games/ directory
+        if (game?.category === 'web_games') {
+          const iframeSrc = `/games/${gameId}/index.html`
+          return (
+            <iframe
+              src={iframeSrc}
+              style={{
+                width: '100%',
+                height: '100%',
+                border: 'none',
+                borderRadius: '0',
+              }}
+              sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-pointer-lock"
+              title={gameId}
+            />
+          )
+        }
+
         // PhET Interactive Simulations (force English locale globally)
         if (gameId?.startsWith('phet-')) {
           const simName = gameId.replace('phet-', '')
@@ -170,16 +188,10 @@ export function Game() {
             />
           )
         }
-        // Web games and auto-uploaded games
-        // Check if it's a web_games category (new auto-hunter games) or legacy /labs/ games
-        const gameData = game
-        const iframeSrc = gameData?.category === 'web_games'
-          ? `/games/${gameId}/index.html`
-          : `/labs/${gameId}/index.html`
-
+        // Default fallback: /labs/ directory for other games
         return (
           <iframe
-            src={iframeSrc}
+            src={`/labs/${gameId}/index.html`}
             style={{
               width: '100%',
               height: '100%',
