@@ -1,0 +1,49 @@
+{
+	"root": true,
+	"parser": "@typescript-eslint/parser",
+	"plugins": ["prettier", "@typescript-eslint"],
+	"extends": ["prettier", "plugin:prettier/recommended", "plugin:@typescript-eslint/recommended"],
+	"overrides": [
+		{
+			"files": ["**/__tests__/**/*.ts", "**/*.test.ts", "**/*.spec.ts"],
+			"rules": {
+				"@typescript-eslint/no-explicit-any": "off",
+				"@typescript-eslint/no-empty-function": "off"
+			}
+		}
+	],
+	"rules": {
+		"prettier/prettier": "error",
+		"no-undef": "error",
+		"no-multi-assign": "error",
+		// Allow some linting issues that are prevalent in the codebase, but please refactor and fix!
+		"@typescript-eslint/no-empty-function": "warn",
+		"@typescript-eslint/no-unused-vars": ["warn", { "argsIgnorePattern": "^_", "varsIgnorePattern": "^_" }],
+		"@typescript-eslint/no-this-alias": ["warn", { "allowedNames": ["ability", "ab"] }],
+		"prefer-const": "warn"
+	},
+	"parserOptions": {
+		"ecmaVersion": 2020,
+		"sourceType": "module",
+		"warnOnUnsupportedTypeScriptVersion": false
+	},
+	"env": {
+		"browser": true,
+		"es6": true,
+		"node": true
+	},
+	"globals": {
+		"Phaser": true,
+		"__WebpackModuleApi": true,
+		"CanvasImageSource": true,
+		"globalThis": true,
+		"jest": true,
+		"beforeAll": true,
+		"afterAll": true,
+		"beforeEach": true,
+		"afterEach": true,
+		"describe": true,
+		"test": true,
+		"expect": true
+	}
+}

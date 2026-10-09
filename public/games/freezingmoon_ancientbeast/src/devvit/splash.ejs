@@ -1,0 +1,182 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+		<title>Ancient Beast</title>
+		<style>
+			* {
+				box-sizing: border-box;
+				user-select: none;
+			}
+			html,
+			body {
+				margin: 0;
+				height: 100%;
+				width: 100%;
+				font-family: 'Play', sans-serif;
+				background: black url('<%= require('assets/interface/skulls.jpg') %>') repeat;
+				overflow: hidden;
+				padding: 0;
+				color: white;
+				caret-color: transparent;
+			}
+			#matchMaking {
+				width: 100%;
+				height: 100%;
+				min-height: 510px;
+				position: absolute;
+				left: 0;
+				top: 0;
+				z-index: 98;
+				text-align: center;
+				background: black url('<%= require('assets/interface/splash.jpg') %>') no-repeat center;
+				background-size: cover;
+				background-position: center;
+				overflow: auto;
+			}
+			#gameSetupContainer {
+				display: flex;
+				flex-direction: column;
+				height: 100vh;
+				caret-color: transparent;
+			}
+			#pre-match {
+				flex: 1;
+				display: flex;
+				flex-direction: column;
+				justify-content: center;
+				align-items: center;
+			}
+			#devvitLobby {
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				gap: 6px;
+			}
+			#devvitTitle img {
+				display: block;
+				margin: 0 auto;
+				max-width: 300px;
+				width: 100%;
+				height: auto;
+			}
+			.lobby-row {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			.button-wrapper {
+				font-size: 1.5em;
+				text-shadow: 2px 2px black;
+				margin: 20px auto;
+				text-align: center;
+			}
+			.button-wrapper .crimson-button {
+				background-color: transparent !important;
+				background-image: url('<%= require('assets/interface/small_button.png') %>');
+				background-size: 190px;
+				border: 0;
+				width: 190px;
+				height: 74px;
+				color: #ffffff;
+				font-size: 0.9em;
+				font-weight: bold;
+				cursor: pointer;
+				transition: filter 0.15s ease-in-out;
+				outline: 0;
+			}
+			.button-wrapper .crimson-button:hover {
+				filter: brightness(135%);
+			}
+			.button-wrapper .crimson-button:focus {
+				color: white;
+				filter: brightness(135%);
+				text-shadow: 0 0 10px rgb(214, 98, 94);
+			}
+			.button-wrapper .crimson-button.disabled {
+				pointer-events: none;
+				filter: grayscale(100%);
+			}
+			.button-wrapper .crimson-button.green-button {
+				background-image: url('<%= require('assets/interface/small_button_green.png') %>');
+			}
+			.button-wrapper .crimson-button.green-button:focus {
+				text-shadow: 0 0 10px rgb(94, 214, 118);
+			}
+			.devvit-queue-status {
+				font-size: 0.95rem;
+				color: #ccc;
+				min-height: 1.2em;
+			}
+			.devvit-matches-counter {
+				font-size: 0.85rem;
+				color: #999;
+			}
+			.ab-loading {
+				display: inline-block;
+				width: 1rem;
+				height: 1rem;
+				margin-right: 0.4rem;
+				vertical-align: -0.15rem;
+				border: 2px solid rgba(255, 255, 255, 0.35);
+				border-top-color: #fff;
+				border-radius: 50%;
+				animation: ab-spin 0.8s linear infinite;
+			}
+			@keyframes ab-spin {
+				to {
+					transform: rotate(360deg);
+				}
+			}
+			.ab-badge {
+				position: fixed;
+				right: 0.5rem;
+				bottom: 0.5rem;
+				z-index: 100;
+				font-size: 0.7rem;
+				line-height: 1.1;
+				text-align: right;
+				color: #9a9a9a;
+				text-shadow: 0 1px 2px rgba(0, 0, 0, 0.9);
+				pointer-events: none;
+				user-select: none;
+			}
+			.ab-badge__game {
+				font-weight: bold;
+			}
+			.ab-badge__devvit {
+				color: #c9c9c9;
+			}
+		</style>
+	</head>
+	<body>
+		<div id="matchMaking">
+			<div id="gameSetupContainer">
+				<div id="pre-match">
+					<div id="devvitLobby">
+						<div id="devvitTitle">
+							<img src="<%= require('assets/interface/AncientBeast.png') %>" alt="Ancient Beast" />
+						</div>
+						<div class="lobby-row">
+							<div class="button-wrapper">
+								<input class="crimson-button green-button" id="devvitBotPracticeButton" type="button" value="Bot Practice" />
+							</div>
+						</div>
+						<div class="lobby-row">
+							<div class="button-wrapper">
+								<input class="crimson-button" id="devvitQueueButton" type="button" value="Online Duel" />
+							</div>
+						</div>
+						<div id="devvitQueueStatus" class="devvit-queue-status"></div>
+						<div id="devvitMatchesCounter" class="devvit-matches-counter"></div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<div id="badge" class="ab-badge">
+			<div class="ab-badge__game"></div>
+			<div class="ab-badge__devvit"></div>
+		</div>
+	</body>
+</html>

@@ -1,0 +1,369 @@
+import $j from 'jquery';
+import { getUrl } from './assets';
+import { Creature } from './creature';
+import Game from './game';
+import { AbilitySlot } from './ability';
+import { CreatureType } from './data/types';
+import { Point } from './utility/pointfacade';
+
+/**
+ * Player Class
+ * Player object with attributes
+ */
+
+/**
+ * NOTE
+ * need to convert game.js -> game.ts to get rid of @ts-expect-errors
+ *
+ * to fix @ts-expect-error 2554: properly type the arguments for the trigger functions in `game.ts`
+ */
+
+type ScoreType =
+	| 'firstKill'
+	| 'kill'
+	| 'combo'
+	| 'humiliation'
+	| 'annihilation'
+	| 'deny'
+	| 'timebonus'
+	| 'creaturebonus'
+	| 'darkpriestbonus'
+	| 'immortal'
+	| 'pickupDrop'
+	| 'upgrade';
+
+export type ScoreEvent = {
+	type: ScoreType;
+	creature?: Creature;
+	player?: PlayerID;
+	kills?: number;
+	ability?: AbilitySlot;
+	/** Points already resolved by the game, for events whose value depends on match state. */
+	points?: number;
+};
+
+/**
+ * Bonus for the first three kills of the match, in order: 30, then 20, then 10.
+ *
+ * The bonus shrinks rather than being all-or-nothing on the very first kill, so
+ * it is a race several players can take part in (first, second and third can all
+ * go to different players) or sweep entirely with one player.
+ */
+export const BLOOD_BONUS = [30, 20, 10];
+
+export type PlayerColor = 'red' | 'blue' | 'orange' | 'green';
+
+export type PlayerID = 0 | 1 | 2 | 3;
+export type PlayerController = 'human' | 'bot';
+
+type DarkPriestOwner = {
+	controller: PlayerController;
+	color: PlayerColor;
+};
+
+/**
+ * The colour a player seat is drawn in, derived purely from its id.
+ *
+ * Exported so a Dark Priest cardboard can be requested before the `Player`
+ * objects exist (see `Game#preloadDarkPriestCardboards`) without duplicating this
+ * mapping.
+ */
+export function getPlayerColor(id: PlayerID): PlayerColor {
+	switch (id) {
+		case 0:
+			return 'red';
+		case 1:
+			return 'blue';
+		case 2:
+			return 'orange';
+		default:
+			return 'green';
+	}
+}
+
+export function getDarkPriestCardboardKey(owner: DarkPriestOwner): string {
+	const variant = owner.controller === 'bot' ? 'clone' : 'player';
+	return `Dark Priest ${variant} ${owner.color}`;
+}
+
+export function getDarkPriestAvatarUrl(owner: DarkPriestOwner): string {
+	const variant = owner.controller === 'bot' ? 'clone' : 'player';
+	return getUrl(`units/avatars/Dark Priest ${variant} ${owner.color}`);
+}
+
+export function getDarkPriestDisplayOffsetX(owner: DarkPriestOwner): number {
+	return owner.controller === 'bot' ? 0 : -10;
+}
+
+type PlayerName = `Player${1 | 2 | 3 | 4}`;
+
+type TotalScore = Record<ScoreType, number> & { total: number };
+
+export class Player {
+	id: PlayerID;
+	game: Game;
+	creatures: Creature[];
+	name: PlayerName;
+	color: PlayerColor;
+	avatar: string;
+	score: ScoreEvent[];
+	plasma: number;
+	flipped: boolean;
+	availableCreatures: CreatureType[];
+	hasLost: boolean;
+	hasFled: boolean;
+	bonusTimePool: number;
+	totalTimePool: number;
+	startTime: Date;
+	_summonCreaturesWithMaterializationSickness: boolean;
+	controller: PlayerController;
+	constructor(id: PlayerID, game: Game) {
+		/* Attributes
+		 *
+		 * id :		Integer :	Id of the player 1, 2, 3 or 4
+		 * creature :	Array :		Array containing players creatures
+		 * plasma :	Integer :	Plasma amount for the player
+		 * flipped :	Boolean :	Player side of the battlefield (affects displayed creature)
+		 *
+		 */
+
+		this.id = id;
+		this.game = game;
+		this.creatures = [];
+		this.name = ('Player' + (id + 1)) as PlayerName;
+		this.color = getPlayerColor(id);
+		this.avatar = getDarkPriestAvatarUrl({ controller: 'human', color: this.color });
+		this.score = [];
+		// @ts-expect-error ts(2339)
+		this.plasma = game.plasma_amount;
+		this.flipped = Boolean(id % 2); // Convert odd/even to true/false
+		this.availableCreatures = game.availableCreatures;
+		this.hasLost = false;
+		this.hasFled = false;
+		this.bonusTimePool = 0;
+		this.totalTimePool = game.timePool * 1000;
+		this.startTime = new Date();
+		this.controller = 'human';
+
+		this.score = [
+			{
+				type: 'timebonus',
+			},
+		];
+
+		/**
+		 * Whether creatures summoned by Player are affected by Materialization Sickness.
+		 */
+		this._summonCreaturesWithMaterializationSickness =
+			!this.game.metaPowersState.disableMaterializationSickness;
+
+		// Events
+		this.game.channels.metaPowers.on('toggleDisableMaterializationSickness', (enabled: boolean) => {
+			this._summonCreaturesWithMaterializationSickness = !enabled;
+		});
+	}
+
+	// TODO: Is this even right? it should be off by 1 based on this code...
+	getNbrOfCreatures() {
+		let nbr = -1;
+		let creature: Creature;
+		const creatures = this.creatures;
+		const count = creatures.length;
+		type CreatureCountFlag = Creature & { hideFromCreatureCount?: boolean };
+
+		for (let i = 0; i < count; i++) {
+			creature = creatures[i];
+
+			if (
+				!creature.dead &&
+				!creature.undead &&
+				!(creature as CreatureCountFlag).hideFromCreatureCount
+			) {
+				nbr++;
+			}
+		}
+
+		return nbr;
+	}
+
+	/**
+	 * @param {string} type - Creature type (ex: "--" for Dark Priest and "G2" for Swampler)
+	 * @param {Point} pos - Position {x,y}
+	 */
+	summon(type: CreatureType, pos: Point) {
+		const game = this.game;
+		const baseCreatureData = game.retrieveCreatureStats(type);
+
+		// Create the full data for creature creation.
+		// Clone the shared stats entry so summoning does not mutate
+		// `game.creatureData` (which `retrieveCreatureStats` returns by
+		// reference) — otherwise a later summon reads back the previous
+		// summon's `x`/`y`/`team`/`temp`, placing the new unit at the
+		// wrong location. This is most visible during replay, where the
+		// Dark Priest materializes several units in a row.
+		const creatureData = $j.extend({}, baseCreatureData, pos, {
+			team: this.id,
+			temp: false,
+		});
+
+		if (creatureData.name !== 'Dark Priest') {
+			game.soundsys.playShout(creatureData.name);
+		}
+
+		const creature = new Creature(creatureData, game);
+
+		this.creatures.push(creature);
+		creature.summon(!this._summonCreaturesWithMaterializationSickness);
+		// Remember what was materialized last so a random materialization can
+		// offer something else instead of copy-catting this one.
+		game.lastSummonedType = type;
+		// @ts-expect-error 2554
+		game.onCreatureSummon(creature);
+	}
+
+	/**
+	 * Ask if the player wants to flee the match
+	 */
+	flee(o?) {
+		this.hasFled = true;
+		this.deactivate();
+		this.game.skipTurn(o);
+	}
+
+	/**
+	 * Create and return a totalScore object that includes the point value for each score event as well as the cumulative score
+	 */
+	getScore(): TotalScore {
+		let points = 0;
+		const total = this.score.length;
+		const totalScore: TotalScore = {
+			firstKill: 0,
+			combo: 0,
+			kill: 0,
+			deny: 0,
+			humiliation: 0,
+			annihilation: 0,
+			timebonus: 0,
+			creaturebonus: 0,
+			darkpriestbonus: 0,
+			immortal: 0,
+			total: 0,
+			pickupDrop: 0,
+			upgrade: 0,
+		};
+
+		for (let i = 0; i < total; i++) {
+			const s = this.score[i];
+			points = 0;
+
+			switch (s.type) {
+				case 'firstKill':
+					points += s.points ?? 0;
+					break;
+				case 'kill':
+					// Prevent issues with non-leveled creatures, e.g. Dark Priest
+					if (s.creature.level && s.creature.level !== '-') {
+						points += Number(s.creature.level) * 5;
+					}
+					break;
+				case 'combo':
+					points += s.kills * 5;
+					break;
+				case 'humiliation':
+					points += 50;
+					break;
+				case 'annihilation':
+					points += 99;
+					break;
+				case 'deny':
+					points += -1 * s.creature.size * 5;
+					break;
+				case 'timebonus':
+					points += Math.round(this.bonusTimePool * 0.5);
+					break;
+				case 'creaturebonus':
+					if (s.creature.level !== '-') {
+						points += Number(s.creature.level) * 5;
+					}
+					break;
+				case 'darkpriestbonus':
+					points += 50;
+					break;
+				case 'immortal':
+					points += 100;
+					break;
+				case 'pickupDrop':
+					points += 2;
+					break;
+				case 'upgrade':
+					points += 1;
+					break;
+			}
+
+			totalScore[s.type] += points;
+			totalScore.total += points;
+		}
+
+		return totalScore;
+	}
+
+	/**
+	 * Test if the player has the greater score.
+	 * Return true if in lead. False if not.
+	 * TODO: This is also wrong, because it allows for ties to result in a "leader".
+	 */
+	isLeader(): boolean {
+		const game = this.game;
+
+		for (let i = 0; i < game.gameMode; i++) {
+			// Each player
+			// If someone has a higher score
+			if (game.players[i].getScore().total > this.getScore().total) {
+				return false; // He's not in lead
+			}
+		}
+
+		return true; // If nobody has a better score he's in lead
+	}
+
+	/**
+	 * A player is considered annihilated if all his creatures are dead DP included
+	 */
+	isAnnihilated(): boolean {
+		// annihilated is false if only one creature is not dead
+		let annihilated = this.creatures.length > 1;
+		const count = this.creatures.length;
+
+		for (let i = 0; i < count; i++) {
+			annihilated = annihilated && this.creatures[i].dead;
+		}
+
+		return annihilated;
+	}
+
+	/**
+	 * Remove all player's creature from the queue
+	 */
+	deactivate(): void {
+		const game = this.game;
+
+		this.hasLost = true;
+
+		game.updateQueueDisplay();
+
+		// Test if allie Dark Priest is dead
+		if (game.gameMode > 2) {
+			// 2 vs 2
+			if (game.players[(this.id + 2) % 4].hasLost) {
+				game.endGame();
+			}
+		} else {
+			// 1 vs 1
+			game.endGame();
+		}
+	}
+
+	get summonCreaturesWithMaterializationSickness() {
+		return this._summonCreaturesWithMaterializationSickness;
+	}
+}

@@ -1,0 +1,134 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { Creature } from './creature';
+import Game from './game';
+import { Hex } from './utility/hex';
+import { Trap } from './utility/trap';
+import { Damage } from './damage';
+
+/*
+ * Effect Class
+ */
+
+type EffectOwner = Creature | Hex;
+type EffectTarget = Creature | Hex;
+
+//type Damage = number; //Why??? what about the actual Damage type? Causes conflict on impaler.ts
+type EffectFnArg = Creature | Hex | Damage;
+
+type EffectOptions = Partial<Effect>;
+
+export class Effect {
+	id: number;
+	game: Game;
+	name: string;
+	owner: EffectOwner;
+	target: EffectTarget;
+	trigger: string;
+	creationTurn: number;
+
+	// NOTE: These "optional arguments" generally set via "optArgs" in the constructor.
+	// eslint-disable-next-line @typescript-eslint/no-empty-function
+	effectFn: (effect?: Effect, creatureHexOrDamage?: EffectFnArg) => void = () => {};
+	requireFn: (_arg?: any) => boolean = (_arg?: any) => true;
+	alterations: { [key: string]: any } = {};
+	turnLifetime = 0;
+	deleteTrigger = 'onStartOfRound';
+	stackable = true;
+	specialHint: string | undefined = undefined; // Special hint for log
+	deleteOnOwnerDeath = false;
+	isDeleted = false;
+
+	_trap: Trap | undefined = undefined;
+
+	// TODO: This is *very* similar to owner, though owner can be a hex
+	// Very few abilities use this field – they have access to ability.creature
+	// Refactor to remove.
+	attacker: Creature | undefined = undefined;
+
+	/**
+	 * @param{string} name - name of the effect
+	 * @param{EffectOwner} owner - Creature that created the effect
+	 * @param{EffectTarget} target - Creature or Hex : the object that possess the effect
+	 * @param{string} trigger - Event that trigger the effect
+	 * @param{EffectOptions} optArgs - dictionary of optional arguments
+	 * @param{Game} game
+	 * @constructor
+	 */
+	constructor(
+		name: string,
+		owner: EffectOwner,
+		target: EffectTarget,
+		trigger: string,
+		optArgs: EffectOptions,
+		game: Game,
+	) {
+		this.id = game.effectId++;
+		this.game = game;
+
+		this.name = name;
+		this.owner = owner;
+		this.target = target;
+		this.trigger = trigger;
+		this.creationTurn = game.turn;
+
+		for (const key of Object.keys(optArgs)) {
+			if (key in this) {
+				this[key] = optArgs[key];
+			}
+		}
+
+		game.effects.push(this);
+	}
+
+	animation(...args) {
+		if (args) {
+			this.activate(...args);
+		} else {
+			this.activate();
+		}
+	}
+
+	activate(arg?: any) {
+		if (!this.requireFn(arg)) {
+			return false;
+		}
+
+		if (arg instanceof Creature) {
+			arg.addEffect(this);
+		}
+
+		this.effectFn(this, arg);
+	}
+
+	deleteEffect() {
+		if (this.isDeleted) {
+			return;
+		}
+
+		this.isDeleted = true;
+
+		if ('effects' in this.target) {
+			const targetIdx = this.target.effects.indexOf(this);
+			if (targetIdx !== -1) {
+				this.target.effects.splice(targetIdx, 1);
+			}
+		}
+
+		const gameIdx = this.game.effects.indexOf(this);
+		if (gameIdx !== -1) {
+			this.game.effects.splice(gameIdx, 1);
+		}
+
+		if ('updateAlteration' in this.target) {
+			this.target.updateAlteration();
+		}
+	}
+
+	get trap() {
+		return this._trap;
+	}
+
+	set trap(trapOrUndefined) {
+		this._trap = trapOrUndefined;
+	}
+}

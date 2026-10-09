@@ -1,0 +1,612 @@
+import { beforeEach, describe, expect, jest, test } from '@jest/globals';
+
+// The real Phaser bundle needs a canvas context at import time, which jsdom
+// does not provide; `plasma-field` reaches it for `BlendModes`.
+jest.mock('phaser', () =>
+	(
+		jest.requireActual('../../../test/phaser-mock') as typeof import('../../../test/phaser-mock')
+	).createPhaserMock(),
+);
+
+jest.mock('../../damage', () => ({
+	Damage: class DamageMock {
+		attacker: unknown;
+		damages: Record<string, number>;
+		target: unknown;
+		constructor(
+			attacker: unknown,
+			damages: Record<string, number>,
+			_area: number,
+			_effects: unknown[],
+			_game: unknown,
+		) {
+			this.attacker = attacker;
+			this.damages = damages;
+		}
+	},
+}));
+
+jest.mock('../../utility/hex', () => ({
+	Hex: class HexMock {},
+	Direction: {
+		Right: 1,
+		Left: 4,
+	},
+}));
+
+jest.mock('../../effect', () => ({
+	Effect: class EffectMock {},
+}));
+
+jest.mock('../../game', () => ({
+	__esModule: true,
+	default: class GameMock {},
+}));
+
+import loadVehemothAbilities from '../../abilities/Vehemoth';
+
+describe('Vehemoth Falling Arrow damage fallback', () => {
+	let game: {
+		abilities: Record<number, unknown[]>;
+		Phaser: {
+			camera: {
+				shake: ReturnType<typeof jest.fn>;
+				SHAKE_VERTICAL: string;
+			};
+			add: {
+				graphics: ReturnType<typeof jest.fn>;
+				tween: ReturnType<typeof jest.fn>;
+			};
+			Easing: {
+				Linear: {
+					None: string;
+				};
+			};
+		};
+		grid: {
+			creatureGroup: {
+				create: ReturnType<typeof jest.fn>;
+			};
+		};
+	};
+	let ability: {
+		activate: (target: {
+			level: string;
+			hexagons: { displayPos: { x: number; y: number } }[];
+			takeDamage: ReturnType<typeof jest.fn>;
+		}) => void;
+		creature: {
+			id: number;
+			level: number;
+			size: number;
+			legacyProjectileEmissionPoint: { x: number; y: number };
+			player: { flipped: boolean };
+			creatureSprite: {
+				grp: { x: number; y: number };
+				sprite: {
+					x: number;
+					y: number;
+					originX: number;
+					originY: number;
+					scaleX: number;
+					scaleY: number;
+					texture: { width: number; height: number };
+				};
+				setDir: ReturnType<typeof jest.fn>;
+			};
+			facePlayerDefault: ReturnType<typeof jest.fn>;
+		};
+		end: ReturnType<typeof jest.fn>;
+		isUpgraded: () => boolean;
+		damages: { pierce: number; frost: number };
+	};
+
+	beforeEach(() => {
+		game = {
+			abilities: {},
+			Phaser: {
+				Easing: {
+					Linear: {
+						None: 'linear-none',
+					},
+				},
+				camera: {
+					shake: jest.fn(),
+					SHAKE_VERTICAL: 'vertical',
+				},
+				add: {
+					graphics: jest.fn(() => ({
+						beginFill: jest.fn(),
+						drawRect: jest.fn(),
+						endFill: jest.fn(),
+						destroy: jest.fn(),
+					})),
+					tween: jest.fn(() => {
+						const tween = {
+							onComplete: {
+								add: (fn: () => void) => {
+									fn();
+								},
+							},
+							to: () => tween,
+							start: () => tween,
+						};
+						return tween;
+					}),
+				},
+			},
+			grid: {
+				creatureGroup: {
+					create: jest.fn(() => ({
+						originX: 0.5,
+						originY: 0.5,
+						displayOriginX: 0,
+						displayOriginY: 0,
+						setOrigin: jest.fn().mockReturnThis(),
+						destroy: jest.fn(),
+						mask: null,
+					})),
+				},
+			},
+		};
+
+		loadVehemothAbilities(game as never);
+
+		// Expose a gameEngine adapter mock so gameplay code that calls
+		// G.gameEngine.* (e.g. cameras.main.shake, add.graphics, tween)
+		// has a stable surface to talk to.
+		(game as any).gameEngine = {
+			cameras: { main: { shake: jest.fn() } },
+			add: {
+				sprite: jest.fn(() => ({
+					setOrigin: jest.fn(),
+					rotation: 0,
+					alpha: 1,
+					x: 0,
+					y: 0,
+					mask: null,
+					destroy: jest.fn(),
+				})),
+				graphics: jest.fn(() => ({
+					beginFill: jest.fn(),
+					drawRect: jest.fn(),
+					endFill: jest.fn(),
+					destroy: jest.fn(),
+				})),
+				bitmapData: jest.fn(() => ({
+					width: 100,
+					height: 100,
+					ctx: {
+						clearRect: jest.fn(),
+						save: jest.fn(),
+						restore: jest.fn(),
+						translate: jest.fn(),
+						scale: jest.fn(),
+						drawImage: jest.fn(),
+					},
+					context: {
+						clearRect: jest.fn(),
+						save: jest.fn(),
+						restore: jest.fn(),
+						translate: jest.fn(),
+						scale: jest.fn(),
+						drawImage: jest.fn(),
+					},
+					dirty: false,
+					update: jest.fn(),
+					destroy: jest.fn(),
+				})),
+				group: jest.fn(() => ({
+					children: [],
+					add: jest.fn(),
+					addAt: jest.fn(),
+					remove: jest.fn(),
+				})),
+				tileSprite: jest.fn(() => ({})),
+				socket: jest.fn(() => ({
+					originX: 0.5,
+					originY: 0.5,
+					displayOriginX: 0,
+					displayOriginY: 0,
+					scaleX: 1,
+					scaleY: 1,
+					setOrigin: jest.fn().mockReturnThis(),
+					setScale: jest.fn().mockReturnThis(),
+					angle: 0,
+					destroy: jest.fn(),
+				})),
+				image: jest.fn(() => ({})),
+				text: jest.fn(() => ({})),
+			},
+			tween: jest.fn(() => {
+				const tween = {
+					onComplete: { add: (fn: () => void) => fn(), addOnce: (fn: () => void) => fn() },
+					to: () => tween,
+					start: () => tween,
+					stop: () => tween,
+					yoyo: () => tween,
+					repeat: () => tween,
+				};
+				return tween;
+			}),
+		};
+
+		const baseAbility = game.abilities[6][3] as typeof ability;
+		ability = {
+			...baseAbility,
+			creature: {
+				id: 6,
+				level: 7,
+				size: 2,
+				legacyProjectileEmissionPoint: { x: 0, y: 0 },
+				player: { flipped: false },
+				creatureSprite: {
+					grp: { x: 0, y: 0 },
+					sprite: {
+						x: 0,
+						y: 0,
+						originX: 0.5,
+						originY: 1,
+						scaleX: 1,
+						scaleY: 1,
+						texture: { width: 100, height: 100 },
+					},
+					setDir: jest.fn(),
+				},
+				facePlayerDefault: jest.fn(),
+			},
+			end: jest.fn(),
+			isUpgraded: () => false,
+			damages: { pierce: 20, frost: 0 },
+		};
+	});
+
+	test('defaults to the base frost bonus when the target has no numeric level', () => {
+		const target = {
+			level: '-',
+			hexagons: [{ displayPos: { x: 1000, y: 10 } }],
+			takeDamage: jest.fn(),
+		};
+
+		ability.activate(target);
+
+		expect(ability.end).toHaveBeenCalledTimes(1);
+		expect(target.takeDamage).toHaveBeenCalledTimes(1);
+		const damage = target.takeDamage.mock.calls[0][0] as {
+			damages: { pierce: number; frost: number };
+		};
+		expect(damage.damages).toEqual({ pierce: 20, frost: 3 });
+	});
+
+	test('fires the arrow without a Graphics mask that would paint over the board', () => {
+		const target = {
+			level: '1',
+			hexagons: [{ displayPos: { x: 1000, y: 10 } }],
+			takeDamage: jest.fn(),
+		};
+
+		ability.activate(target);
+
+		// A Graphics mask in the creature group is drawn by the WebGL renderer, so
+		// it flashed a white slab over the board and hid the projectile itself.
+		expect((game as any).gameEngine.add.graphics).not.toHaveBeenCalled();
+		// The bolt is created through the engine, which parents it into the
+		// creature group; `Group.create` has no Phaser 4 equivalent.
+		const addSprite = (game as any).gameEngine.add.sprite;
+		expect(addSprite).toHaveBeenCalledWith(
+			expect.any(Number),
+			expect.any(Number),
+			'effects_ice-bolt',
+			undefined,
+			game.grid.creatureGroup,
+		);
+		const sprite = addSprite.mock.results[0].value as { mask: unknown };
+		expect(sprite.mask).toBeNull();
+	});
+});
+
+describe('Vehemoth Flat Frons deferred query resume', () => {
+	let game: {
+		abilities: Record<number, unknown[]>;
+		Phaser: {
+			camera: {
+				shake: ReturnType<typeof jest.fn>;
+				SHAKE_HORIZONTAL: string;
+			};
+		};
+		grid: {
+			hexes: { x: number; y: number; creature: unknown }[][];
+			getHexLine: ReturnType<typeof jest.fn>;
+			refreshHoverState: ReturnType<typeof jest.fn>;
+		};
+		activeCreature: {
+			queryMove: ReturnType<typeof jest.fn>;
+			dead?: boolean;
+		};
+		animationQueue: unknown[];
+		_deferredQueryMovePending: number;
+		freezedInput: boolean;
+	};
+
+	beforeEach(() => {
+		game = {
+			abilities: {},
+			Phaser: {
+				camera: {
+					shake: jest.fn(),
+					SHAKE_HORIZONTAL: 'horizontal',
+				},
+			},
+			grid: {
+				hexes: [
+					[
+						{ x: 0, y: 0, creature: null },
+						{ x: 1, y: 0, creature: null },
+						{ x: 2, y: 0, creature: null },
+						{ x: 3, y: 0, creature: null },
+						{ x: 4, y: 0, creature: null },
+					],
+				],
+				getHexLine: jest.fn(() => [
+					{ x: 2, y: 0, creature: null },
+					{ x: 3, y: 0, creature: null },
+				]),
+				refreshHoverState: jest.fn(),
+			},
+			activeCreature: {
+				queryMove: jest.fn(),
+			},
+			animationQueue: [],
+			_deferredQueryMovePending: 0,
+			freezedInput: false,
+		};
+
+		loadVehemothAbilities(game as never);
+
+		// Expose a gameEngine adapter mock so gameplay code that calls
+		// G.gameEngine.* (e.g. cameras.main.shake) has a stable surface.
+		(game as any).gameEngine = {
+			cameras: {
+				main: {
+					shake: jest.fn(),
+					SHAKE_HORIZONTAL: 'horizontal',
+					SHAKE_VERTICAL: 'vertical',
+					SHAKE_BOTH: 'both',
+				},
+			},
+		};
+	});
+
+	test('resumes query when knockback target is unmoveable', () => {
+		const ability = game.abilities[6][1] as {
+			activate: (path: unknown[], args: { direction: number }) => void;
+			_damageTarget: (target: unknown) => { kill: boolean };
+			_getHexes: () => unknown[];
+			end: ReturnType<typeof jest.fn>;
+			creature: {
+				id: number;
+				size: number;
+				x: number;
+				y: number;
+				stats: { moveable: boolean };
+				player: { flipped: boolean };
+				queryMove: ReturnType<typeof jest.fn>;
+				calculatePath: ReturnType<typeof jest.fn>;
+				moveTo: ReturnType<typeof jest.fn>;
+			};
+		};
+
+		const target = {
+			id: 99,
+			x: 2,
+			y: 0,
+			size: 1,
+			stats: { moveable: false },
+			moveTo: jest.fn(),
+		};
+
+		ability._getHexes = () => [];
+		ability.end = jest.fn();
+		ability._damageTarget = jest.fn(() => ({ kill: false }));
+		ability.creature = {
+			id: 6,
+			size: 2,
+			x: 0,
+			y: 0,
+			stats: { moveable: true },
+			player: { flipped: false },
+			queryMove: jest.fn(),
+			calculatePath: jest.fn(() => [{ x: 1, y: 0 }]),
+			moveTo: jest.fn((_hex, opts: { callback: () => void }) => {
+				opts.callback();
+			}),
+		};
+
+		const path = [
+			{ x: 1, y: 0, creature: null },
+			{ x: 2, y: 0, creature: target },
+		];
+
+		ability.activate(path, { direction: 1 });
+
+		expect(ability.end).toHaveBeenCalledWith(false, true);
+		expect(ability.creature.queryMove).not.toHaveBeenCalled();
+		expect(target.moveTo).not.toHaveBeenCalled();
+		expect(game.activeCreature.queryMove).toHaveBeenCalledTimes(1);
+	});
+
+	test('resumes query after successful knockback movement callback', () => {
+		const ability = game.abilities[6][1] as {
+			activate: (path: unknown[], args: { direction: number }) => void;
+			_damageTarget: (target: unknown) => { kill: boolean };
+			_getHexes: () => unknown[];
+			end: ReturnType<typeof jest.fn>;
+			creature: {
+				id: number;
+				size: number;
+				x: number;
+				y: number;
+				stats: { moveable: boolean };
+				player: { flipped: boolean };
+				queryMove: ReturnType<typeof jest.fn>;
+				calculatePath: ReturnType<typeof jest.fn>;
+				moveTo: ReturnType<typeof jest.fn>;
+			};
+		};
+
+		const target = {
+			id: 99,
+			x: 2,
+			y: 0,
+			size: 1,
+			stats: { moveable: true },
+			moveTo: jest.fn((_hex, opts: { callback: () => void }) => {
+				opts.callback();
+			}),
+		};
+
+		ability._getHexes = () => [];
+		ability.end = jest.fn();
+		ability._damageTarget = jest.fn(() => ({ kill: false }));
+		ability.creature = {
+			id: 6,
+			size: 2,
+			x: 0,
+			y: 0,
+			stats: { moveable: true },
+			player: { flipped: false },
+			queryMove: jest.fn(),
+			calculatePath: jest.fn(() => [{ x: 1, y: 0 }]),
+			moveTo: jest.fn((_hex, opts: { callback: () => void }) => {
+				opts.callback();
+			}),
+		};
+
+		const path = [
+			{ x: 1, y: 0, creature: null },
+			{ x: 2, y: 0, creature: target },
+		];
+
+		ability.activate(path, { direction: 1 });
+
+		expect(target.moveTo).toHaveBeenCalledTimes(1);
+		expect(ability.creature.queryMove).not.toHaveBeenCalled();
+		expect(game.activeCreature.queryMove).toHaveBeenCalledTimes(1);
+	});
+
+	test('releases deferred freeze when active creature is dead during resume', () => {
+		const ability = game.abilities[6][1] as {
+			activate: (path: unknown[], args: { direction: number }) => void;
+			_damageTarget: (target: unknown) => { kill: boolean };
+			_getHexes: () => unknown[];
+			end: ReturnType<typeof jest.fn>;
+			creature: {
+				id: number;
+				size: number;
+				x: number;
+				y: number;
+				stats: { moveable: boolean };
+				player: { flipped: boolean };
+				queryMove: ReturnType<typeof jest.fn>;
+				calculatePath: ReturnType<typeof jest.fn>;
+				moveTo: ReturnType<typeof jest.fn>;
+			};
+		};
+
+		const target = {
+			id: 99,
+			x: 2,
+			y: 0,
+			size: 1,
+			stats: { moveable: false },
+			moveTo: jest.fn(),
+		};
+
+		game._deferredQueryMovePending = 1;
+		game.freezedInput = true;
+		game.activeCreature.dead = true;
+
+		ability._getHexes = () => [];
+		ability.end = jest.fn();
+		ability._damageTarget = jest.fn(() => ({ kill: false }));
+		ability.creature = {
+			id: 6,
+			size: 2,
+			x: 0,
+			y: 0,
+			stats: { moveable: true },
+			player: { flipped: false },
+			queryMove: jest.fn(),
+			calculatePath: jest.fn(() => [{ x: 1, y: 0 }]),
+			moveTo: jest.fn((_hex, opts: { callback: () => void }) => {
+				opts.callback();
+			}),
+		};
+
+		const path = [
+			{ x: 1, y: 0, creature: null },
+			{ x: 2, y: 0, creature: target },
+		];
+
+		ability.activate(path, { direction: 1 });
+
+		expect(game._deferredQueryMovePending).toBe(0);
+		expect(game.freezedInput).toBe(false);
+		expect(game.grid.refreshHoverState).toHaveBeenCalledTimes(1);
+		expect(game.activeCreature.queryMove).not.toHaveBeenCalled();
+	});
+
+	test('resumes query when charge destination has no path', () => {
+		const ability = game.abilities[6][1] as {
+			activate: (path: unknown[], args: { direction: number }) => void;
+			_damageTarget: (target: unknown) => { kill: boolean };
+			_getHexes: () => unknown[];
+			end: ReturnType<typeof jest.fn>;
+			creature: {
+				id: number;
+				size: number;
+				x: number;
+				y: number;
+				stats: { moveable: boolean };
+				player: { flipped: boolean };
+				queryMove: ReturnType<typeof jest.fn>;
+				calculatePath: ReturnType<typeof jest.fn>;
+				moveTo: ReturnType<typeof jest.fn>;
+			};
+		};
+
+		const target = {
+			id: 99,
+			x: 2,
+			y: 0,
+			size: 1,
+			stats: { moveable: true },
+			moveTo: jest.fn(),
+		};
+
+		ability._getHexes = () => [];
+		ability.end = jest.fn();
+		ability._damageTarget = jest.fn(() => ({ kill: false }));
+		ability.creature = {
+			id: 6,
+			size: 2,
+			x: 0,
+			y: 0,
+			stats: { moveable: true },
+			player: { flipped: false },
+			queryMove: jest.fn(),
+			calculatePath: jest.fn(() => []),
+			moveTo: jest.fn(),
+		};
+
+		const path = [
+			{ x: 1, y: 0, creature: null },
+			{ x: 2, y: 0, creature: target },
+		];
+
+		ability.activate(path, { direction: 1 });
+
+		expect(ability.creature.moveTo).not.toHaveBeenCalled();
+		expect(game.activeCreature.queryMove).toHaveBeenCalledTimes(1);
+	});
+});

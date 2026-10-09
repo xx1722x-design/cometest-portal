@@ -1,0 +1,6 @@
+.github
+node_modules
+deploy
+assets.js
+assets/index.js
+package-lock.json
