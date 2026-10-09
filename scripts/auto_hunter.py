@@ -88,8 +88,8 @@ def find_game_repo(skip_ids=None):
             response = requests.get(
                 "https://api.github.com/search/repositories",
                 params={
-                    # Ultra-simple query: just topic and minimum stars, let Python filter
-                    "q": "topic:html5-game stars:>10",
+                    # Safe licenses only: MIT, Apache 2.0, Zlib (permissive for commercial use)
+                    "q": "topic:html5-game stars:>10 (license:mit OR license:apache-2.0 OR license:zlib)",
                     "sort": "stars",
                     "order": "desc",
                     "per_page": 100,  # Max results per page
@@ -382,8 +382,8 @@ def capture_screenshot(game_folder, repo_id):
         return None
 
 
-def update_games_data(repo_id, metadata, thumbnail_path):
-    """Add game to gamesData.ts by directly modifying the TypeScript file"""
+def update_games_data(repo_id, metadata, thumbnail_path, original_author=None, source_url=None):
+    """Add game to gamesData.ts with attribution metadata"""
     print("📝 Updating gamesData.ts...")
 
     try:
@@ -394,9 +394,11 @@ def update_games_data(repo_id, metadata, thumbnail_path):
         title = metadata.get('title', '🎮 Unknown Game').replace('"', '\\"').replace('\n', ' ')
         description = metadata.get('description', 'A mysterious game.').replace('"', '\\"').replace('\n', ' ')[:150]
         image_path = thumbnail_path or "/thumbnails/default.jpg"
+        author = original_author or 'Unknown Developer'
+        url = source_url or 'https://github.com'
 
-        # Create new game entry - use template string instead of format()
-        new_game = '{\n    id: \'' + repo_id + '\',\n    title: \'' + title + '\',\n    description: \'' + description + '\',\n    thumbnail: \'🎮\',\n    category: \'web_games\',\n    icon: \'🎮\',\n    path: \'/game/' + repo_id + '\',\n    image: \'' + image_path + '\',\n    tags: [\'html5\', \'game\', \'auto-hunter\'],\n    seoKeywords: [\'html5\', \'game\', \'interactive\'],\n    occultTheme: \'dark-fantasy\',\n    play_count: 0,\n  }'
+        # Create new game entry with attribution
+        new_game = '{\n    id: \'' + repo_id + '\',\n    title: \'' + title + '\',\n    description: \'' + description + '\',\n    thumbnail: \'🎮\',\n    category: \'web_games\',\n    icon: \'🎮\',\n    path: \'/game/' + repo_id + '\',\n    image: \'' + image_path + '\',\n    tags: [\'html5\', \'game\', \'auto-hunter\'],\n    seoKeywords: [\'html5\', \'game\', \'interactive\'],\n    occultTheme: \'dark-fantasy\',\n    originalAuthor: \'' + author + '\',\n    sourceUrl: \'' + url + '\',\n    play_count: 0,\n  }'
 
         # Insert before the closing bracket of GAMES_DATA array
         # Find the last closing bracket before the export
@@ -548,8 +550,12 @@ def main():
         # Capture screenshot
         thumbnail_path = capture_screenshot(game_folder, extracted_id)
 
-        # Update gamesData.ts
-        if not update_games_data(extracted_id, metadata, thumbnail_path):
+        # Extract attribution info
+        original_author = repo['full_name'].split('/')[0]  # GitHub username
+        source_url = repo['html_url']  # GitHub repo URL
+
+        # Update gamesData.ts with attribution
+        if not update_games_data(extracted_id, metadata, thumbnail_path, original_author, source_url):
             print(f"   ❌ gamesData update failed, skipping")
             skip_ids.add(repo_id)  # Add to skip list on failure
             print(f"      Added to skip list (total protected: {len(skip_ids)})")

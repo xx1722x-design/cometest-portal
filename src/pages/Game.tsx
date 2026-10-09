@@ -155,17 +155,45 @@ export function Game() {
         if (game?.category === 'web_games') {
           const iframeSrc = `/games/${gameId}/index.html`
           return (
-            <iframe
-              src={iframeSrc}
-              style={{
-                width: '100%',
-                height: '100%',
-                border: 'none',
-                borderRadius: '0',
-              }}
-              sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-pointer-lock"
-              title={gameId}
-            />
+            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+              <iframe
+                src={iframeSrc}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  border: 'none',
+                  borderRadius: '0',
+                  display: 'block',
+                }}
+                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-pointer-lock"
+                title={gameId}
+              />
+              {game?.originalAuthor && game?.sourceUrl && (
+                <a
+                  href={game.sourceUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    position: 'absolute',
+                    bottom: '8px',
+                    right: '8px',
+                    fontSize: '10px',
+                    color: 'rgba(255, 255, 255, 0.4)',
+                    textDecoration: 'none',
+                    zIndex: 1000,
+                    padding: '4px 8px',
+                    backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                    borderRadius: '3px',
+                    transition: 'color 0.3s ease',
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.8)')}
+                  onMouseLeave={(e) => (e.currentTarget.style.color = 'rgba(255, 255, 255, 0.4)')}
+                  title={`Original Open Source Game by ${game.originalAuthor}`}
+                >
+                  Original: {game.originalAuthor}
+                </a>
+              )}
+            </div>
           )
         }
 
@@ -175,17 +203,35 @@ export function Game() {
           // Force English locale regardless of source file language
           const iframeSrc = `/simulations/${simName}.html?locale=en`
           return (
-            <iframe
-              src={iframeSrc}
-              style={{
-                width: '100%',
-                height: '100%',
-                border: 'none',
-                borderRadius: '0',
-              }}
-              sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-pointer-lock"
-              title={gameId}
-            />
+            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+              <iframe
+                src={iframeSrc}
+                style={{
+                  width: '100%',
+                  height: '100%',
+                  border: 'none',
+                  borderRadius: '0',
+                  display: 'block',
+                }}
+                sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-pointer-lock"
+                title={gameId}
+              />
+              <div
+                style={{
+                  position: 'absolute',
+                  bottom: '8px',
+                  right: '8px',
+                  fontSize: '10px',
+                  color: 'rgba(255, 255, 255, 0.4)',
+                  zIndex: 1000,
+                  padding: '4px 8px',
+                  backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                  borderRadius: '3px',
+                }}
+              >
+                Open Source by PhET
+              </div>
+            </div>
           )
         }
         // Default fallback: /labs/ directory for other games

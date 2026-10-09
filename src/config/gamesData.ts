@@ -13,6 +13,8 @@ export interface GameItem {
   image?: string
   tags?: string[]
   play_count?: number
+  originalAuthor?: string
+  sourceUrl?: string
 }
 
 export const GAMES_DATA: GameItem[] = [
