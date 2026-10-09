@@ -68,8 +68,16 @@ def load_existing_game_ids():
 def find_game_repo(skip_ids=None):
     """Find INDIE MASTERPIECE HTML5 games on GitHub with smart internal filtering"""
     skip_ids = skip_ids or set()
+
+    # Permanent blacklist: repos with malicious traps or harmful content
+    permanent_blacklist = {
+        'mumuy_pacman',  # Malicious redirect trap (5sec auto-redirect to Chinese site)
+        'mumuy/pacman',
+    }
+    skip_ids.update(permanent_blacklist)
+
     print("🔍 Searching GitHub for HTML5 games (stars >10)...")
-    print(f"   (Skipping {len(skip_ids)} previously processed repos)")
+    print(f"   (Skipping {len(skip_ids)} previously processed/blacklisted repos)")
 
     # Forbidden keywords that indicate non-game repos
     forbidden_keywords = ['engine', 'framework', 'library', 'template', 'boilerplate',
