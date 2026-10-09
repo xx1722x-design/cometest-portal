@@ -78,6 +78,9 @@ def find_game_repo(skip_ids=None):
                           'challenge', 'demo', 'example', 'sample', 'test', 'collection',
                           'resource', 'assets']
 
+    # Safe open-source licenses (permissive for commercial use)
+    safe_licenses = ['mit', 'apache-2.0', 'zlib', 'unlicense', 'bsd-2-clause', 'bsd-3-clause', 'isc']
+
     try:
         page = 1
         max_pages = 5  # 5 pages * 100 per_page = 500 candidates to filter from
@@ -88,8 +91,8 @@ def find_game_repo(skip_ids=None):
             response = requests.get(
                 "https://api.github.com/search/repositories",
                 params={
-                    # Safe licenses only: MIT, Apache 2.0, Zlib (permissive for commercial use)
-                    "q": "topic:html5-game stars:>10 (license:mit OR license:apache-2.0 OR license:zlib)",
+                    # Simple query: let Python filter licenses internally
+                    "q": "topic:html5-game stars:>10",
                     "sort": "stars",
                     "order": "desc",
                     "per_page": 100,  # Max results per page
@@ -109,7 +112,7 @@ def find_game_repo(skip_ids=None):
                 print(f"   (No results on page {page}, search complete)")
                 break
 
-            # Internal smart filtering: check repo name and description
+            # Internal smart filtering: check repo name, description, and license
             for repo in repos:
                 repo_id = repo['full_name'].replace('/', '_').lower()
                 repo_name = repo.get('name', '').lower()
@@ -125,9 +128,16 @@ def find_game_repo(skip_ids=None):
                 if is_forbidden:
                     continue
 
+                # Check license (strict legal compliance)
+                repo_license = repo.get('license')
+                if not repo_license or repo_license.get('key') not in safe_licenses:
+                    # No license or unsafe license - skip
+                    continue
+
                 # Found a candidate!
                 print(f"✅ Found: {repo['full_name']}")
                 print(f"   ⭐ Stars: {repo.get('stargazers_count', '?')}")
+                print(f"   📜 License: {repo_license.get('name', 'Unknown') if repo_license else 'None'}")
                 print(f"   📝 Description: {repo.get('description', 'N/A')[:80]}")
                 return repo
 
