@@ -148,7 +148,7 @@ def register_in_games_data(game_ids):
 
 
 def generate_ai_metadata(game_ids):
-    """Step 3: Generate AI metadata using Gemini and update gamesData.ts"""
+    """Step 3: Generate AI metadata using Gemini"""
     print("\n" + "="*60)
     print("🤖 [3/5] AI 메타데이터 생성 (Gemini)")
     print("="*60 + "\n")
@@ -161,9 +161,8 @@ def generate_ai_metadata(game_ids):
     client = genai.Client(api_key=gemini_key)
     print(f"📌 처리할 게임: {len(game_ids)}개\n")
 
-    content = GAMES_DATA_FILE.read_text(encoding='utf-8')
-    updated_content = content
-    updated_count = 0
+    # Collect all new games first
+    new_games = []
 
     for game_id in game_ids:
         print(f"  {game_id}...", end=' ', flush=True)
@@ -191,17 +190,26 @@ DESC: [2-3 sentence eerie description]"""
                 title_json = json.dumps(title)
                 desc_json = json.dumps(desc)
 
-                # Update gamesData.ts with new metadata using JSON-escaped strings
-                pattern = f"(id: '{game_id}',[\\s\\S]*?)(title: )'🎮 {game_id}',"
-                replacement = f"\\1\\2{title_json},"
-                updated_content = re.sub(pattern, replacement, updated_content, flags=re.DOTALL)
+                # Build complete game object with safe JSON escaping
+                title_emoji_json = json.dumps(f"🎮 {title}")
 
-                pattern = f"(id: '{game_id}',[\\s\\S]*?)(description: )'[^']*',"
-                replacement = f"\\1\\2{desc_json},"
-                updated_content = re.sub(pattern, replacement, updated_content, flags=re.DOTALL)
+                game_obj = f'''  {{
+    id: '{game_id}',
+    englishTitle: {title_json},
+    englishDescription: {desc_json},
+    title: {title_emoji_json},
+    description: {desc_json},
+    thumbnail: '🎮',
+    category: 'web_games',
+    icon: '🎮',
+    path: '/game/{game_id}',
+    image: '/thumbnails/{game_id}.png',
+    tags: ['web_games'],
+    play_count: 0,
+  }},'''
 
+                new_games.append(game_obj)
                 print("✅")
-                updated_count += 1
             else:
                 print("⚠️  (파싱 실패)")
 
@@ -211,11 +219,24 @@ DESC: [2-3 sentence eerie description]"""
             error_msg = str(e)
             print(f"\n    ❌ 에러: {error_msg}")
 
-    # Write updated content back to file
-    if updated_count > 0:
-        GAMES_DATA_FILE.write_text(updated_content, encoding='utf-8')
+    # Safely append new games to file
+    if new_games:
+        content = GAMES_DATA_FILE.read_text(encoding='utf-8')
 
-    print(f"\n✅ AI 메타데이터 생성 및 반영 완료: {updated_count}개 업데이트")
+        # Find the end of GAMES_DATA array (];)
+        if '];' in content:
+            # Replace ]; with new games + ];
+            updated_content = content.replace(
+                '];',
+                '\n' + '\n'.join(new_games) + '\n];\n',
+                1  # Replace only the first occurrence (the main array)
+            )
+            GAMES_DATA_FILE.write_text(updated_content, encoding='utf-8')
+            print(f"\n✅ {len(new_games)}개 게임 추가 완료")
+        else:
+            print(f"\n❌ 배열 구조 오류 (]; 찾을 수 없음)")
+            return False
+
     return True
 
 
