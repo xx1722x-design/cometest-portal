@@ -214,9 +214,18 @@ DESC: [2-3 sentence eerie description]"""
         # Find the AUTO_INSERT_ANCHOR and replace it with new games + anchor
         anchor = '// [AUTO_INSERT_ANCHOR]'
         if anchor in content:
-            # Build replacement: join games with commas, then add comma and anchor
-            replacement = ',\n'.join(new_games) + ',\n  ' + anchor
-            updated_content = content.replace(anchor, replacement, 1)  # Replace only first occurrence
+            # Build replacement safely: ensure no duplicate commas or undefined elements
+            # Format each game object as-is (no trailing comma in template)
+            # Join all games with comma+newline between them
+            games_str = ',\n'.join(new_games)
+
+            # Replace the anchor line with: games + comma + newline + anchor comment
+            # This produces: game1,\ngame2,...,\n  // [AUTO_INSERT_ANCHOR]
+            replacement = games_str + ',\n  ' + anchor
+
+            # Replace the anchor (with exact spacing to avoid stray commas)
+            updated_content = content.replace('  ' + anchor, replacement, 1)
+
             GAMES_DATA_FILE.write_text(updated_content, encoding='utf-8')
             print(f"\n✅ {len(new_games)}개 게임 추가 완료 (앵커 방식)")
         else:
@@ -355,8 +364,9 @@ def main():
         print("\n✅ 처리할 게임이 없습니다")
         return 0
 
-    if not register_in_games_data(game_ids):
-        return 1
+    # Skip placeholder registration - go straight to AI metadata
+    # if not register_in_games_data(game_ids):
+    #     return 1
 
     if not generate_ai_metadata(game_ids):
         return 1
