@@ -187,17 +187,17 @@ DESC: [2-3 sentence eerie description]"""
                 title = title_match.group(1).strip()
                 desc = desc_match.group(1).strip()
 
-                # Escape single quotes and backslashes to prevent TS syntax errors
-                title_escaped = title.replace("\\", "\\\\").replace("'", "\\'")
-                desc_escaped = desc.replace("\\", "\\\\").replace("'", "\\'")
+                # Use json.dumps() for perfect TypeScript/JavaScript string escaping
+                title_json = json.dumps(title)
+                desc_json = json.dumps(desc)
 
-                # Update gamesData.ts with new metadata
+                # Update gamesData.ts with new metadata using JSON-escaped strings
                 pattern = f"(id: '{game_id}',[\\s\\S]*?)(title: )'🎮 {game_id}',"
-                replacement = f"\\1\\2'🎮 {title_escaped}',"
+                replacement = f"\\1\\2{title_json},"
                 updated_content = re.sub(pattern, replacement, updated_content, flags=re.DOTALL)
 
                 pattern = f"(id: '{game_id}',[\\s\\S]*?)(description: )'[^']*',"
-                replacement = f"\\1\\2'{desc_escaped}',"
+                replacement = f"\\1\\2{desc_json},"
                 updated_content = re.sub(pattern, replacement, updated_content, flags=re.DOTALL)
 
                 print("✅")
