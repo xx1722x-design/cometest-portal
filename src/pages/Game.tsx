@@ -57,6 +57,73 @@ export function Game() {
     return () => window.removeEventListener('keydown', handleKeyDown)
   }, [])
 
+  // Audio Volume Boost - Enhance all game audio
+  useEffect(() => {
+    const BOOST_FACTOR = 2.5 // 2.5x volume increase
+
+    // Intercept AudioContext creation
+    const originalAudioContext = window.AudioContext || (window as any).webkitAudioContext
+
+    if (originalAudioContext) {
+      const boostedContexts = new WeakSet()
+
+      const createBoostedContext = function() {
+        const ctx = Reflect.construct(originalAudioContext, []) as any
+
+        if (!boostedContexts.has(ctx)) {
+          boostedContexts.add(ctx)
+          const originalCreateGain = ctx.createGain.bind(ctx)
+
+          ctx.createGain = function() {
+            const gainNode = originalCreateGain()
+            const originalGain = Object.getOwnPropertyDescriptor(
+              Object.getPrototypeOf(gainNode),
+              'gain'
+            )
+
+            if (originalGain) {
+              Object.defineProperty(gainNode, '_originalGain', {
+                value: gainNode.gain,
+                writable: false,
+              })
+
+              Object.defineProperty(gainNode, 'gain', {
+                get() {
+                  return {
+                    ...this._originalGain,
+                    setValueAtTime: (value: number, time: number) => {
+                      return this._originalGain.setValueAtTime(value * BOOST_FACTOR, time)
+                    },
+                    linearRampToValueAtTime: (value: number, time: number) => {
+                      return this._originalGain.linearRampToValueAtTime(value * BOOST_FACTOR, time)
+                    },
+                    exponentialRampToValueAtTime: (value: number, time: number) => {
+                      return this._originalGain.exponentialRampToValueAtTime(value * BOOST_FACTOR, time)
+                    },
+                    value: (this._originalGain.value || 1) * BOOST_FACTOR,
+                  }
+                },
+              })
+            }
+            return gainNode
+          }
+        }
+        return ctx
+      }
+
+      ;(window as any).AudioContext = createBoostedContext
+      ;(window as any).webkitAudioContext = createBoostedContext
+    }
+
+    return () => {
+      // Restore original when component unmounts
+      if (originalAudioContext) {
+        ;(window as any).AudioContext = originalAudioContext
+        ;(window as any).webkitAudioContext = originalAudioContext
+      }
+    }
+  }, [])
+
   // Clear game cache on mount and unmount
   useEffect(() => {
     if (!gameId) return
@@ -369,22 +436,21 @@ export function Game() {
         </div>
       )}
 
-      {/* Collapsed Panel Toggle Button */}
+      {/* Collapsed Panel Toggle Button - Bottom Right Corner */}
       {(game?.controls || game?.storyDescription || game?.englishDescription) && !isPanelOpen && (
         <button
           onClick={() => setIsPanelOpen(true)}
           style={{
             position: 'absolute',
-            bottom: '0',
-            left: '50%',
-            transform: 'translateX(-50%)',
+            bottom: '1rem',
+            right: '1rem',
             zIndex: 60,
-            padding: '0.5rem 1rem',
+            padding: '0.5rem 0.75rem',
             backgroundColor: 'rgba(100, 181, 246, 0.15)',
             border: '1px solid rgba(100, 181, 246, 0.3)',
-            borderRadius: '8px 8px 0 0',
+            borderRadius: '6px',
             cursor: 'pointer',
-            fontSize: '16px',
+            fontSize: '14px',
             transition: 'all 0.3s ease',
             color: 'rgba(100, 181, 246, 0.8)',
           }}
