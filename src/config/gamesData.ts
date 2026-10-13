@@ -734,6 +734,20 @@ export const GAMES_DATA: GameItem[] = [
     tags: ['web_games'],
     play_count: 0,
   },
+  {
+    id: 'the-terror-of-mongolia',
+    englishTitle: "Shadows of the Cosmic Steppe",
+    englishDescription: "Beneath the desolate Gobi, an ancient eldritch hunger stirs within forgotten sacrificial tombs. Dark shamanic rituals bleed into the earth, awakening cosmic horrors that hunt across the freezing wastes. Will you uncover the blasphemous truth, or become another sacrifice to the void?",
+    title: "\ud83c\udfae Shadows of the Cosmic Steppe",
+    description: "Beneath the desolate Gobi, an ancient eldritch hunger stirs within forgotten sacrificial tombs. Dark shamanic rituals bleed into the earth, awakening cosmic horrors that hunt across the freezing wastes. Will you uncover the blasphemous truth, or become another sacrifice to the void?",
+    thumbnail: '🎮',
+    category: 'web_games',
+    icon: '🎮',
+    path: '/game/the-terror-of-mongolia',
+    image: '/thumbnails/the-terror-of-mongolia.png',
+    tags: ['web_games'],
+    play_count: 0,
+  },
   // [AUTO_INSERT_ANCHOR]
 ]
 
