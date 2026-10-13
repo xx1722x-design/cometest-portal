@@ -29,6 +29,34 @@ export function Game() {
   const PORTAL_SAVE_KEY = `PORTAL_SAVE_${gameId}`
   const PORTAL_SETTINGS_KEY = 'PORTAL_SETTINGS'
 
+  // Keyboard listener for ^ / v panel toggle
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Arrow Up (^) - Show panel
+      if (e.key === 'ArrowUp' || e.key === '^') {
+        e.preventDefault()
+        setIsPanelOpen(true)
+      }
+      // Arrow Down (v) - Hide panel
+      if (e.key === 'ArrowDown' || e.key === 'v' || e.key === 'V') {
+        e.preventDefault()
+        setIsPanelOpen(false)
+      }
+      // F - Toggle fullscreen
+      if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault()
+        if (!document.fullscreenElement) {
+          document.documentElement.requestFullscreen().catch(() => {})
+        } else {
+          document.exitFullscreen().catch(() => {})
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [])
+
   // Clear game cache on mount and unmount
   useEffect(() => {
     if (!gameId) return
@@ -342,7 +370,7 @@ export function Game() {
       )}
 
       {/* Collapsed Panel Toggle Button */}
-      {(game?.controls || game?.storyDescription) && !isPanelOpen && (
+      {(game?.controls || game?.storyDescription || game?.englishDescription) && !isPanelOpen && (
         <button
           onClick={() => setIsPanelOpen(true)}
           style={{
@@ -374,7 +402,7 @@ export function Game() {
       )}
 
       {/* Controls & Story Description Panel - Bottom overlay */}
-      {(game?.controls || game?.storyDescription) && isPanelOpen && (
+      {(game?.controls || game?.storyDescription || game?.englishDescription) && isPanelOpen && (
         <div
           style={{
             position: 'absolute',
@@ -451,6 +479,28 @@ export function Game() {
             >
               <span style={{ color: 'rgba(100, 181, 246, 0.8)', marginRight: '0.5rem' }}>✦</span>
               {game.storyDescription}
+            </div>
+          )}
+
+          {/* Occult Theme Description Section */}
+          {game?.englishDescription && (
+            <div
+              style={{
+                color: 'rgba(200, 150, 255, 0.9)',
+                fontSize: '14px',
+                lineHeight: '1.6',
+                fontStyle: 'italic',
+                maxWidth: '1200px',
+                marginTop: game?.storyDescription ? '1.5rem' : '0',
+                padding: '1rem',
+                backgroundColor: 'rgba(75, 0, 130, 0.15)',
+                borderLeft: '4px solid rgba(200, 150, 255, 0.6)',
+                borderRadius: '4px',
+              }}
+            >
+              <span style={{ color: 'rgba(200, 150, 255, 0.8)', marginRight: '0.5rem', fontSize: '16px' }}>🔮</span>
+              <span style={{ color: 'rgba(200, 150, 255, 0.7)', marginRight: '0.75rem', fontWeight: '600' }}>OCCULT LORE:</span>
+              {game.englishDescription}
             </div>
           )}
 
