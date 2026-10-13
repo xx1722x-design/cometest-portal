@@ -1462,6 +1462,20 @@ export const GAMES_DATA: GameItem[] = [
     tags: ['web_games'],
     play_count: 0,
   },
+  {
+    id: 'push-back',
+    englishTitle: "Ward Against the Cosmic Abyss",
+    englishDescription: "Ancient horrors press against the fragile veil of reality, hungering to swallow the physical world whole. Master forbidden rituals to repel the encroaching darkness before it claims your mind and soul. Every inch of ground reclaimed demands a terrible price.",
+    title: "\ud83c\udfae Ward Against the Cosmic Abyss",
+    description: "Ancient horrors press against the fragile veil of reality, hungering to swallow the physical world whole. Master forbidden rituals to repel the encroaching darkness before it claims your mind and soul. Every inch of ground reclaimed demands a terrible price.",
+    thumbnail: '🎮',
+    category: 'web_games',
+    icon: '🎮',
+    path: '/game/push-back',
+    image: '/thumbnails/push-back.png',
+    tags: ['web_games'],
+    play_count: 0,
+  },
   // [AUTO_INSERT_ANCHOR]
 ]
 
