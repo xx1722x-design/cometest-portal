@@ -117,30 +117,18 @@ def register_in_games_data(game_ids):
   }},'''
             new_entries.append(entry)
 
-        # Try multiple patterns to find where to insert
-        insert_point = -1
-        insert_pos = -1
-
-        # Pattern 1: "GAMES_DATA: GameItem[] = ["
-        insert_point = content.find("GAMES_DATA: GameItem[] = [")
-        if insert_point != -1:
-            insert_pos = content.find("[", insert_point) + 1
-
-        # Pattern 2: "export const GAMES_DATA: GameItem[" (without = [)
-        if insert_point == -1:
-            insert_point = content.find("export const GAMES_DATA: GameItem[")
-            if insert_point != -1:
-                insert_pos = content.find("[", insert_point) + 1
-
-        if insert_pos == -1:
-            print("⚠️  게임 배열을 찾을 수 없습니다 (수동 등록 필요)")
+        # Use anchor method for safe insertion
+        anchor = '// [AUTO_INSERT_ANCHOR]'
+        if anchor in content:
+            # Insert new games before the anchor
+            replacement = '\n'.join(new_entries) + ',\n  ' + anchor
+            new_content = content.replace(anchor, replacement, 1)
+            GAMES_DATA_FILE.write_text(new_content, encoding='utf-8')
+            print(f"✅ {len(game_ids)}개 게임 등록 완료 (앵커 방식)")
+            return True
+        else:
+            print("❌ 앵커 찾기 실패 (// [AUTO_INSERT_ANCHOR] 없음)")
             return False
-
-        new_content = content[:insert_pos] + "\n" + "\n".join(new_entries) + "\n" + content[insert_pos:]
-
-        GAMES_DATA_FILE.write_text(new_content, encoding='utf-8')
-        print(f"✅ {len(game_ids)}개 게임 등록 완료")
-        return True
 
     except Exception as e:
         print(f"❌ 등록 실패: {e}")
@@ -219,22 +207,20 @@ DESC: [2-3 sentence eerie description]"""
             error_msg = str(e)
             print(f"\n    ❌ 에러: {error_msg}")
 
-    # Safely append new games to file
+    # Safely append new games to file using anchor method
     if new_games:
         content = GAMES_DATA_FILE.read_text(encoding='utf-8')
 
-        # Find the end of GAMES_DATA array (];)
-        if '];' in content:
-            # Replace ]; with new games + ];
-            updated_content = content.replace(
-                '];',
-                '\n' + '\n'.join(new_games) + '\n];\n',
-                1  # Replace only the first occurrence (the main array)
-            )
+        # Find the AUTO_INSERT_ANCHOR and replace it with new games + anchor
+        anchor = '// [AUTO_INSERT_ANCHOR]'
+        if anchor in content:
+            # Build replacement: new games + comma + anchor
+            replacement = '\n'.join(new_games) + ',\n  ' + anchor
+            updated_content = content.replace(anchor, replacement, 1)  # Replace only first occurrence
             GAMES_DATA_FILE.write_text(updated_content, encoding='utf-8')
-            print(f"\n✅ {len(new_games)}개 게임 추가 완료")
+            print(f"\n✅ {len(new_games)}개 게임 추가 완료 (앵커 방식)")
         else:
-            print(f"\n❌ 배열 구조 오류 (]; 찾을 수 없음)")
+            print(f"\n❌ 앵커 찾기 실패 (// [AUTO_INSERT_ANCHOR] 없음)")
             return False
 
     return True

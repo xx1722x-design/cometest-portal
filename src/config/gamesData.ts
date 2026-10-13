@@ -20,6 +20,7 @@ export interface GameItem {
 }
 
 export const GAMES_DATA: GameItem[] = [
+  // [AUTO_INSERT_ANCHOR]
 ]
 
 // ==================== HTML-based PhET Simulations (Awaiting AI Reprocessing) ====================
