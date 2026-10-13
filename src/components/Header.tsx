@@ -3,6 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { createPortal } from 'react-dom'
 import { FreshLangMenu } from './FreshLangMenu'
+import { VolumeControl } from './VolumeControl'
 import { useDarkMode } from '../theme'
 import { searchPortal, type SearchItem } from '../config/searchData'
 
@@ -278,6 +279,9 @@ export function Header() {
         </div>
 
         <div className="site-header__actions">
+          {/* Volume Control */}
+          <VolumeControl />
+
           <button
             type="button"
             className="icon-btn"
