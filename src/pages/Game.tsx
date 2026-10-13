@@ -151,9 +151,9 @@ export function Game() {
       case 'neon-space-shooter':
         return <NeonSpaceShooter />
       default:
-        // Web games category - route to /games/ directory
+        // Web games category - route to /labs/ directory
         if (game?.category === 'web_games') {
-          const iframeSrc = `/games/${gameId}/index.html`
+          const iframeSrc = `/labs/${gameId}/index.html`
           return (
             <div style={{ position: 'relative', width: '100%', height: '100%' }}>
               <iframe
