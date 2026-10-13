@@ -1,0 +1,395 @@
+<!-- Game Info Toggle Panel - Slide-up/down Description & Controls -->
+<div id="gameInfoOverlay" class="game-info-overlay">
+  <!-- Toggle Button (^ / v) -->
+  <button id="gameInfoToggle" class="game-info-toggle-btn" title="Show/Hide Game Info" aria-label="Toggle game information">
+    <span class="toggle-icon">^</span>
+  </button>
+
+  <!-- Info Panel -->
+  <div id="gameInfoPanel" class="game-info-panel">
+    <div class="game-info-content">
+      <!-- Header -->
+      <div class="game-info-header">
+        <h2 id="gameTitle" class="game-info-title">Game Title</h2>
+        <div id="gameCategory" class="game-info-category">
+          <span class="category-badge">Cosmic Horror</span>
+        </div>
+      </div>
+
+      <!-- Story Description -->
+      <div class="game-info-section">
+        <h3 class="game-info-section-title">📖 Narrative</h3>
+        <p id="gameStory" class="game-info-story">
+          Loading story description...
+        </p>
+      </div>
+
+      <!-- Controls -->
+      <div class="game-info-section">
+        <h3 class="game-info-section-title">🎮 Controls</h3>
+        <p id="gameControls" class="game-info-controls">
+          Loading controls...
+        </p>
+      </div>
+
+      <!-- Keywords -->
+      <div class="game-info-section keywords-section">
+        <h3 class="game-info-section-title">🔮 Tags</h3>
+        <div id="gameKeywords" class="game-info-keywords">
+          <!-- Tags will be inserted here -->
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+/* Game Info Toggle Panel Styles */
+
+:root {
+  --overlay-bg: rgba(10, 10, 20, 0.95);
+  --overlay-text: #e0e0f0;
+  --overlay-accent: #9d4edd;
+  --overlay-border: #5a189a;
+  --toggle-btn-bg: rgba(157, 78, 221, 0.8);
+  --toggle-btn-hover: rgba(157, 78, 221, 1);
+  --transition-speed: 0.35s;
+}
+
+/* Overlay Container */
+.game-info-overlay {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 100%;
+  height: auto;
+  max-height: 0;
+  z-index: 9998;
+  pointer-events: none;
+  transition: max-height var(--transition-speed) ease-out;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.game-info-overlay.active {
+  pointer-events: auto;
+}
+
+/* Toggle Button */
+.game-info-toggle-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background: var(--toggle-btn-bg);
+  border: 2px solid var(--overlay-accent);
+  color: #fff;
+  font-size: 24px;
+  cursor: pointer;
+  z-index: 9999;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(157, 78, 221, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  backdrop-filter: blur(10px);
+}
+
+.game-info-toggle-btn:hover {
+  background: var(--toggle-btn-hover);
+  transform: scale(1.1);
+  box-shadow: 0 6px 20px rgba(157, 78, 221, 0.6);
+}
+
+.game-info-toggle-btn:active {
+  transform: scale(0.95);
+}
+
+.toggle-icon {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.game-info-overlay.active .toggle-icon {
+  transform: rotate(180deg);
+}
+
+/* Info Panel */
+.game-info-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 100%;
+  max-height: 60vh;
+  background: var(--overlay-bg);
+  border-top: 2px solid var(--overlay-border);
+  border-radius: 20px 20px 0 0;
+  overflow-y: auto;
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  transform: translateY(100%);
+  transition: transform var(--transition-speed) ease-out;
+  box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.5);
+}
+
+.game-info-overlay.active .game-info-panel {
+  transform: translateY(0);
+}
+
+/* Content Container */
+.game-info-content {
+  padding: 30px;
+  color: var(--overlay-text);
+  line-height: 1.6;
+}
+
+/* Header */
+.game-info-header {
+  margin-bottom: 25px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid var(--overlay-border);
+}
+
+.game-info-title {
+  font-size: 28px;
+  font-weight: bold;
+  margin: 0 0 12px 0;
+  color: #fff;
+  text-shadow: 0 2px 10px rgba(157, 78, 221, 0.3);
+}
+
+.game-info-category {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.category-badge {
+  display: inline-block;
+  background: linear-gradient(135deg, var(--overlay-accent), #7209b7);
+  color: #fff;
+  padding: 6px 14px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Section */
+.game-info-section {
+  margin-bottom: 20px;
+}
+
+.game-info-section:last-child {
+  margin-bottom: 0;
+}
+
+.game-info-section-title {
+  font-size: 16px;
+  font-weight: bold;
+  color: var(--overlay-accent);
+  margin: 0 0 12px 0;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.game-info-story,
+.game-info-controls {
+  margin: 0;
+  font-size: 14px;
+  color: var(--overlay-text);
+  line-height: 1.7;
+}
+
+/* Keywords/Tags */
+.keywords-section {
+  margin-top: 15px;
+}
+
+.game-info-keywords {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.keyword-tag {
+  display: inline-block;
+  background: rgba(157, 78, 221, 0.2);
+  color: var(--overlay-accent);
+  padding: 4px 12px;
+  border-radius: 15px;
+  font-size: 12px;
+  border: 1px solid rgba(157, 78, 221, 0.4);
+  transition: all 0.2s ease;
+}
+
+.keyword-tag:hover {
+  background: rgba(157, 78, 221, 0.3);
+  border-color: var(--overlay-accent);
+  transform: translateY(-2px);
+}
+
+/* Scrollbar Styling */
+.game-info-panel::-webkit-scrollbar {
+  width: 8px;
+}
+
+.game-info-panel::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.2);
+}
+
+.game-info-panel::-webkit-scrollbar-thumb {
+  background: var(--overlay-accent);
+  border-radius: 4px;
+}
+
+.game-info-panel::-webkit-scrollbar-thumb:hover {
+  background: #a855f7;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .game-info-panel {
+    max-height: 70vh;
+  }
+
+  .game-info-content {
+    padding: 20px;
+  }
+
+  .game-info-title {
+    font-size: 22px;
+  }
+
+  .game-info-section-title {
+    font-size: 14px;
+  }
+
+  .game-info-story,
+  .game-info-controls {
+    font-size: 13px;
+  }
+
+  .game-info-toggle-btn {
+    bottom: 15px;
+    right: 15px;
+    width: 45px;
+    height: 45px;
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 480px) {
+  .game-info-panel {
+    max-height: 75vh;
+  }
+
+  .game-info-content {
+    padding: 16px;
+  }
+
+  .game-info-title {
+    font-size: 18px;
+  }
+
+  .game-info-toggle-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+    bottom: 12px;
+    right: 12px;
+  }
+}
+
+/* Dark Theme (already default) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --overlay-bg: rgba(5, 5, 15, 0.97);
+    --overlay-text: #d0d0f0;
+  }
+}
+
+/* Light Theme */
+@media (prefers-color-scheme: light) {
+  :root {
+    --overlay-bg: rgba(240, 240, 250, 0.95);
+    --overlay-text: #2d2d4d;
+    --overlay-accent: #7c3aed;
+    --overlay-border: #d8b4fe;
+    --toggle-btn-bg: rgba(124, 58, 237, 0.75);
+    --toggle-btn-hover: rgba(124, 58, 237, 0.95);
+  }
+
+  .game-info-title {
+    color: #1f1f3d;
+  }
+
+  .category-badge {
+    background: linear-gradient(135deg, #7c3aed, #a78bfa);
+  }
+
+  .game-info-section-title {
+    color: #7c3aed;
+  }
+}
+</style>
+
+<script>
+// Game Info Toggle Functionality
+(function() {
+  const toggle = document.getElementById('gameInfoToggle');
+  const overlay = document.getElementById('gameInfoOverlay');
+  const panel = document.getElementById('gameInfoPanel');
+
+  // Toggle panel open/close
+  if (toggle) {
+    toggle.addEventListener('click', () => {
+      overlay.classList.toggle('active');
+    });
+  }
+
+  // Close on outside click
+  document.addEventListener('click', (e) => {
+    if (!overlay.contains(e.target) && !toggle.contains(e.target)) {
+      if (overlay.classList.contains('active')) {
+        overlay.classList.remove('active');
+      }
+    }
+  });
+
+  // Close on ESC key
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && overlay.classList.contains('active')) {
+      overlay.classList.remove('active');
+    }
+  });
+
+  // Expose API for setting game info
+  window.setGameInfo = function(gameData) {
+    if (gameData.title) document.getElementById('gameTitle').textContent = gameData.title;
+    if (gameData.story) document.getElementById('gameStory').textContent = gameData.story;
+    if (gameData.controls) document.getElementById('gameControls').textContent = gameData.controls;
+
+    if (gameData.category) {
+      document.querySelector('.category-badge').textContent = gameData.category;
+    }
+
+    if (gameData.keywords && Array.isArray(gameData.keywords)) {
+      const keywordsContainer = document.getElementById('gameKeywords');
+      keywordsContainer.innerHTML = gameData.keywords
+        .map(kw => `<span class="keyword-tag">${kw}</span>`)
+        .join('');
+    }
+  };
+
+  // Auto-populate from page data if available
+  if (window.gameMetadata) {
+    window.setGameInfo(window.gameMetadata);
+  }
+})();
+</script>

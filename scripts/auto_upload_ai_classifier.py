@@ -170,7 +170,7 @@ STORY: A forbidden astronomical experiment where the black forces governing the 
 REASON: Orbital mechanics simulation naturally maps to cosmic horror themes and gravitational mysteries in occult classification."""
 
         response = client.chat.completions.create(
-            model="openai/gpt-oss-20b",
+            model="mixtral-8x7b-32768",
             max_tokens=600,
             messages=[{"role": "user", "content": prompt}]
         )
