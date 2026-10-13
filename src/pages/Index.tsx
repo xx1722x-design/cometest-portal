@@ -70,6 +70,7 @@ export function Index() {
           padding: '0',
           marginBottom: '20px',
           overflow: 'hidden',
+          width: '100%',
         }}
       >
         {/* Secondary Categories Row - Occult Themes */}
@@ -80,8 +81,9 @@ export function Index() {
             overflowX: 'auto',
             overflowY: 'hidden',
             scrollBehavior: 'smooth',
-            padding: '16px 20px 16px 20px',
-            minWidth: 'max-content',
+            padding: '16px 20px',
+            width: '100%',
+            boxSizing: 'border-box',
             // Hide scrollbar for all browsers
             scrollbarWidth: 'none' as any,
             msOverflowStyle: 'none' as any,
@@ -136,7 +138,7 @@ export function Index() {
             </button>
           ))}
           {/* Trailing spacer to prevent last item clipping at right edge - allows full scrolling past final tab */}
-          <div style={{ width: '32px', flexShrink: 0 }} />
+          <div style={{ width: '12px', flexShrink: 0 }} />
         </div>
       </div>
 
