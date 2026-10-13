@@ -77,11 +77,11 @@ export function Index() {
         <div
           style={{
             display: 'flex',
-            gap: '8px',
+            gap: '6px',
             overflowX: 'auto',
             overflowY: 'hidden',
             scrollBehavior: 'smooth',
-            padding: '16px 20px',
+            padding: '12px 16px',
             width: '100%',
             boxSizing: 'border-box',
             // Hide scrollbar for all browsers
@@ -100,7 +100,7 @@ export function Index() {
                 setActiveCategory('all')
               }}
               style={{
-                padding: '6px 12px',
+                padding: '5px 10px',
                 borderRadius: '16px',
                 border: 'none',
                 backgroundColor:
@@ -112,7 +112,7 @@ export function Index() {
                     ? '#fff'
                     : 'rgba(200, 200, 255, 0.7)',
                 cursor: 'pointer',
-                fontSize: '12px',
+                fontSize: '11px',
                 fontWeight:
                   activeSecondaryCategory === cat.id ? '600' : '500',
                 whiteSpace: 'nowrap',
@@ -138,7 +138,7 @@ export function Index() {
             </button>
           ))}
           {/* Trailing spacer to prevent last item clipping at right edge - allows full scrolling past final tab */}
-          <div style={{ width: '12px', flexShrink: 0 }} />
+          <div style={{ width: '8px', flexShrink: 0 }} />
         </div>
       </div>
 
