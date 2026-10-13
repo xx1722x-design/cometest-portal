@@ -18,7 +18,7 @@ import subprocess
 import time
 from pathlib import Path
 from datetime import datetime
-import google.generativeai as genai
+from google import genai
 from dotenv import load_dotenv
 import os
 
@@ -158,8 +158,7 @@ def generate_ai_metadata(game_ids):
         print("⚠️  GEMINI_API_KEY 없음 (기본값 사용)")
         return True
 
-    genai.configure(api_key=gemini_key)
-    model = genai.GenerativeModel("models/gemini-3.5-flash")
+    client = genai.Client(api_key=gemini_key)
     print(f"📌 처리할 게임: {len(game_ids)}개\n")
 
     content = GAMES_DATA_FILE.read_text(encoding='utf-8')
@@ -174,7 +173,10 @@ Respond with EXACTLY:
 TITLE: [3-5 word cosmic/dark title]
 DESC: [2-3 sentence eerie description]"""
 
-            response = model.generate_content(prompt)
+            response = client.models.generate_content(
+                model="gemini-3.5-flash",
+                contents=prompt
+            )
             text = response.text
 
             # Parse response
