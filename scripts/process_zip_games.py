@@ -18,7 +18,7 @@ import subprocess
 import time
 from pathlib import Path
 from datetime import datetime
-from groq import Groq
+import google.generativeai as genai
 from dotenv import load_dotenv
 import os
 
@@ -112,13 +112,25 @@ def register_in_games_data(game_ids):
   }},'''
             new_entries.append(entry)
 
-        # Insert after GAMES_DATA: GameItem[] = [
+        # Try multiple patterns to find where to insert
+        insert_point = -1
+        insert_pos = -1
+
+        # Pattern 1: "GAMES_DATA: GameItem[] = ["
         insert_point = content.find("GAMES_DATA: GameItem[] = [")
+        if insert_point != -1:
+            insert_pos = content.find("[", insert_point) + 1
+
+        # Pattern 2: "export const GAMES_DATA: GameItem[" (without = [)
         if insert_point == -1:
+            insert_point = content.find("export const GAMES_DATA: GameItem[")
+            if insert_point != -1:
+                insert_pos = content.find("[", insert_point) + 1
+
+        if insert_pos == -1:
             print("⚠️  게임 배열을 찾을 수 없습니다 (수동 등록 필요)")
             return False
 
-        insert_pos = content.find("[", insert_point) + 1
         new_content = content[:insert_pos] + "\n" + "\n".join(new_entries) + "\n" + content[insert_pos:]
 
         GAMES_DATA_FILE.write_text(new_content, encoding='utf-8')
@@ -131,38 +143,35 @@ def register_in_games_data(game_ids):
 
 
 def generate_ai_metadata(game_ids):
-    """Step 3: Generate AI metadata using Groq"""
+    """Step 3: Generate AI metadata using Gemini"""
     print("\n" + "="*60)
-    print("🤖 [3/5] AI 메타데이터 생성 (Groq)")
+    print("🤖 [3/5] AI 메타데이터 생성 (Gemini)")
     print("="*60 + "\n")
 
-    groq_key = os.getenv("GROQ_API_KEY")
-    if not groq_key:
-        print("⚠️  GROQ_API_KEY 없음 (기본값 사용)")
+    gemini_key = os.getenv("GEMINI_API_KEY")
+    if not gemini_key:
+        print("⚠️  GEMINI_API_KEY 없음 (기본값 사용)")
         return True
 
-    client = Groq(api_key=groq_key)
+    genai.configure(api_key=gemini_key)
+    model = genai.GenerativeModel("models/gemini-3.5-flash")
     print(f"📌 처리할 게임: {len(game_ids)}개\n")
 
     for game_id in game_ids:
-        print(f"  {game_id}...", end=' ')
+        print(f"  {game_id}...", end=' ', flush=True)
         try:
             prompt = f"""Generate English occult-themed metadata for game "{game_id}".
 Respond with EXACTLY:
 TITLE: [3-5 word cosmic/dark title]
 DESC: [2-3 sentence eerie description]"""
 
-            response = client.chat.completions.create(
-                model="mixtral-8x7b-32768",
-                max_tokens=200,
-                messages=[{"role": "user", "content": prompt}]
-            )
-
+            response = model.generate_content(prompt)
             print("✅")
-            time.sleep(2)
+            time.sleep(1)
 
         except Exception as e:
-            print(f"⚠️  ({str(e)[:20]})")
+            error_msg = str(e)
+            print(f"\n    ❌ 에러: {error_msg}")
 
     print("\n✅ AI 메타데이터 생성 완료")
     return True
