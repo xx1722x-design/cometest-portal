@@ -194,7 +194,7 @@ DESC: [2-3 sentence eerie description]"""
     image: '/thumbnails/{game_id}.png',
     tags: ['web_games'],
     play_count: 0,
-  }},'''
+  }}'''  # No trailing comma - will be added by join logic
 
                 new_games.append(game_obj)
                 print("✅")
@@ -214,8 +214,8 @@ DESC: [2-3 sentence eerie description]"""
         # Find the AUTO_INSERT_ANCHOR and replace it with new games + anchor
         anchor = '// [AUTO_INSERT_ANCHOR]'
         if anchor in content:
-            # Build replacement: new games + comma + anchor
-            replacement = '\n'.join(new_games) + ',\n  ' + anchor
+            # Build replacement: join games with commas, then add comma and anchor
+            replacement = ',\n'.join(new_games) + ',\n  ' + anchor
             updated_content = content.replace(anchor, replacement, 1)  # Replace only first occurrence
             GAMES_DATA_FILE.write_text(updated_content, encoding='utf-8')
             print(f"\n✅ {len(new_games)}개 게임 추가 완료 (앵커 방식)")
