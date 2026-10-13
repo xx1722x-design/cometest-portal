@@ -52,7 +52,9 @@ export function ContentCard({ item, className }: ContentCardProps) {
     >
       {/* 썸네일 */}
       <div className="glass-card__thumb">
-        {item.icon ? (
+        {(item as any).image ? (
+          <img src={(item as any).image} alt={item.title} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        ) : item.icon ? (
           <span className="glass-card__emoji">{item.icon}</span>
         ) : (
           <img src={item.thumbnail} alt={item.title} />

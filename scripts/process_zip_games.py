@@ -98,17 +98,22 @@ def register_in_games_data(game_ids):
     try:
         content = GAMES_DATA_FILE.read_text(encoding='utf-8')
 
-        # Create new game entries
+        # Create new game entries with thumbnail and category
         new_entries = []
         for game_id in game_ids:
             entry = f'''  {{
     id: '{game_id}',
-    englishTitle: 'Loaded Game',
-    englishDescription: 'Loading game data...',
+    englishTitle: 'Occult Mystery',
+    englishDescription: 'A game shrouded in dark mystery and cosmic intrigue...',
     title: '🎮 {game_id}',
-    description: 'Game description pending...',
+    description: 'A game shrouded in dark mystery and cosmic intrigue...',
+    thumbnail: '🎮',
     category: 'web_games',
+    icon: '🎮',
     path: '/game/{game_id}',
+    image: '/thumbnails/{game_id}.png',
+    tags: ['web_games'],
+    play_count: 0,
   }},'''
             new_entries.append(entry)
 
@@ -143,7 +148,7 @@ def register_in_games_data(game_ids):
 
 
 def generate_ai_metadata(game_ids):
-    """Step 3: Generate AI metadata using Gemini"""
+    """Step 3: Generate AI metadata using Gemini and update gamesData.ts"""
     print("\n" + "="*60)
     print("🤖 [3/5] AI 메타데이터 생성 (Gemini)")
     print("="*60 + "\n")
@@ -157,6 +162,10 @@ def generate_ai_metadata(game_ids):
     model = genai.GenerativeModel("models/gemini-3.5-flash")
     print(f"📌 처리할 게임: {len(game_ids)}개\n")
 
+    content = GAMES_DATA_FILE.read_text(encoding='utf-8')
+    updated_content = content
+    updated_count = 0
+
     for game_id in game_ids:
         print(f"  {game_id}...", end=' ', flush=True)
         try:
@@ -166,14 +175,41 @@ TITLE: [3-5 word cosmic/dark title]
 DESC: [2-3 sentence eerie description]"""
 
             response = model.generate_content(prompt)
-            print("✅")
+            text = response.text
+
+            # Parse response
+            title_match = re.search(r'TITLE:\s*(.+?)(?:\n|$)', text)
+            desc_match = re.search(r'DESC:\s*(.+?)(?:\n|$)', text, re.DOTALL)
+
+            if title_match and desc_match:
+                title = title_match.group(1).strip()
+                desc = desc_match.group(1).strip()
+
+                # Update gamesData.ts with new metadata
+                pattern = f"(id: '{game_id}',[\\s\\S]*?)(title: )'🎮 {game_id}',"
+                replacement = f"\\1\\2'🎮 {title}',"
+                updated_content = re.sub(pattern, replacement, updated_content, flags=re.DOTALL)
+
+                pattern = f"(id: '{game_id}',[\\s\\S]*?)(description: )'[^']*',"
+                replacement = f"\\1\\2'{desc}',"
+                updated_content = re.sub(pattern, replacement, updated_content, flags=re.DOTALL)
+
+                print("✅")
+                updated_count += 1
+            else:
+                print("⚠️  (파싱 실패)")
+
             time.sleep(1)
 
         except Exception as e:
             error_msg = str(e)
             print(f"\n    ❌ 에러: {error_msg}")
 
-    print("\n✅ AI 메타데이터 생성 완료")
+    # Write updated content back to file
+    if updated_count > 0:
+        GAMES_DATA_FILE.write_text(updated_content, encoding='utf-8')
+
+    print(f"\n✅ AI 메타데이터 생성 및 반영 완료: {updated_count}개 업데이트")
     return True
 
 
@@ -211,6 +247,41 @@ def capture_screenshots(game_ids):
             print(f"⚠️")
 
     print(f"\n✅ 캡처 완료: {captured}/{len(game_ids)}")
+    return True
+
+
+def move_completed_files(game_ids):
+    """Step 6: Move processed ZIP files to Completed folder"""
+    print("\n" + "="*60)
+    print("📦 [6/6] 처리 완료 파일 정리")
+    print("="*60 + "\n")
+
+    if not game_ids:
+        print("ℹ️  정리할 파일이 없습니다")
+        return True
+
+    completed_dir = Path(r"D:\Cometest_Dropzone\Completed")
+    completed_dir.mkdir(parents=True, exist_ok=True)
+
+    moved_count = 0
+    failed_count = 0
+
+    for game_id in game_ids:
+        zip_file = INBOX_DIR / f"{game_id}.zip"
+
+        if zip_file.exists():
+            try:
+                dest = completed_dir / f"{game_id}.zip"
+                zip_file.rename(dest)
+                print(f"  ✅ {game_id}.zip → Completed/")
+                moved_count += 1
+            except Exception as e:
+                print(f"  ⚠️  {game_id}.zip: {str(e)[:40]}")
+                failed_count += 1
+        else:
+            print(f"  ⓘ  {game_id}.zip: 이미 이동됨")
+
+    print(f"\n✅ 파일 정리 완료: {moved_count}개 이동, {failed_count}개 실패")
     return True
 
 
@@ -281,6 +352,9 @@ def main():
         return 1
 
     if not apply_hero_ui(game_ids):
+        return 1
+
+    if not move_completed_files(game_ids):
         return 1
 
     print("\n" + "="*60)
