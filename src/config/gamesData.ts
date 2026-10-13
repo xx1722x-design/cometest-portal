@@ -187,8 +187,8 @@ export const GAMES_DATA: GameItem[] = [
     image: '/thumbnails/unifrost.png',
     tags: ['web_games'],
     play_count: 0,
-  },,
-    {
+  },
+  {
     id: 'at-both-ends',
     englishTitle: "Echoes of the Twin Abyss",
     englishDescription: "A forbidden ritual has tethered your soul to a candle burning from two ends, drawing terrifying entities from the dark. Navigate the crumbling sigils of an ancient void before the encroaching shadows devour what little remains. In this unholy race against time, salvation demands a total sacrifice.",
@@ -369,8 +369,8 @@ export const GAMES_DATA: GameItem[] = [
     image: '/thumbnails/sp13ktra.png',
     tags: ['web_games'],
     play_count: 0,
-  },,
-    {
+  },
+  {
     id: 'sp13ktra',
     englishTitle: "Rituals of the Forbidden Spectrum",
     englishDescription: "Peer beyond the visible realm to uncover ancient, esoteric frequencies that bind the cosmos. As the veil between dimensions dissolves, malevolent specters awaken to claim those who dare to observe the hidden light. Tread carefully, for the secrets woven into the void will strip away your sanity.",
