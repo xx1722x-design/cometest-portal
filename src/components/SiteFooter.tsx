@@ -96,6 +96,10 @@ export function SiteFooter() {
             <strong>Archive Notice:</strong> Cometest Portal is an educational simulation and interactive platform.
             All content is provided for personal, non-commercial use only. Unauthorized commercial reproduction is prohibited.
           </p>
+          <p style={{ margin: '8px 0' }}>
+            <strong>JS13KGames Entries:</strong> Selected web games are sourced from the annual JS13KGames competition,
+            featured here for educational and non-commercial archiving purposes.
+          </p>
         </div>
       </div>
     </footer>
