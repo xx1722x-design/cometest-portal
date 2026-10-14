@@ -256,36 +256,50 @@ export function Game() {
                     borderRadius: '8px',
                   }}
                 >
-                  {/* Top: Static + Dynamic Banners (side by side) */}
+                  {/* Top: Large 300x250 Banners (side by side) */}
                   <div
                     style={{
                       display: 'flex',
-                      gap: '12px',
+                      gap: '20px',
                       justifyContent: 'center',
-                      alignItems: 'flex-start',
+                      alignItems: 'center',
                       flexWrap: 'wrap',
                     }}
                   >
-                    {/* Static Banner */}
-                    <iframe
-                      src="https://coupa.ng/cp9PiZ"
-                      width="120"
-                      height="240"
-                      frameBorder="0"
-                      scrolling="no"
-                      referrerPolicy="unsafe-url"
-                      style={{ borderRadius: '4px' }}
-                    />
-                    {/* Dynamic AI Banner */}
-                    <iframe
-                      src="https://ads-partners.coupang.com/widgets.html?id=1039159&template=carousel&trackingCode=AF1892950&subId=&width=120&height=240&tsource="
-                      width="120"
-                      height="240"
-                      frameBorder="0"
-                      scrolling="no"
-                      referrerPolicy="unsafe-url"
-                      style={{ borderRadius: '4px' }}
-                    />
+                    {/* Rocket Electronics/Digital Banner */}
+                    <a
+                      href="https://link.coupang.com/a/hQjksOpjPM"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        src="https://ads-partners.coupang.com/banners/1039175?trackingCode=AF1892950&subId=&traceId=V0-301-5f9bd61900e673c0-I1039175&w=300&h=250"
+                        alt="로켓 가전/디지털"
+                        style={{
+                          width: '300px',
+                          height: '250px',
+                          borderRadius: '4px',
+                          display: 'block',
+                        }}
+                      />
+                    </a>
+                    {/* Rocket Home Interior Banner */}
+                    <a
+                      href="https://link.coupang.com/a/hQj3lUdru8"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        src="https://ads-partners.coupang.com/banners/1039178?trackingCode=AF1892950&subId=&traceId=V0-301-2f679fc6bd8f2e58-I1039178&w=300&h=250"
+                        alt="로켓 홈인테리어"
+                        style={{
+                          width: '300px',
+                          height: '250px',
+                          borderRadius: '4px',
+                          display: 'block',
+                        }}
+                      />
+                    </a>
                   </div>
 
                   {/* Bottom: Search Widget (full width) */}
@@ -424,36 +438,50 @@ export function Game() {
                     borderRadius: '8px',
                   }}
                 >
-                  {/* Top: Static + Dynamic Banners (side by side) */}
+                  {/* Top: Large 300x250 Banners (side by side) */}
                   <div
                     style={{
                       display: 'flex',
-                      gap: '12px',
+                      gap: '20px',
                       justifyContent: 'center',
-                      alignItems: 'flex-start',
+                      alignItems: 'center',
                       flexWrap: 'wrap',
                     }}
                   >
-                    {/* Static Banner */}
-                    <iframe
-                      src="https://coupa.ng/cp9PiZ"
-                      width="120"
-                      height="240"
-                      frameBorder="0"
-                      scrolling="no"
-                      referrerPolicy="unsafe-url"
-                      style={{ borderRadius: '4px' }}
-                    />
-                    {/* Dynamic AI Banner */}
-                    <iframe
-                      src="https://ads-partners.coupang.com/widgets.html?id=1039159&template=carousel&trackingCode=AF1892950&subId=&width=120&height=240&tsource="
-                      width="120"
-                      height="240"
-                      frameBorder="0"
-                      scrolling="no"
-                      referrerPolicy="unsafe-url"
-                      style={{ borderRadius: '4px' }}
-                    />
+                    {/* Rocket Electronics/Digital Banner */}
+                    <a
+                      href="https://link.coupang.com/a/hQjksOpjPM"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        src="https://ads-partners.coupang.com/banners/1039175?trackingCode=AF1892950&subId=&traceId=V0-301-5f9bd61900e673c0-I1039175&w=300&h=250"
+                        alt="로켓 가전/디지털"
+                        style={{
+                          width: '300px',
+                          height: '250px',
+                          borderRadius: '4px',
+                          display: 'block',
+                        }}
+                      />
+                    </a>
+                    {/* Rocket Home Interior Banner */}
+                    <a
+                      href="https://link.coupang.com/a/hQj3lUdru8"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <img
+                        src="https://ads-partners.coupang.com/banners/1039178?trackingCode=AF1892950&subId=&traceId=V0-301-2f679fc6bd8f2e58-I1039178&w=300&h=250"
+                        alt="로켓 홈인테리어"
+                        style={{
+                          width: '300px',
+                          height: '250px',
+                          borderRadius: '4px',
+                          display: 'block',
+                        }}
+                      />
+                    </a>
                   </div>
 
                   {/* Bottom: Search Widget (full width) */}
