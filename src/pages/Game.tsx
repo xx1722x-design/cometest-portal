@@ -244,41 +244,64 @@ export function Game() {
                   🕹️ Creator Store - More 3D Assets & Games
                 </a>
 
-                {/* Right: Gaming Gear Affiliate (Placeholder for partner script) */}
+                {/* Right: Gaming Gear Affiliate - Coupang Partners iframes */}
                 <div
                   style={{
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    flexWrap: 'wrap',
+                    gap: '12px',
                     padding: '16px',
                     backgroundColor: 'linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(255, 152, 0, 0.2))',
                     border: '1px solid rgba(76, 175, 80, 0.3)',
                     borderRadius: '8px',
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    minHeight: '50px',
-                  }}
-                  onClick={() => {
-                    /* TODO: Replace with actual affiliate link (Coupang Partners, etc.) */
-                    window.open('https://example.com/gaming-gear', '_blank')
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'linear-gradient(135deg, rgba(76, 175, 80, 0.3), rgba(255, 152, 0, 0.3))'
-                    e.currentTarget.style.borderColor = 'rgba(76, 175, 80, 0.5)'
-                    e.currentTarget.style.transform = 'translateY(-2px)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(255, 152, 0, 0.2))'
-                    e.currentTarget.style.borderColor = 'rgba(76, 175, 80, 0.3)'
-                    e.currentTarget.style.transform = 'translateY(0)'
+                    alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                 >
-                  🖱️ Recommended Gaming Gear
-                  {/* Affiliate banner script replaces this area — update with actual partner code */}
+                  <iframe
+                    src="https://coupa.ng/cp9PiZ"
+                    width="120"
+                    height="240"
+                    frameBorder="0"
+                    scrolling="no"
+                    referrerPolicy="unsafe-url"
+                    style={{ borderRadius: '4px' }}
+                  />
+                  <iframe
+                    src="https://coupa.ng/cp9Po1"
+                    width="120"
+                    height="240"
+                    frameBorder="0"
+                    scrolling="no"
+                    referrerPolicy="unsafe-url"
+                    style={{ borderRadius: '4px' }}
+                  />
+                  <iframe
+                    src="https://coupa.ng/cp9PwR"
+                    width="120"
+                    height="240"
+                    frameBorder="0"
+                    scrolling="no"
+                    referrerPolicy="unsafe-url"
+                    style={{ borderRadius: '4px' }}
+                  />
                 </div>
+              </div>
+
+              {/* FTC Disclosure for Coupang Partners */}
+              <div
+                style={{
+                  fontSize: '12px',
+                  color: 'rgba(200, 200, 200, 0.6)',
+                  textAlign: 'center',
+                  padding: '8px 12px',
+                  backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                  marginTop: '8px',
+                  borderRadius: '4px',
+                  lineHeight: '1.4',
+                }}
+              >
+                이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
               </div>
 
               {game?.originalAuthor && game?.sourceUrl && (
@@ -376,41 +399,64 @@ export function Game() {
                   🕹️ Creator Store - More 3D Assets & Games
                 </a>
 
-                {/* Right: Gaming Gear Affiliate (Placeholder for partner script) */}
+                {/* Right: Gaming Gear Affiliate - Coupang Partners iframes */}
                 <div
                   style={{
                     display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    flexWrap: 'wrap',
+                    gap: '12px',
                     padding: '16px',
                     backgroundColor: 'linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(255, 152, 0, 0.2))',
                     border: '1px solid rgba(76, 175, 80, 0.3)',
                     borderRadius: '8px',
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                    cursor: 'pointer',
-                    transition: 'all 0.3s ease',
-                    minHeight: '50px',
-                  }}
-                  onClick={() => {
-                    /* TODO: Replace with actual affiliate link (Coupang Partners, etc.) */
-                    window.open('https://example.com/gaming-gear', '_blank')
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'linear-gradient(135deg, rgba(76, 175, 80, 0.3), rgba(255, 152, 0, 0.3))'
-                    e.currentTarget.style.borderColor = 'rgba(76, 175, 80, 0.5)'
-                    e.currentTarget.style.transform = 'translateY(-2px)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(255, 152, 0, 0.2))'
-                    e.currentTarget.style.borderColor = 'rgba(76, 175, 80, 0.3)'
-                    e.currentTarget.style.transform = 'translateY(0)'
+                    alignItems: 'center',
+                    justifyContent: 'center',
                   }}
                 >
-                  🖱️ Recommended Gaming Gear
-                  {/* Affiliate banner script replaces this area — update with actual partner code */}
+                  <iframe
+                    src="https://coupa.ng/cp9PiZ"
+                    width="120"
+                    height="240"
+                    frameBorder="0"
+                    scrolling="no"
+                    referrerPolicy="unsafe-url"
+                    style={{ borderRadius: '4px' }}
+                  />
+                  <iframe
+                    src="https://coupa.ng/cp9Po1"
+                    width="120"
+                    height="240"
+                    frameBorder="0"
+                    scrolling="no"
+                    referrerPolicy="unsafe-url"
+                    style={{ borderRadius: '4px' }}
+                  />
+                  <iframe
+                    src="https://coupa.ng/cp9PwR"
+                    width="120"
+                    height="240"
+                    frameBorder="0"
+                    scrolling="no"
+                    referrerPolicy="unsafe-url"
+                    style={{ borderRadius: '4px' }}
+                  />
                 </div>
+              </div>
+
+              {/* FTC Disclosure for Coupang Partners */}
+              <div
+                style={{
+                  fontSize: '12px',
+                  color: 'rgba(200, 200, 200, 0.6)',
+                  textAlign: 'center',
+                  padding: '8px 12px',
+                  backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                  marginTop: '8px',
+                  borderRadius: '4px',
+                  lineHeight: '1.4',
+                }}
+              >
+                이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
               </div>
 
               <div
@@ -492,41 +538,64 @@ export function Game() {
                 🕹️ Creator Store - More 3D Assets & Games
               </a>
 
-              {/* Right: Gaming Gear Affiliate (Placeholder for partner script) */}
+              {/* Right: Gaming Gear Affiliate - Coupang Partners iframes */}
               <div
                 style={{
                   display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
+                  flexWrap: 'wrap',
+                  gap: '12px',
                   padding: '16px',
                   backgroundColor: 'linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(255, 152, 0, 0.2))',
                   border: '1px solid rgba(76, 175, 80, 0.3)',
                   borderRadius: '8px',
-                  color: 'rgba(255, 255, 255, 0.9)',
-                  fontSize: '14px',
-                  fontWeight: '600',
-                  cursor: 'pointer',
-                  transition: 'all 0.3s ease',
-                  minHeight: '50px',
-                }}
-                onClick={() => {
-                  /* TODO: Replace with actual affiliate link (Coupang Partners, etc.) */
-                  window.open('https://example.com/gaming-gear', '_blank')
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.backgroundColor = 'linear-gradient(135deg, rgba(76, 175, 80, 0.3), rgba(255, 152, 0, 0.3))'
-                  e.currentTarget.style.borderColor = 'rgba(76, 175, 80, 0.5)'
-                  e.currentTarget.style.transform = 'translateY(-2px)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.backgroundColor = 'linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(255, 152, 0, 0.2))'
-                  e.currentTarget.style.borderColor = 'rgba(76, 175, 80, 0.3)'
-                  e.currentTarget.style.transform = 'translateY(0)'
+                  alignItems: 'center',
+                  justifyContent: 'center',
                 }}
               >
-                🖱️ Recommended Gaming Gear
-                {/* Affiliate banner script replaces this area — update with actual partner code */}
+                <iframe
+                  src="https://coupa.ng/cp9PiZ"
+                  width="120"
+                  height="240"
+                  frameBorder="0"
+                  scrolling="no"
+                  referrerPolicy="unsafe-url"
+                  style={{ borderRadius: '4px' }}
+                />
+                <iframe
+                  src="https://coupa.ng/cp9Po1"
+                  width="120"
+                  height="240"
+                  frameBorder="0"
+                  scrolling="no"
+                  referrerPolicy="unsafe-url"
+                  style={{ borderRadius: '4px' }}
+                />
+                <iframe
+                  src="https://coupa.ng/cp9PwR"
+                  width="120"
+                  height="240"
+                  frameBorder="0"
+                  scrolling="no"
+                  referrerPolicy="unsafe-url"
+                  style={{ borderRadius: '4px' }}
+                />
               </div>
+            </div>
+
+            {/* FTC Disclosure for Coupang Partners */}
+            <div
+              style={{
+                fontSize: '12px',
+                color: 'rgba(200, 200, 200, 0.6)',
+                textAlign: 'center',
+                padding: '8px 12px',
+                backgroundColor: 'rgba(0, 0, 0, 0.3)',
+                marginTop: '8px',
+                borderRadius: '4px',
+                lineHeight: '1.4',
+              }}
+            >
+              이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
             </div>
           </div>
         )
