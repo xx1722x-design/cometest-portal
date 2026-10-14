@@ -146,7 +146,7 @@ export function GameList() {
               }}
               onClick={() => navigate(item.path)}
             >
-              🎮 플레이
+              🎮 Play
             </button>
           </div>
         </div>

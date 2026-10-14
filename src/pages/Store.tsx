@@ -93,7 +93,7 @@ export function Store() {
                 fontWeight: '500',
               }}
             >
-              {t('play_game')}
+              Play
             </button>
           </div>
 
