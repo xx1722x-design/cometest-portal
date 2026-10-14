@@ -422,19 +422,23 @@ export function Game() {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'flex-start',
+            justifyContent: 'center',
             padding: '12px',
             overflow: 'auto',
             backgroundColor: 'rgba(10, 10, 20, 0.5)',
             borderRight: '1px solid rgba(100, 181, 246, 0.2)',
           }}
         >
-          {/* Rocket Electronics/Digital Banner */}
+          {/* Rocket Electronics/Digital Banner - Vertically Centered */}
           <a
             href="https://link.coupang.com/a/hQjksOpjPM"
             target="_blank"
             rel="noopener noreferrer"
-            style={{ marginTop: '1rem' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
           >
             <img
               src="https://ads-partners.coupang.com/banners/1039175?trackingCode=AF1892950&subId=&traceId=V0-301-5f9bd61900e673c0-I1039175&w=300&h=250"
@@ -722,19 +726,23 @@ export function Game() {
             display: 'flex',
             flexDirection: 'column',
             alignItems: 'center',
-            justifyContent: 'flex-start',
+            justifyContent: 'center',
             padding: '12px',
             overflow: 'auto',
             backgroundColor: 'rgba(10, 10, 20, 0.5)',
             borderLeft: '1px solid rgba(100, 181, 246, 0.2)',
           }}
         >
-          {/* Rocket Home Interior Banner */}
+          {/* Rocket Home Interior Banner - Vertically Centered */}
           <a
             href="https://link.coupang.com/a/hQj3lUdru8"
             target="_blank"
             rel="noopener noreferrer"
-            style={{ marginTop: '1rem' }}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+            }}
           >
             <img
               src="https://ads-partners.coupang.com/banners/1039178?trackingCode=AF1892950&subId=&traceId=V0-301-2f679fc6bd8f2e58-I1039178&w=300&h=250"
