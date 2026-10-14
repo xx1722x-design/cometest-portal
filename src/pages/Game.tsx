@@ -244,46 +244,59 @@ export function Game() {
                   🕹️ Creator Store - More 3D Assets & Games
                 </a>
 
-                {/* Right: Gaming Gear Affiliate - Coupang Partners iframes */}
+                {/* Right: Gaming Gear Affiliate - Optimized Coupang Layout (Static + Dynamic + Search) */}
                 <div
                   style={{
                     display: 'flex',
-                    flexWrap: 'wrap',
+                    flexDirection: 'column',
                     gap: '12px',
                     padding: '16px',
                     backgroundColor: 'linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(255, 152, 0, 0.2))',
                     border: '1px solid rgba(76, 175, 80, 0.3)',
                     borderRadius: '8px',
-                    alignItems: 'center',
-                    justifyContent: 'center',
                   }}
                 >
+                  {/* Top: Static + Dynamic Banners (side by side) */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: '12px',
+                      justifyContent: 'center',
+                      alignItems: 'flex-start',
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    {/* Static Banner */}
+                    <iframe
+                      src="https://coupa.ng/cp9PiZ"
+                      width="120"
+                      height="240"
+                      frameBorder="0"
+                      scrolling="no"
+                      referrerPolicy="unsafe-url"
+                      style={{ borderRadius: '4px' }}
+                    />
+                    {/* Dynamic AI Banner */}
+                    <iframe
+                      src="https://ads-partners.coupang.com/widgets.html?id=1039159&template=carousel&trackingCode=AF1892950&subId=&width=120&height=240&tsource="
+                      width="120"
+                      height="240"
+                      frameBorder="0"
+                      scrolling="no"
+                      referrerPolicy="unsafe-url"
+                      style={{ borderRadius: '4px' }}
+                    />
+                  </div>
+
+                  {/* Bottom: Search Widget (full width) */}
                   <iframe
-                    src="https://coupa.ng/cp9PiZ"
-                    width="120"
-                    height="240"
+                    src="https://coupa.ng/cp9Q60"
+                    width="100%"
+                    height="75"
                     frameBorder="0"
                     scrolling="no"
                     referrerPolicy="unsafe-url"
-                    style={{ borderRadius: '4px' }}
-                  />
-                  <iframe
-                    src="https://coupa.ng/cp9Po1"
-                    width="120"
-                    height="240"
-                    frameBorder="0"
-                    scrolling="no"
-                    referrerPolicy="unsafe-url"
-                    style={{ borderRadius: '4px' }}
-                  />
-                  <iframe
-                    src="https://coupa.ng/cp9PwR"
-                    width="120"
-                    height="240"
-                    frameBorder="0"
-                    scrolling="no"
-                    referrerPolicy="unsafe-url"
-                    style={{ borderRadius: '4px' }}
+                    style={{ borderRadius: '4px', minWidth: '0' }}
                   />
                 </div>
               </div>
@@ -399,46 +412,59 @@ export function Game() {
                   🕹️ Creator Store - More 3D Assets & Games
                 </a>
 
-                {/* Right: Gaming Gear Affiliate - Coupang Partners iframes */}
+                {/* Right: Gaming Gear Affiliate - Optimized Coupang Layout (Static + Dynamic + Search) */}
                 <div
                   style={{
                     display: 'flex',
-                    flexWrap: 'wrap',
+                    flexDirection: 'column',
                     gap: '12px',
                     padding: '16px',
                     backgroundColor: 'linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(255, 152, 0, 0.2))',
                     border: '1px solid rgba(76, 175, 80, 0.3)',
                     borderRadius: '8px',
-                    alignItems: 'center',
-                    justifyContent: 'center',
                   }}
                 >
+                  {/* Top: Static + Dynamic Banners (side by side) */}
+                  <div
+                    style={{
+                      display: 'flex',
+                      gap: '12px',
+                      justifyContent: 'center',
+                      alignItems: 'flex-start',
+                      flexWrap: 'wrap',
+                    }}
+                  >
+                    {/* Static Banner */}
+                    <iframe
+                      src="https://coupa.ng/cp9PiZ"
+                      width="120"
+                      height="240"
+                      frameBorder="0"
+                      scrolling="no"
+                      referrerPolicy="unsafe-url"
+                      style={{ borderRadius: '4px' }}
+                    />
+                    {/* Dynamic AI Banner */}
+                    <iframe
+                      src="https://ads-partners.coupang.com/widgets.html?id=1039159&template=carousel&trackingCode=AF1892950&subId=&width=120&height=240&tsource="
+                      width="120"
+                      height="240"
+                      frameBorder="0"
+                      scrolling="no"
+                      referrerPolicy="unsafe-url"
+                      style={{ borderRadius: '4px' }}
+                    />
+                  </div>
+
+                  {/* Bottom: Search Widget (full width) */}
                   <iframe
-                    src="https://coupa.ng/cp9PiZ"
-                    width="120"
-                    height="240"
+                    src="https://coupa.ng/cp9Q60"
+                    width="100%"
+                    height="75"
                     frameBorder="0"
                     scrolling="no"
                     referrerPolicy="unsafe-url"
-                    style={{ borderRadius: '4px' }}
-                  />
-                  <iframe
-                    src="https://coupa.ng/cp9Po1"
-                    width="120"
-                    height="240"
-                    frameBorder="0"
-                    scrolling="no"
-                    referrerPolicy="unsafe-url"
-                    style={{ borderRadius: '4px' }}
-                  />
-                  <iframe
-                    src="https://coupa.ng/cp9PwR"
-                    width="120"
-                    height="240"
-                    frameBorder="0"
-                    scrolling="no"
-                    referrerPolicy="unsafe-url"
-                    style={{ borderRadius: '4px' }}
+                    style={{ borderRadius: '4px', minWidth: '0' }}
                   />
                 </div>
               </div>
