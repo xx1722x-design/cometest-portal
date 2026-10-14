@@ -22,12 +22,20 @@ export function Game() {
   const { t } = useTranslation()
   const [saveExists, setSaveExists] = useState(false)
   const [isPanelOpen, setIsPanelOpen] = useState(true)
+  const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
 
   const game = gameId ? getGameById(gameId) : null
 
   // Portal save keys
   const PORTAL_SAVE_KEY = `PORTAL_SAVE_${gameId}`
   const PORTAL_SETTINGS_KEY = 'PORTAL_SETTINGS'
+
+  // Window resize listener for sidebar layout
+  useEffect(() => {
+    const handleResize = () => setWindowWidth(window.innerWidth)
+    window.addEventListener('resize', handleResize)
+    return () => window.removeEventListener('resize', handleResize)
+  }, [])
 
   // Keyboard listener for ^ / v panel toggle
   useEffect(() => {
@@ -198,139 +206,6 @@ export function Game() {
                 title={gameId}
               />
 
-              {/* Native Affiliate & Store Banners */}
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                  gap: '12px',
-                  padding: '12px',
-                  backgroundColor: 'rgba(20, 20, 40, 0.95)',
-                  borderTop: '1px solid rgba(100, 181, 246, 0.2)',
-                  backdropFilter: 'blur(5px)',
-                }}
-              >
-                {/* Left: Creator Store Promotion */}
-                <a
-                  href="https://store.cometest.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '16px',
-                    backgroundColor: 'linear-gradient(135deg, rgba(100, 181, 246, 0.2), rgba(156, 39, 176, 0.2))',
-                    border: '1px solid rgba(100, 181, 246, 0.3)',
-                    borderRadius: '8px',
-                    textDecoration: 'none',
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    transition: 'all 0.3s ease',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'linear-gradient(135deg, rgba(100, 181, 246, 0.3), rgba(156, 39, 176, 0.3))'
-                    e.currentTarget.style.borderColor = 'rgba(100, 181, 246, 0.5)'
-                    e.currentTarget.style.transform = 'translateY(-2px)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'linear-gradient(135deg, rgba(100, 181, 246, 0.2), rgba(156, 39, 176, 0.2))'
-                    e.currentTarget.style.borderColor = 'rgba(100, 181, 246, 0.3)'
-                    e.currentTarget.style.transform = 'translateY(0)'
-                  }}
-                >
-                  🕹️ Creator Store - More 3D Assets & Games
-                </a>
-
-                {/* Right: Gaming Gear Affiliate - Optimized Coupang Layout (Static + Dynamic + Search) */}
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '12px',
-                    padding: '16px',
-                    backgroundColor: 'linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(255, 152, 0, 0.2))',
-                    border: '1px solid rgba(76, 175, 80, 0.3)',
-                    borderRadius: '8px',
-                  }}
-                >
-                  {/* Top: Large 300x250 Banners (side by side) */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      gap: '20px',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      flexWrap: 'wrap',
-                    }}
-                  >
-                    {/* Rocket Electronics/Digital Banner */}
-                    <a
-                      href="https://link.coupang.com/a/hQjksOpjPM"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <img
-                        src="https://ads-partners.coupang.com/banners/1039175?trackingCode=AF1892950&subId=&traceId=V0-301-5f9bd61900e673c0-I1039175&w=300&h=250"
-                        alt="로켓 가전/디지털"
-                        style={{
-                          width: '300px',
-                          height: '250px',
-                          borderRadius: '4px',
-                          display: 'block',
-                        }}
-                      />
-                    </a>
-                    {/* Rocket Home Interior Banner */}
-                    <a
-                      href="https://link.coupang.com/a/hQj3lUdru8"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <img
-                        src="https://ads-partners.coupang.com/banners/1039178?trackingCode=AF1892950&subId=&traceId=V0-301-2f679fc6bd8f2e58-I1039178&w=300&h=250"
-                        alt="로켓 홈인테리어"
-                        style={{
-                          width: '300px',
-                          height: '250px',
-                          borderRadius: '4px',
-                          display: 'block',
-                        }}
-                      />
-                    </a>
-                  </div>
-
-                  {/* Bottom: Search Widget (full width) */}
-                  <iframe
-                    src="https://coupa.ng/cp9Q60"
-                    width="100%"
-                    height="75"
-                    frameBorder="0"
-                    scrolling="no"
-                    referrerPolicy="unsafe-url"
-                    style={{ borderRadius: '4px', minWidth: '0' }}
-                  />
-                </div>
-              </div>
-
-              {/* FTC Disclosure for Coupang Partners */}
-              <div
-                style={{
-                  fontSize: '12px',
-                  color: 'rgba(200, 200, 200, 0.6)',
-                  textAlign: 'center',
-                  padding: '8px 12px',
-                  backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                  marginTop: '8px',
-                  borderRadius: '4px',
-                  lineHeight: '1.4',
-                }}
-              >
-                이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
-              </div>
-
               {game?.originalAuthor && game?.sourceUrl && (
                 <a
                   href={game.sourceUrl}
@@ -379,139 +254,6 @@ export function Game() {
                 sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-pointer-lock"
                 title={gameId}
               />
-
-              {/* Native Affiliate & Store Banners */}
-              <div
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                  gap: '12px',
-                  padding: '12px',
-                  backgroundColor: 'rgba(20, 20, 40, 0.95)',
-                  borderTop: '1px solid rgba(100, 181, 246, 0.2)',
-                  backdropFilter: 'blur(5px)',
-                }}
-              >
-                {/* Left: Creator Store Promotion */}
-                <a
-                  href="https://store.cometest.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '16px',
-                    backgroundColor: 'linear-gradient(135deg, rgba(100, 181, 246, 0.2), rgba(156, 39, 176, 0.2))',
-                    border: '1px solid rgba(100, 181, 246, 0.3)',
-                    borderRadius: '8px',
-                    textDecoration: 'none',
-                    color: 'rgba(255, 255, 255, 0.9)',
-                    transition: 'all 0.3s ease',
-                    cursor: 'pointer',
-                    fontSize: '14px',
-                    fontWeight: '600',
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.backgroundColor = 'linear-gradient(135deg, rgba(100, 181, 246, 0.3), rgba(156, 39, 176, 0.3))'
-                    e.currentTarget.style.borderColor = 'rgba(100, 181, 246, 0.5)'
-                    e.currentTarget.style.transform = 'translateY(-2px)'
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.backgroundColor = 'linear-gradient(135deg, rgba(100, 181, 246, 0.2), rgba(156, 39, 176, 0.2))'
-                    e.currentTarget.style.borderColor = 'rgba(100, 181, 246, 0.3)'
-                    e.currentTarget.style.transform = 'translateY(0)'
-                  }}
-                >
-                  🕹️ Creator Store - More 3D Assets & Games
-                </a>
-
-                {/* Right: Gaming Gear Affiliate - Optimized Coupang Layout (Static + Dynamic + Search) */}
-                <div
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: '12px',
-                    padding: '16px',
-                    backgroundColor: 'linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(255, 152, 0, 0.2))',
-                    border: '1px solid rgba(76, 175, 80, 0.3)',
-                    borderRadius: '8px',
-                  }}
-                >
-                  {/* Top: Large 300x250 Banners (side by side) */}
-                  <div
-                    style={{
-                      display: 'flex',
-                      gap: '20px',
-                      justifyContent: 'center',
-                      alignItems: 'center',
-                      flexWrap: 'wrap',
-                    }}
-                  >
-                    {/* Rocket Electronics/Digital Banner */}
-                    <a
-                      href="https://link.coupang.com/a/hQjksOpjPM"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <img
-                        src="https://ads-partners.coupang.com/banners/1039175?trackingCode=AF1892950&subId=&traceId=V0-301-5f9bd61900e673c0-I1039175&w=300&h=250"
-                        alt="로켓 가전/디지털"
-                        style={{
-                          width: '300px',
-                          height: '250px',
-                          borderRadius: '4px',
-                          display: 'block',
-                        }}
-                      />
-                    </a>
-                    {/* Rocket Home Interior Banner */}
-                    <a
-                      href="https://link.coupang.com/a/hQj3lUdru8"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <img
-                        src="https://ads-partners.coupang.com/banners/1039178?trackingCode=AF1892950&subId=&traceId=V0-301-2f679fc6bd8f2e58-I1039178&w=300&h=250"
-                        alt="로켓 홈인테리어"
-                        style={{
-                          width: '300px',
-                          height: '250px',
-                          borderRadius: '4px',
-                          display: 'block',
-                        }}
-                      />
-                    </a>
-                  </div>
-
-                  {/* Bottom: Search Widget (full width) */}
-                  <iframe
-                    src="https://coupa.ng/cp9Q60"
-                    width="100%"
-                    height="75"
-                    frameBorder="0"
-                    scrolling="no"
-                    referrerPolicy="unsafe-url"
-                    style={{ borderRadius: '4px', minWidth: '0' }}
-                  />
-                </div>
-              </div>
-
-              {/* FTC Disclosure for Coupang Partners */}
-              <div
-                style={{
-                  fontSize: '12px',
-                  color: 'rgba(200, 200, 200, 0.6)',
-                  textAlign: 'center',
-                  padding: '8px 12px',
-                  backgroundColor: 'rgba(0, 0, 0, 0.3)',
-                  marginTop: '8px',
-                  borderRadius: '4px',
-                  lineHeight: '1.4',
-                }}
-              >
-                이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
-              </div>
 
               <div
                 style={{
@@ -667,10 +409,59 @@ export function Game() {
         fontFamily: "'Arial', sans-serif",
         backgroundColor: '#0a0a1a',
         position: 'relative',
+        display: 'flex',
+        gap: '0px',
       }}
     >
-      {/* Game Rendering */}
-      {renderGame()}
+      {/* Left Sidebar - Desktop Only (1280px+) */}
+      {windowWidth >= 1280 && (
+        <div
+          style={{
+            width: '320px',
+            height: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            padding: '12px',
+            overflow: 'auto',
+            backgroundColor: 'rgba(10, 10, 20, 0.5)',
+            borderRight: '1px solid rgba(100, 181, 246, 0.2)',
+          }}
+        >
+          {/* Rocket Electronics/Digital Banner */}
+          <a
+            href="https://link.coupang.com/a/hQjksOpjPM"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ marginTop: '1rem' }}
+          >
+            <img
+              src="https://ads-partners.coupang.com/banners/1039175?trackingCode=AF1892950&subId=&traceId=V0-301-5f9bd61900e673c0-I1039175&w=300&h=250"
+              alt="로켓 가전/디지털"
+              style={{
+                width: '300px',
+                height: '250px',
+                borderRadius: '4px',
+                display: 'block',
+              }}
+            />
+          </a>
+        </div>
+      )}
+
+      {/* Main Game Area */}
+      <div
+        style={{
+          flex: 1,
+          width: windowWidth >= 1280 ? 'auto' : '100%',
+          height: '100vh',
+          overflow: 'hidden',
+          position: 'relative',
+        }}
+      >
+        {/* Game Rendering */}
+        {renderGame()}
 
       {/* Floating Save/Load HUD */}
       {gameId && (gameId.includes('-') || gameId === 'ninja-vs-evilcorp' || gameId === '13th-floor') && (
@@ -918,6 +709,44 @@ export function Game() {
               🎮 For personal entertainment and educational use only. Non-commercial use.
             </span>
           </div>
+        </div>
+      )}
+      </div>
+
+      {/* Right Sidebar - Desktop Only (1280px+) */}
+      {windowWidth >= 1280 && (
+        <div
+          style={{
+            width: '320px',
+            height: '100vh',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'flex-start',
+            padding: '12px',
+            overflow: 'auto',
+            backgroundColor: 'rgba(10, 10, 20, 0.5)',
+            borderLeft: '1px solid rgba(100, 181, 246, 0.2)',
+          }}
+        >
+          {/* Rocket Home Interior Banner */}
+          <a
+            href="https://link.coupang.com/a/hQj3lUdru8"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ marginTop: '1rem' }}
+          >
+            <img
+              src="https://ads-partners.coupang.com/banners/1039178?trackingCode=AF1892950&subId=&traceId=V0-301-2f679fc6bd8f2e58-I1039178&w=300&h=250"
+              alt="로켓 홈인테리어"
+              style={{
+                width: '300px',
+                height: '250px',
+                borderRadius: '4px',
+                display: 'block',
+              }}
+            />
+          </a>
         </div>
       )}
 
