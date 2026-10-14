@@ -152,16 +152,29 @@ export function Store() {
         </div>
 
         {/* FTC Disclosure */}
-        <p
-          style={{
-            margin: '0.75rem 0 0 0',
-            opacity: '0.5',
-            fontSize: '11px',
-            lineHeight: '1.4',
-          }}
-        >
-          이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
-        </p>
+        {/* FTC Disclosure - Korean & English */}
+        <div style={{ marginTop: '1rem' }}>
+          <p
+            style={{
+              margin: '0.5rem 0',
+              opacity: '0.5',
+              fontSize: '11px',
+              lineHeight: '1.4',
+            }}
+          >
+            이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
+          </p>
+          <p
+            style={{
+              margin: '0.5rem 0 0 0',
+              opacity: '0.5',
+              fontSize: '11px',
+              lineHeight: '1.4',
+            }}
+          >
+            As a Coupang Partners affiliate, we earn a commission from qualifying purchases.
+          </p>
+        </div>
       </footer>
     </div>
   )
