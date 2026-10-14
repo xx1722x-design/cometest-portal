@@ -130,6 +130,38 @@ export function Store() {
         }}
       >
         <p style={{ margin: 0 }}>{t('copyright')}</p>
+
+        {/* Coupang Dynamic Affiliate Banner */}
+        <div
+          style={{
+            marginTop: '1.5rem',
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          }}
+        >
+          <iframe
+            src="https://ads-partners.coupang.com/widgets.html?id=1039159&template=carousel&trackingCode=AF1892950&subId=&width=120&height=240&tsource="
+            width="120"
+            height="240"
+            frameBorder="0"
+            scrolling="no"
+            referrerPolicy="unsafe-url"
+            style={{ borderRadius: '4px' }}
+          />
+        </div>
+
+        {/* FTC Disclosure */}
+        <p
+          style={{
+            margin: '0.75rem 0 0 0',
+            opacity: '0.5',
+            fontSize: '11px',
+            lineHeight: '1.4',
+          }}
+        >
+          이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.
+        </p>
       </footer>
     </div>
   )
