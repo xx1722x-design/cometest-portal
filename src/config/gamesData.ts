@@ -2162,6 +2162,20 @@ export const GAMES_DATA: GameItem[] = [
     tags: ['web_games'],
     play_count: 0,
   },
+  {
+    id: 'gl1tchexe',
+    englishTitle: "Grimoire of the Corrupted Void",
+    englishDescription: "Deep within the glitched sectors of a forbidden terminal, an ancient ritual bleeds through the shattered code. Decipher the malformed sigils to survive the whispering entities lurking inside the digital dark. Once the cursed executable begins, your soul becomes part of the permanent error log.",
+    title: "\ud83c\udfae Grimoire of the Corrupted Void",
+    description: "Deep within the glitched sectors of a forbidden terminal, an ancient ritual bleeds through the shattered code. Decipher the malformed sigils to survive the whispering entities lurking inside the digital dark. Once the cursed executable begins, your soul becomes part of the permanent error log.",
+    thumbnail: '🎮',
+    category: 'web_games',
+    icon: '🎮',
+    path: '/game/gl1tchexe',
+    image: '/thumbnails/gl1tchexe.png',
+    tags: ['web_games'],
+    play_count: 0,
+  },
   // [AUTO_INSERT_ANCHOR]
 ]
 
