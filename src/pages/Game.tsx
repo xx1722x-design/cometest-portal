@@ -184,12 +184,12 @@ export function Game() {
         if (game?.category === 'web_games') {
           const iframeSrc = `/labs/${gameId}/index.html`
           return (
-            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
               <iframe
                 src={iframeSrc}
                 style={{
+                  flex: 1,
                   width: '100%',
-                  height: '100%',
                   border: 'none',
                   borderRadius: '0',
                   display: 'block',
@@ -197,6 +197,90 @@ export function Game() {
                 sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-pointer-lock"
                 title={gameId}
               />
+
+              {/* Native Affiliate & Store Banners */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                  gap: '12px',
+                  padding: '12px',
+                  backgroundColor: 'rgba(20, 20, 40, 0.95)',
+                  borderTop: '1px solid rgba(100, 181, 246, 0.2)',
+                  backdropFilter: 'blur(5px)',
+                }}
+              >
+                {/* Left: Creator Store Promotion */}
+                <a
+                  href="https://store.cometest.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '16px',
+                    backgroundColor: 'linear-gradient(135deg, rgba(100, 181, 246, 0.2), rgba(156, 39, 176, 0.2))',
+                    border: '1px solid rgba(100, 181, 246, 0.3)',
+                    borderRadius: '8px',
+                    textDecoration: 'none',
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'linear-gradient(135deg, rgba(100, 181, 246, 0.3), rgba(156, 39, 176, 0.3))'
+                    e.currentTarget.style.borderColor = 'rgba(100, 181, 246, 0.5)'
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'linear-gradient(135deg, rgba(100, 181, 246, 0.2), rgba(156, 39, 176, 0.2))'
+                    e.currentTarget.style.borderColor = 'rgba(100, 181, 246, 0.3)'
+                    e.currentTarget.style.transform = 'translateY(0)'
+                  }}
+                >
+                  🕹️ Creator Store - More 3D Assets & Games
+                </a>
+
+                {/* Right: Gaming Gear Affiliate (Placeholder for partner script) */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '16px',
+                    backgroundColor: 'linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(255, 152, 0, 0.2))',
+                    border: '1px solid rgba(76, 175, 80, 0.3)',
+                    borderRadius: '8px',
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    minHeight: '50px',
+                  }}
+                  onClick={() => {
+                    /* TODO: Replace with actual affiliate link (Coupang Partners, etc.) */
+                    window.open('https://example.com/gaming-gear', '_blank')
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'linear-gradient(135deg, rgba(76, 175, 80, 0.3), rgba(255, 152, 0, 0.3))'
+                    e.currentTarget.style.borderColor = 'rgba(76, 175, 80, 0.5)'
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(255, 152, 0, 0.2))'
+                    e.currentTarget.style.borderColor = 'rgba(76, 175, 80, 0.3)'
+                    e.currentTarget.style.transform = 'translateY(0)'
+                  }}
+                >
+                  🖱️ Recommended Gaming Gear
+                  {/* Affiliate banner script replaces this area — update with actual partner code */}
+                </div>
+              </div>
+
               {game?.originalAuthor && game?.sourceUrl && (
                 <a
                   href={game.sourceUrl}
@@ -204,7 +288,7 @@ export function Game() {
                   rel="noopener noreferrer"
                   style={{
                     position: 'absolute',
-                    bottom: '8px',
+                    bottom: '100px',
                     right: '8px',
                     fontSize: '10px',
                     color: 'rgba(255, 255, 255, 0.4)',
@@ -232,12 +316,12 @@ export function Game() {
           // Force English locale regardless of source file language
           const iframeSrc = `/simulations/${simName}.html?locale=en`
           return (
-            <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+            <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
               <iframe
                 src={iframeSrc}
                 style={{
+                  flex: 1,
                   width: '100%',
-                  height: '100%',
                   border: 'none',
                   borderRadius: '0',
                   display: 'block',
@@ -245,10 +329,94 @@ export function Game() {
                 sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-pointer-lock"
                 title={gameId}
               />
+
+              {/* Native Affiliate & Store Banners */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                  gap: '12px',
+                  padding: '12px',
+                  backgroundColor: 'rgba(20, 20, 40, 0.95)',
+                  borderTop: '1px solid rgba(100, 181, 246, 0.2)',
+                  backdropFilter: 'blur(5px)',
+                }}
+              >
+                {/* Left: Creator Store Promotion */}
+                <a
+                  href="https://store.cometest.com"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '16px',
+                    backgroundColor: 'linear-gradient(135deg, rgba(100, 181, 246, 0.2), rgba(156, 39, 176, 0.2))',
+                    border: '1px solid rgba(100, 181, 246, 0.3)',
+                    borderRadius: '8px',
+                    textDecoration: 'none',
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    transition: 'all 0.3s ease',
+                    cursor: 'pointer',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'linear-gradient(135deg, rgba(100, 181, 246, 0.3), rgba(156, 39, 176, 0.3))'
+                    e.currentTarget.style.borderColor = 'rgba(100, 181, 246, 0.5)'
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'linear-gradient(135deg, rgba(100, 181, 246, 0.2), rgba(156, 39, 176, 0.2))'
+                    e.currentTarget.style.borderColor = 'rgba(100, 181, 246, 0.3)'
+                    e.currentTarget.style.transform = 'translateY(0)'
+                  }}
+                >
+                  🕹️ Creator Store - More 3D Assets & Games
+                </a>
+
+                {/* Right: Gaming Gear Affiliate (Placeholder for partner script) */}
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '16px',
+                    backgroundColor: 'linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(255, 152, 0, 0.2))',
+                    border: '1px solid rgba(76, 175, 80, 0.3)',
+                    borderRadius: '8px',
+                    color: 'rgba(255, 255, 255, 0.9)',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    minHeight: '50px',
+                  }}
+                  onClick={() => {
+                    /* TODO: Replace with actual affiliate link (Coupang Partners, etc.) */
+                    window.open('https://example.com/gaming-gear', '_blank')
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = 'linear-gradient(135deg, rgba(76, 175, 80, 0.3), rgba(255, 152, 0, 0.3))'
+                    e.currentTarget.style.borderColor = 'rgba(76, 175, 80, 0.5)'
+                    e.currentTarget.style.transform = 'translateY(-2px)'
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(255, 152, 0, 0.2))'
+                    e.currentTarget.style.borderColor = 'rgba(76, 175, 80, 0.3)'
+                    e.currentTarget.style.transform = 'translateY(0)'
+                  }}
+                >
+                  🖱️ Recommended Gaming Gear
+                  {/* Affiliate banner script replaces this area — update with actual partner code */}
+                </div>
+              </div>
+
               <div
                 style={{
                   position: 'absolute',
-                  bottom: '8px',
+                  bottom: '100px',
                   right: '8px',
                   fontSize: '10px',
                   color: 'rgba(255, 255, 255, 0.4)',
@@ -265,17 +433,102 @@ export function Game() {
         }
         // Default fallback: /labs/ directory for other games
         return (
-          <iframe
-            src={`/labs/${gameId}/index.html`}
-            style={{
-              width: '100%',
-              height: '100%',
-              border: 'none',
-              borderRadius: '0',
-            }}
-            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-pointer-lock"
-            title={gameId}
-          />
+          <div style={{ position: 'relative', width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+            <iframe
+              src={`/labs/${gameId}/index.html`}
+              style={{
+                flex: 1,
+                width: '100%',
+                border: 'none',
+                borderRadius: '0',
+              }}
+              sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-pointer-lock"
+              title={gameId}
+            />
+
+            {/* Native Affiliate & Store Banners */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+                gap: '12px',
+                padding: '12px',
+                backgroundColor: 'rgba(20, 20, 40, 0.95)',
+                borderTop: '1px solid rgba(100, 181, 246, 0.2)',
+                backdropFilter: 'blur(5px)',
+              }}
+            >
+              {/* Left: Creator Store Promotion */}
+              <a
+                href="https://store.cometest.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '16px',
+                  backgroundColor: 'linear-gradient(135deg, rgba(100, 181, 246, 0.2), rgba(156, 39, 176, 0.2))',
+                  border: '1px solid rgba(100, 181, 246, 0.3)',
+                  borderRadius: '8px',
+                  textDecoration: 'none',
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  transition: 'all 0.3s ease',
+                  cursor: 'pointer',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'linear-gradient(135deg, rgba(100, 181, 246, 0.3), rgba(156, 39, 176, 0.3))'
+                  e.currentTarget.style.borderColor = 'rgba(100, 181, 246, 0.5)'
+                  e.currentTarget.style.transform = 'translateY(-2px)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'linear-gradient(135deg, rgba(100, 181, 246, 0.2), rgba(156, 39, 176, 0.2))'
+                  e.currentTarget.style.borderColor = 'rgba(100, 181, 246, 0.3)'
+                  e.currentTarget.style.transform = 'translateY(0)'
+                }}
+              >
+                🕹️ Creator Store - More 3D Assets & Games
+              </a>
+
+              {/* Right: Gaming Gear Affiliate (Placeholder for partner script) */}
+              <div
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  padding: '16px',
+                  backgroundColor: 'linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(255, 152, 0, 0.2))',
+                  border: '1px solid rgba(76, 175, 80, 0.3)',
+                  borderRadius: '8px',
+                  color: 'rgba(255, 255, 255, 0.9)',
+                  fontSize: '14px',
+                  fontWeight: '600',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  minHeight: '50px',
+                }}
+                onClick={() => {
+                  /* TODO: Replace with actual affiliate link (Coupang Partners, etc.) */
+                  window.open('https://example.com/gaming-gear', '_blank')
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = 'linear-gradient(135deg, rgba(76, 175, 80, 0.3), rgba(255, 152, 0, 0.3))'
+                  e.currentTarget.style.borderColor = 'rgba(76, 175, 80, 0.5)'
+                  e.currentTarget.style.transform = 'translateY(-2px)'
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = 'linear-gradient(135deg, rgba(76, 175, 80, 0.2), rgba(255, 152, 0, 0.2))'
+                  e.currentTarget.style.borderColor = 'rgba(76, 175, 80, 0.3)'
+                  e.currentTarget.style.transform = 'translateY(0)'
+                }}
+              >
+                🖱️ Recommended Gaming Gear
+                {/* Affiliate banner script replaces this area — update with actual partner code */}
+              </div>
+            </div>
+          </div>
         )
     }
   }
