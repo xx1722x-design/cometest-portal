@@ -489,7 +489,7 @@ export function Game() {
               <div style={{ marginTop: '6px', textAlign: 'center', fontSize: '10px', color: '#555555', lineHeight: '1.3' }}>이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div>
             </>
           ) : (
-            /* International User: Amazon Luxury Beauty Cards */
+            /* International User: Amazon Luxury Beauty Cards - Left Sidebar */
             <div
               style={{
                 display: 'flex',
@@ -500,24 +500,37 @@ export function Game() {
                 padding: '8px 0',
               }}
             >
-              <AmazonBannerCard
-                productId="B08MJZYW8P"
-                productName="Premium Luxury Beauty"
-                affiliateUrl="https://www.amazon.com/dp/B08MJZYW8P?tag=cometest20-20"
-                description="Exclusive beauty collection"
-                rating={4.5}
-                imageUrl="https://images-na.ssl-images-amazon.com/images/P/B08MJZYW8P.01.jpg"
-                fallbackImageUrl="https://images-na.ssl-images-amazon.com/images/P/B08MJZYW8P.01._SL200_.jpg"
-              />
-              <AmazonBannerCard
-                productId="B07XCYBCCN"
-                productName="Premium Beauty Essentials"
-                affiliateUrl="https://www.amazon.com/dp/B07XCYBCCN?tag=cometest20-20"
-                description="Premium beauty skincare"
-                rating={4.6}
-                imageUrl="https://m.media-amazon.com/images/I/71sXglSV3QL.jpg"
-                fallbackImageUrl="https://images-na.ssl-images-amazon.com/images/P/B07XCYBCCN.01.jpg"
-              />
+              {[
+                {
+                  productId: 'B08MJZYW8P',
+                  productName: 'Premium Luxury Beauty',
+                  affiliateUrl: 'https://www.amazon.com/dp/B08MJZYW8P?tag=cometest20-20',
+                  description: 'Exclusive beauty collection',
+                  rating: 4.5,
+                  imageUrl: 'https://images-na.ssl-images-amazon.com/images/P/B08MJZYW8P.01.jpg',
+                  fallbackImageUrl: 'https://images-na.ssl-images-amazon.com/images/P/B08MJZYW8P.01._SL200_.jpg',
+                },
+                {
+                  productId: 'B07XCYBCCN',
+                  productName: 'Premium Beauty Essentials',
+                  affiliateUrl: 'https://www.amazon.com/dp/B07XCYBCCN?tag=cometest20-20',
+                  description: 'Premium beauty skincare',
+                  rating: 4.6,
+                  imageUrl: 'https://m.media-amazon.com/images/I/71sXglSV3QL.jpg',
+                  fallbackImageUrl: 'https://images-na.ssl-images-amazon.com/images/P/B07XCYBCCN.01.jpg',
+                },
+              ].map((product, idx) => (
+                <AmazonBannerCard
+                  key={`left-card-${idx}`}
+                  productId={product.productId}
+                  productName={product.productName}
+                  affiliateUrl={product.affiliateUrl}
+                  description={product.description}
+                  rating={product.rating}
+                  imageUrl={product.imageUrl}
+                  fallbackImageUrl={product.fallbackImageUrl}
+                />
+              ))}
             </div>
           )}
         </div>
@@ -829,7 +842,7 @@ export function Game() {
               <div style={{ marginTop: '6px', textAlign: 'center', fontSize: '10px', color: '#555555', lineHeight: '1.3' }}>이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div>
             </>
           ) : (
-            /* International User: Amazon Luxury Beauty Cards */
+            /* International User: Amazon Luxury Beauty Cards - Right Sidebar */
             <div
               style={{
                 display: 'flex',
@@ -840,24 +853,37 @@ export function Game() {
                 padding: '8px 0',
               }}
             >
-              <AmazonBannerCard
-                productId="B07BMBQG73"
-                productName="Luxury Beauty Essentials"
-                affiliateUrl="https://www.amazon.com/dp/B07BMBQG73?tag=cometest20-20"
-                description="Premium skincare range"
-                rating={4.7}
-                imageUrl="https://images-na.ssl-images-amazon.com/images/P/B07BMBQG73.01.jpg"
-                fallbackImageUrl="https://images-na.ssl-images-amazon.com/images/P/B07BMBQG73.01._SL200_.jpg"
-              />
-              <AmazonBannerCard
-                productId="B0714LK2WT"
-                productName="Elite Beauty Collection"
-                affiliateUrl="https://www.amazon.com/dp/B0714LK2WT?tag=cometest20-20"
-                description="Luxury beauty products"
-                rating={4.6}
-                imageUrl="https://images-na.ssl-images-amazon.com/images/P/B0714LK2WT.01.jpg"
-                fallbackImageUrl="https://images-na.ssl-images-amazon.com/images/P/B0714LK2WT.01._SL200_.jpg"
-              />
+              {[
+                {
+                  productId: 'B07BMBQG73',
+                  productName: 'Luxury Beauty Essentials',
+                  affiliateUrl: 'https://www.amazon.com/dp/B07BMBQG73?tag=cometest20-20',
+                  description: 'Premium skincare range',
+                  rating: 4.7,
+                  imageUrl: 'https://images-na.ssl-images-amazon.com/images/P/B07BMBQG73.01.jpg',
+                  fallbackImageUrl: 'https://images-na.ssl-images-amazon.com/images/P/B07BMBQG73.01._SL200_.jpg',
+                },
+                {
+                  productId: 'B0714LK2WT',
+                  productName: 'Elite Beauty Collection',
+                  affiliateUrl: 'https://www.amazon.com/dp/B0714LK2WT?tag=cometest20-20',
+                  description: 'Luxury beauty products',
+                  rating: 4.6,
+                  imageUrl: 'https://images-na.ssl-images-amazon.com/images/P/B0714LK2WT.01.jpg',
+                  fallbackImageUrl: 'https://images-na.ssl-images-amazon.com/images/P/B0714LK2WT.01._SL200_.jpg',
+                },
+              ].map((product, idx) => (
+                <AmazonBannerCard
+                  key={`right-card-${idx}`}
+                  productId={product.productId}
+                  productName={product.productName}
+                  affiliateUrl={product.affiliateUrl}
+                  description={product.description}
+                  rating={product.rating}
+                  imageUrl={product.imageUrl}
+                  fallbackImageUrl={product.fallbackImageUrl}
+                />
+              ))}
             </div>
           )}
         </div>
