@@ -494,9 +494,10 @@ export function Game() {
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '12px',
+                gap: '16px',
                 width: '100%',
-                maxWidth: '280px',
+                maxWidth: '300px',
+                padding: '12px 0',
               }}
             >
               <AmazonBannerCard
@@ -504,14 +505,15 @@ export function Game() {
                 productName="Premium Luxury Beauty"
                 affiliateUrl="https://www.amazon.com/dp/B08MJZYW8P?tag=cometest20-20"
                 description="Exclusive beauty collection"
+                rating={4.5}
               />
               <AmazonBannerCard
                 productId="B0CK7CJ8YT"
                 productName="Luxury Care Set"
                 affiliateUrl="https://www.amazon.com/dp/B0CK7CJ8YT?tag=cometest20-20"
                 description="Premium skincare essentials"
+                rating={4.8}
               />
-              <div style={{ marginTop: '6px', textAlign: 'center', fontSize: '10px', color: '#888', lineHeight: '1.3' }}>As an Amazon Associate, we earn from qualifying purchases.</div>
             </div>
           )}
         </div>
@@ -828,9 +830,10 @@ export function Game() {
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '12px',
+                gap: '16px',
                 width: '100%',
-                maxWidth: '280px',
+                maxWidth: '300px',
+                padding: '12px 0',
               }}
             >
               <AmazonBannerCard
@@ -838,14 +841,15 @@ export function Game() {
                 productName="Luxury Beauty Essentials"
                 affiliateUrl="https://www.amazon.com/dp/B07BMBQG73?tag=cometest20-20"
                 description="Premium skincare range"
+                rating={4.7}
               />
               <AmazonBannerCard
                 productId="B0714LK2WT"
                 productName="Elite Beauty Collection"
                 affiliateUrl="https://www.amazon.com/dp/B0714LK2WT?tag=cometest20-20"
                 description="Luxury beauty products"
+                rating={4.6}
               />
-              <div style={{ marginTop: '6px', textAlign: 'center', fontSize: '10px', color: '#888', lineHeight: '1.3' }}>As an Amazon Associate, we earn from qualifying purchases.</div>
             </div>
           )}
         </div>
