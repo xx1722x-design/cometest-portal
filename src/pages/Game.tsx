@@ -11,6 +11,7 @@ import { NeonPlatformerPhaser } from '../components/games/NeonPlatformerPhaser'
 import { BreakoutArcadePhaser } from '../components/games/BreakoutArcadePhaser'
 import { NeonDodgePhaser } from '../components/games/NeonDodgePhaser'
 import { getGameById } from '../config/gamesData'
+import AmazonBannerCard from '../components/AmazonBannerCard'
 
 // Dynamic import for AllYouCanTycoon (JSX file)
 // @ts-ignore - importing JSX file is intentional for game compatibility
@@ -23,8 +24,28 @@ export function Game() {
   const [saveExists, setSaveExists] = useState(false)
   const [isPanelOpen, setIsPanelOpen] = useState(true)
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
+  const [country, setCountry] = useState<string>('US')
+  const [countryLoading, setCountryLoading] = useState(true)
 
   const game = gameId ? getGameById(gameId) : null
+
+  // Fetch country from Vercel Function
+  useEffect(() => {
+    const fetchCountry = async () => {
+      try {
+        const response = await fetch('/api/country')
+        const data = await response.json()
+        setCountry(data.country || 'US')
+      } catch (error) {
+        console.error('Failed to fetch country:', error)
+        setCountry('US')
+      } finally {
+        setCountryLoading(false)
+      }
+    }
+
+    fetchCountry()
+  }, [])
 
   // Portal save keys
   const PORTAL_SAVE_KEY = `PORTAL_SAVE_${gameId}`
@@ -429,29 +450,58 @@ export function Game() {
             borderRight: '1px solid rgba(100, 181, 246, 0.2)',
           }}
         >
-          {/* Rocket Electronics/Digital Banner - Vertically Centered */}
-          <a
-            href="https://link.coupang.com/a/hQjksOpjPM"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <img
-              src="https://ads-partners.coupang.com/banners/1039175?trackingCode=AF1892950&subId=&traceId=V0-301-5f9bd61900e673c0-I1039175&w=300&h=250"
-              alt="로켓 가전/디지털"
+          {/* Korean User: Coupang Banner */}
+          {country === 'KR' ? (
+            <>
+              <a
+                href="https://link.coupang.com/a/hQjksOpjPM"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <img
+                  src="https://ads-partners.coupang.com/banners/1039175?trackingCode=AF1892950&subId=&traceId=V0-301-5f9bd61900e673c0-I1039175&w=300&h=250"
+                  alt="로켓 가전/디지털"
+                  style={{
+                    width: '300px',
+                    height: '250px',
+                    borderRadius: '4px',
+                    display: 'block',
+                  }}
+                />
+              </a>
+              <div style={{ marginTop: '6px', textAlign: 'center', fontSize: '10px', color: '#555555', lineHeight: '1.3' }}>이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div>
+            </>
+          ) : (
+            /* International User: Amazon Luxury Beauty Cards */
+            <div
               style={{
-                width: '300px',
-                height: '250px',
-                borderRadius: '4px',
-                display: 'block',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+                width: '100%',
+                maxWidth: '280px',
               }}
-            />
-          </a>
-          <div style={{ marginTop: '6px', textAlign: 'center', fontSize: '10px', color: '#555555', lineHeight: '1.3' }}>이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div>
+            >
+              <AmazonBannerCard
+                productId="B08MJZYW8P"
+                productName="Premium Luxury Beauty"
+                affiliateUrl="https://www.amazon.com/dp/B08MJZYW8P?tag=cometest20-20"
+                description="Exclusive beauty collection"
+              />
+              <AmazonBannerCard
+                productId="B0CK7CJ8YT"
+                productName="Luxury Care Set"
+                affiliateUrl="https://www.amazon.com/dp/B0CK7CJ8YT?tag=cometest20-20"
+                description="Premium skincare essentials"
+              />
+              <div style={{ marginTop: '6px', textAlign: 'center', fontSize: '10px', color: '#888', lineHeight: '1.3' }}>As an Amazon Associate, we earn from qualifying purchases.</div>
+            </div>
+          )}
         </div>
       )}
 
@@ -734,29 +784,58 @@ export function Game() {
             borderLeft: '1px solid rgba(100, 181, 246, 0.2)',
           }}
         >
-          {/* Rocket Home Interior Banner - Vertically Centered */}
-          <a
-            href="https://link.coupang.com/a/hQj3lUdru8"
-            target="_blank"
-            rel="noopener noreferrer"
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-            }}
-          >
-            <img
-              src="https://ads-partners.coupang.com/banners/1039178?trackingCode=AF1892950&subId=&traceId=V0-301-2f679fc6bd8f2e58-I1039178&w=300&h=250"
-              alt="로켓 홈인테리어"
+          {/* Korean User: Coupang Banner */}
+          {country === 'KR' ? (
+            <>
+              <a
+                href="https://link.coupang.com/a/hQj3lUdru8"
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                }}
+              >
+                <img
+                  src="https://ads-partners.coupang.com/banners/1039178?trackingCode=AF1892950&subId=&traceId=V0-301-2f679fc6bd8f2e58-I1039178&w=300&h=250"
+                  alt="로켓 홈인테리어"
+                  style={{
+                    width: '300px',
+                    height: '250px',
+                    borderRadius: '4px',
+                    display: 'block',
+                  }}
+                />
+              </a>
+              <div style={{ marginTop: '6px', textAlign: 'center', fontSize: '10px', color: '#555555', lineHeight: '1.3' }}>이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div>
+            </>
+          ) : (
+            /* International User: Amazon Luxury Beauty Cards */
+            <div
               style={{
-                width: '300px',
-                height: '250px',
-                borderRadius: '4px',
-                display: 'block',
+                display: 'flex',
+                flexDirection: 'column',
+                gap: '12px',
+                width: '100%',
+                maxWidth: '280px',
               }}
-            />
-          </a>
-          <div style={{ marginTop: '6px', textAlign: 'center', fontSize: '10px', color: '#555555', lineHeight: '1.3' }}>이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div>
+            >
+              <AmazonBannerCard
+                productId="B07BMBQG73"
+                productName="Luxury Beauty Essentials"
+                affiliateUrl="https://www.amazon.com/dp/B07BMBQG73?tag=cometest20-20"
+                description="Premium skincare range"
+              />
+              <AmazonBannerCard
+                productId="B0714LK2WT"
+                productName="Elite Beauty Collection"
+                affiliateUrl="https://www.amazon.com/dp/B0714LK2WT?tag=cometest20-20"
+                description="Luxury beauty products"
+              />
+              <div style={{ marginTop: '6px', textAlign: 'center', fontSize: '10px', color: '#888', lineHeight: '1.3' }}>As an Amazon Associate, we earn from qualifying purchases.</div>
+            </div>
+          )}
         </div>
       )}
 
