@@ -33,11 +33,23 @@ export function Game() {
   useEffect(() => {
     const fetchCountry = async () => {
       try {
-        const response = await fetch('/api/country')
-        const data = await response.json()
-        setCountry(data.country || 'US')
+        // Check for test_country query parameter first
+        const params = new URLSearchParams(window.location.search)
+        const testCountry = params.get('test_country')
+
+        if (testCountry) {
+          setCountry(testCountry.toUpperCase())
+          console.log('[Banner Debug] Test country detected:', testCountry)
+        } else {
+          // Fetch from API
+          const response = await fetch('/api/country')
+          const data = await response.json()
+          const detectedCountry = data.country || 'US'
+          setCountry(detectedCountry)
+          console.log('[Banner Debug] Country from API:', detectedCountry)
+        }
       } catch (error) {
-        console.error('Failed to fetch country:', error)
+        console.error('[Banner Debug] Failed to fetch country:', error)
         setCountry('US')
       } finally {
         setCountryLoading(false)
