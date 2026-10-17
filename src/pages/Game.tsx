@@ -494,10 +494,10 @@ export function Game() {
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '16px',
+                gap: '12px',
                 width: '100%',
                 maxWidth: '300px',
-                padding: '12px 0',
+                padding: '8px 0',
               }}
             >
               <AmazonBannerCard
@@ -830,10 +830,10 @@ export function Game() {
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '16px',
+                gap: '12px',
                 width: '100%',
                 maxWidth: '300px',
-                padding: '12px 0',
+                padding: '8px 0',
               }}
             >
               <AmazonBannerCard
