@@ -510,13 +510,13 @@ export function Game() {
                 fallbackImageUrl="https://images-na.ssl-images-amazon.com/images/P/B08MJZYW8P.01._SL200_.jpg"
               />
               <AmazonBannerCard
-                productId="B0CK7CJ8YT"
-                productName="Luxury Care Set"
-                affiliateUrl="https://www.amazon.com/dp/B0CK7CJ8YT?tag=cometest20-20"
-                description="Premium skincare essentials"
-                rating={4.8}
-                imageUrl="https://images-na.ssl-images-amazon.com/images/P/B0CK7CJ8YT.01.jpg"
-                fallbackImageUrl="https://m.media-amazon.com/images/I/B0CK7CJ8YT.jpg"
+                productId="B002OLQAQG"
+                productName="ELEMIS Exfoliating Cleanser"
+                affiliateUrl="https://www.amazon.com/ELEMIS-Exfoliating-exfoliating-Non-abrasive-alternative/dp/B002OLQAQG?tag=cometest20-20"
+                description="Premium skincare exfoliating"
+                rating={4.6}
+                imageUrl="https://m.media-amazon.com/images/I/41VdQO4j5YL.jpg"
+                fallbackImageUrl="https://m.media-amazon.com/images/I/51K92GkBzEL.jpg"
               />
             </div>
           )}
