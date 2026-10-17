@@ -506,6 +506,7 @@ export function Game() {
                 affiliateUrl="https://www.amazon.com/dp/B08MJZYW8P?tag=cometest20-20"
                 description="Exclusive beauty collection"
                 rating={4.5}
+                imageUrl="https://images-na.ssl-images-amazon.com/images/P/B08MJZYW8P.01.jpg"
               />
               <AmazonBannerCard
                 productId="B0CK7CJ8YT"
@@ -513,6 +514,7 @@ export function Game() {
                 affiliateUrl="https://www.amazon.com/dp/B0CK7CJ8YT?tag=cometest20-20"
                 description="Premium skincare essentials"
                 rating={4.8}
+                imageUrl="https://images-na.ssl-images-amazon.com/images/P/B0CK7CJ8YT.01.jpg"
               />
             </div>
           )}
@@ -842,6 +844,7 @@ export function Game() {
                 affiliateUrl="https://www.amazon.com/dp/B07BMBQG73?tag=cometest20-20"
                 description="Premium skincare range"
                 rating={4.7}
+                imageUrl="https://images-na.ssl-images-amazon.com/images/P/B07BMBQG73.01.jpg"
               />
               <AmazonBannerCard
                 productId="B0714LK2WT"
@@ -849,6 +852,7 @@ export function Game() {
                 affiliateUrl="https://www.amazon.com/dp/B0714LK2WT?tag=cometest20-20"
                 description="Luxury beauty products"
                 rating={4.6}
+                imageUrl="https://images-na.ssl-images-amazon.com/images/P/B0714LK2WT.01.jpg"
               />
             </div>
           )}

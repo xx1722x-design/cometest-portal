@@ -7,6 +7,7 @@ interface AmazonBannerCardProps {
   affiliateUrl: string
   description?: string
   rating?: number
+  imageUrl?: string
 }
 
 export default function AmazonBannerCard({
@@ -15,12 +16,15 @@ export default function AmazonBannerCard({
   affiliateUrl,
   description,
   rating,
+  imageUrl,
 }: AmazonBannerCardProps) {
   const [isDark] = useDarkMode()
   const [isHovered, setIsHovered] = useState(false)
+  const [imageLoaded, setImageLoaded] = useState(false)
+  const [imageError, setImageError] = useState(false)
 
-  // 제품별 컬러 스킴 (럭셔리 브랜드 컬러)
-  const getProductColorScheme = (id: string) => {
+  // 제품별 스킴 (컬러 + 아이콘 + 폴백)
+  const getProductScheme = (id: string) => {
     const schemes: Record<
       string,
       {
@@ -31,26 +35,26 @@ export default function AmazonBannerCard({
       }
     > = {
       'B08MJZYW8P': {
-        primary: '#8B0000', // 진한 버건디
-        accent: '#FFD700', // 골드
+        primary: '#8B0000',
+        accent: '#FFD700',
         icon: '💄',
         name: 'Beauty',
       },
       'B0CK7CJ8YT': {
-        primary: '#2C2C2C', // 진한 차콜
-        accent: '#E8D5C4', // 크림
+        primary: '#2C2C2C',
+        accent: '#E8D5C4',
         icon: '✨',
         name: 'Care',
       },
       'B07BMBQG73': {
-        primary: '#D4248D', // 핫핑크
-        accent: '#FFD700', // 골드
+        primary: '#D4248D',
+        accent: '#FFD700',
         icon: '🧴',
         name: 'Skincare',
       },
       'B0714LK2WT': {
-        primary: '#1A1A2E', // 진한 네이비
-        accent: '#C0C0C0', // 실버
+        primary: '#1A1A2E',
+        accent: '#C0C0C0',
         icon: '💎',
         name: 'Luxury',
       },
@@ -65,7 +69,9 @@ export default function AmazonBannerCard({
     )
   }
 
-  const colorScheme = getProductColorScheme(productId)
+  const scheme = getProductScheme(productId)
+  const showImage = imageUrl && !imageError && imageLoaded
+  const showFallback = !imageUrl || imageError
 
   return (
     <a
@@ -79,7 +85,7 @@ export default function AmazonBannerCard({
         flexDirection: 'column',
         width: '100%',
         maxWidth: '300px',
-        height: '480px',
+        height: '450px',
         backgroundColor: isDark ? '#1a1a2e' : '#f5f5f5',
         borderRadius: '12px',
         textDecoration: 'none',
@@ -88,97 +94,121 @@ export default function AmazonBannerCard({
         transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
         cursor: 'pointer',
         boxShadow: isHovered
-          ? `0 20px 40px rgba(212, 175, 55, 0.4), inset 0 0 30px ${colorScheme.accent}15`
-          : '0 10px 30px rgba(0, 0, 0, 0.3)',
-        transform: isHovered ? 'translateY(-6px)' : 'translateY(0)',
+          ? `0 16px 32px rgba(0, 0, 0, 0.25), inset 0 0 20px ${scheme.accent}20`
+          : '0 8px 20px rgba(0, 0, 0, 0.15)',
+        transform: isHovered ? 'translateY(-4px) scale(1.01)' : 'translateY(0) scale(1)',
       }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* 상단: 럭셔리 컬러 블록 (130px) */}
+      {/* 상단: 제품 이미지 영역 (220px) */}
       <div
         style={{
+          position: 'relative',
           width: '100%',
-          height: '130px',
-          background: `linear-gradient(135deg, ${colorScheme.primary} 0%, ${colorScheme.primary}dd 100%)`,
+          height: '220px',
+          backgroundColor: isDark ? '#0f0f1e' : '#e8e8e8',
           display: 'flex',
-          flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          gap: '8px',
-          position: 'relative',
           overflow: 'hidden',
+          borderBottom: `1px solid ${isDark ? 'rgba(212, 175, 55, 0.15)' : 'rgba(0, 0, 0, 0.08)'}`,
         }}
       >
-        {/* Amazon 로고 텍스트 */}
-        <div
-          style={{
-            fontSize: '10px',
-            fontWeight: '700',
-            color: 'rgba(255, 255, 255, 0.7)',
-            letterSpacing: '2px',
-            textTransform: 'uppercase',
-          }}
-        >
-          Amazon
-        </div>
+        {/* 실제 상품 이미지 */}
+        {imageUrl && (
+          <img
+            src={imageUrl}
+            alt={productName}
+            onLoad={() => setImageLoaded(true)}
+            onError={() => setImageError(true)}
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              objectPosition: 'center',
+              opacity: imageLoaded ? 1 : 0.3,
+              transition: 'opacity 0.4s ease',
+            }}
+          />
+        )}
 
-        {/* 폴백 아이콘 */}
-        <div
-          style={{
-            fontSize: '42px',
-            filter: 'drop-shadow(0 2px 4px rgba(0, 0, 0, 0.2))',
-          }}
-        >
-          {colorScheme.icon}
-        </div>
+        {/* 이미지 로드 실패 시 폴백 */}
+        {showFallback && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0,
+              left: 0,
+              width: '100%',
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              justifyContent: 'center',
+              background: `linear-gradient(135deg, ${scheme.primary}40 0%, ${scheme.primary}20 100%)`,
+              gap: '8px',
+              backdropFilter: 'blur(4px)',
+            }}
+          >
+            {/* Amazon 로고 */}
+            <div
+              style={{
+                fontSize: '10px',
+                fontWeight: '700',
+                color: 'rgba(255, 255, 255, 0.6)',
+                letterSpacing: '2px',
+                textTransform: 'uppercase',
+              }}
+            >
+              Amazon
+            </div>
 
-        {/* 카테고리 텍스트 */}
-        <div
-          style={{
-            fontSize: '9px',
-            color: colorScheme.accent,
-            fontWeight: '600',
-            letterSpacing: '1px',
-            textTransform: 'uppercase',
-          }}
-        >
-          {colorScheme.name}
-        </div>
+            {/* 폴백 아이콘 */}
+            <div
+              style={{
+                fontSize: '48px',
+              }}
+            >
+              {scheme.icon}
+            </div>
+
+            {/* 카테고리 */}
+            <div
+              style={{
+                fontSize: '9px',
+                color: scheme.accent,
+                fontWeight: '600',
+                letterSpacing: '1px',
+                textTransform: 'uppercase',
+              }}
+            >
+              {scheme.name}
+            </div>
+          </div>
+        )}
       </div>
 
-      {/* 하단: 제품 정보 영역 (350px) */}
+      {/* 하단: 제품 정보 영역 (230px) */}
       <div
         style={{
           flex: 1,
-          padding: '12px 14px 14px 14px',
+          padding: '11px 13px 12px 13px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
-          gap: '0',
+          minHeight: 0,
         }}
       >
-        {/* 상단 정보 그룹 */}
+        {/* 정보 블록 */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '6px',
+            gap: '5px',
+            flex: 1,
           }}
         >
-          {/* 제품명 */}
-          <h3
-            style={{
-              fontSize: '14px',
-              fontWeight: '700',
-              lineHeight: '1.3',
-              margin: '0',
-              color: isDark ? '#FFFFFF' : '#1a1a2e',
-            }}
-          >
-            {productName}
-          </h3>
-
           {/* 별점 */}
           {rating && (
             <div
@@ -186,11 +216,12 @@ export default function AmazonBannerCard({
                 display: 'flex',
                 alignItems: 'center',
                 gap: '3px',
+                height: '16px',
               }}
             >
               <span
                 style={{
-                  fontSize: '12px',
+                  fontSize: '11px',
                   color: '#FFD700',
                   lineHeight: '1',
                 }}
@@ -199,8 +230,8 @@ export default function AmazonBannerCard({
               </span>
               <span
                 style={{
-                  fontSize: '11px',
-                  color: isDark ? 'rgba(255, 255, 255, 0.65)' : 'rgba(0, 0, 0, 0.55)',
+                  fontSize: '10px',
+                  color: isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.5)',
                 }}
               >
                 {rating.toFixed(1)}
@@ -208,14 +239,29 @@ export default function AmazonBannerCard({
             </div>
           )}
 
+          {/* 제품명 */}
+          <h3
+            style={{
+              fontSize: '13px',
+              fontWeight: '700',
+              lineHeight: '1.25',
+              margin: '0',
+              color: isDark ? '#FFFFFF' : '#1a1a2e',
+              wordBreak: 'break-word',
+            }}
+          >
+            {productName}
+          </h3>
+
           {/* 설명 */}
           {description && (
             <p
               style={{
-                fontSize: '11px',
-                lineHeight: '1.35',
-                margin: '2px 0 0 0',
-                color: isDark ? 'rgba(255, 255, 255, 0.7)' : 'rgba(0, 0, 0, 0.65)',
+                fontSize: '10px',
+                lineHeight: '1.3',
+                margin: '0',
+                color: isDark ? 'rgba(255, 255, 255, 0.65)' : 'rgba(0, 0, 0, 0.6)',
+                flex: 1,
               }}
             >
               {description}
@@ -227,22 +273,23 @@ export default function AmazonBannerCard({
         <button
           style={{
             width: '100%',
-            padding: '9px 11px',
-            backgroundColor: isHovered ? colorScheme.accent : '#FF9933',
+            padding: '8px 10px',
+            backgroundColor: isHovered ? scheme.accent : '#FF9933',
             color: isHovered ? '#1a1a2e' : '#FFFFFF',
-            border: `1.5px solid ${colorScheme.accent}40`,
-            borderRadius: '6px',
-            fontSize: '11px',
+            border: 'none',
+            borderRadius: '5px',
+            fontSize: '10px',
             fontWeight: '700',
             cursor: 'pointer',
-            transition: 'all 0.3s ease',
+            transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
             textTransform: 'uppercase',
-            letterSpacing: '0.5px',
+            letterSpacing: '0.4px',
             boxShadow: isHovered
-              ? `0 6px 16px ${colorScheme.accent}40`
-              : `0 2px 6px ${colorScheme.accent}20`,
-            transform: isHovered ? 'translateY(-2px)' : 'translateY(0)',
-            marginTop: '8px',
+              ? `0 6px 14px ${scheme.accent}50`
+              : `0 2px 5px ${scheme.accent}25`,
+            transform: isHovered ? 'translateY(-1px)' : 'translateY(0)',
+            marginTop: '6px',
+            marginBottom: '4px',
           }}
           onClick={(e) => {
             e.preventDefault()
@@ -252,14 +299,14 @@ export default function AmazonBannerCard({
           View on Amazon
         </button>
 
-        {/* Amazon Affiliate 공시 */}
+        {/* 공정위 문구 */}
         <p
           style={{
-            fontSize: '8px',
-            color: isDark ? 'rgba(255, 255, 255, 0.45)' : 'rgba(0, 0, 0, 0.35)',
-            margin: '4px 0 0 0',
+            fontSize: '7px',
+            color: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.3)',
+            margin: '0',
             textAlign: 'center',
-            lineHeight: '1.2',
+            lineHeight: '1.15',
           }}
         >
           As an Amazon Associate, we earn from qualifying purchases.
