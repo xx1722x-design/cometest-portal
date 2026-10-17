@@ -507,6 +507,7 @@ export function Game() {
                 description="Exclusive beauty collection"
                 rating={4.5}
                 imageUrl="https://images-na.ssl-images-amazon.com/images/P/B08MJZYW8P.01.jpg"
+                fallbackImageUrl="https://images-na.ssl-images-amazon.com/images/P/B08MJZYW8P.01._SL200_.jpg"
               />
               <AmazonBannerCard
                 productId="B0CK7CJ8YT"
@@ -515,6 +516,7 @@ export function Game() {
                 description="Premium skincare essentials"
                 rating={4.8}
                 imageUrl="https://images-na.ssl-images-amazon.com/images/P/B0CK7CJ8YT.01.jpg"
+                fallbackImageUrl="https://m.media-amazon.com/images/I/B0CK7CJ8YT.jpg"
               />
             </div>
           )}
@@ -845,6 +847,7 @@ export function Game() {
                 description="Premium skincare range"
                 rating={4.7}
                 imageUrl="https://images-na.ssl-images-amazon.com/images/P/B07BMBQG73.01.jpg"
+                fallbackImageUrl="https://images-na.ssl-images-amazon.com/images/P/B07BMBQG73.01._SL200_.jpg"
               />
               <AmazonBannerCard
                 productId="B0714LK2WT"
@@ -853,6 +856,7 @@ export function Game() {
                 description="Luxury beauty products"
                 rating={4.6}
                 imageUrl="https://images-na.ssl-images-amazon.com/images/P/B0714LK2WT.01.jpg"
+                fallbackImageUrl="https://images-na.ssl-images-amazon.com/images/P/B0714LK2WT.01._SL200_.jpg"
               />
             </div>
           )}

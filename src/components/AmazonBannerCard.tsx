@@ -8,6 +8,7 @@ interface AmazonBannerCardProps {
   description?: string
   rating?: number
   imageUrl?: string
+  fallbackImageUrl?: string
 }
 
 export default function AmazonBannerCard({
@@ -17,13 +18,26 @@ export default function AmazonBannerCard({
   description,
   rating,
   imageUrl,
+  fallbackImageUrl,
 }: AmazonBannerCardProps) {
   const [isDark] = useDarkMode()
   const [isHovered, setIsHovered] = useState(false)
   const [imageLoaded, setImageLoaded] = useState(false)
-  const [imageError, setImageError] = useState(false)
+  const [primaryImageError, setPrimaryImageError] = useState(false)
+  const [useFallback, setUseFallback] = useState(false)
 
-  // 제품별 스킴 (컬러 + 아이콘 + 폴백)
+  const handlePrimaryImageError = () => {
+    setPrimaryImageError(true)
+    if (fallbackImageUrl) {
+      setUseFallback(true)
+    }
+  }
+
+  const handleFallbackImageError = () => {
+    setImageLoaded(true)
+  }
+
+  // 제품별 스킴 (컬러 + 아이콘)
   const getProductScheme = (id: string) => {
     const schemes: Record<
       string,
@@ -70,8 +84,8 @@ export default function AmazonBannerCard({
   }
 
   const scheme = getProductScheme(productId)
-  const showImage = imageUrl && !imageError && imageLoaded
-  const showFallback = !imageUrl || imageError
+  const currentImageUrl = useFallback && fallbackImageUrl ? fallbackImageUrl : imageUrl
+  const showFallback = !currentImageUrl || (primaryImageError && !useFallback)
 
   return (
     <a
@@ -101,12 +115,12 @@ export default function AmazonBannerCard({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* 상단: 제품 이미지 영역 (220px) */}
+      {/* 상단: 제품 이미지 영역 (290px - 2배 확대) */}
       <div
         style={{
           position: 'relative',
           width: '100%',
-          height: '220px',
+          height: '290px',
           backgroundColor: isDark ? '#0f0f1e' : '#e8e8e8',
           display: 'flex',
           alignItems: 'center',
@@ -116,12 +130,12 @@ export default function AmazonBannerCard({
         }}
       >
         {/* 실제 상품 이미지 */}
-        {imageUrl && (
+        {currentImageUrl && !showFallback && (
           <img
-            src={imageUrl}
+            src={currentImageUrl}
             alt={productName}
             onLoad={() => setImageLoaded(true)}
-            onError={() => setImageError(true)}
+            onError={useFallback ? handleFallbackImageError : handlePrimaryImageError}
             style={{
               width: '100%',
               height: '100%',
@@ -189,24 +203,24 @@ export default function AmazonBannerCard({
         )}
       </div>
 
-      {/* 하단: 제품 정보 영역 (230px) */}
+      {/* 하단: 제품 정보 영역 (160px - 컴팩트) */}
       <div
         style={{
           flex: 1,
-          padding: '11px 13px 12px 13px',
+          padding: '8px 12px',
           display: 'flex',
           flexDirection: 'column',
           justifyContent: 'space-between',
           minHeight: 0,
+          gap: '2px',
         }}
       >
-        {/* 정보 블록 */}
+        {/* 상단 정보 블록 */}
         <div
           style={{
             display: 'flex',
             flexDirection: 'column',
-            gap: '5px',
-            flex: 1,
+            gap: '3px',
           }}
         >
           {/* 별점 */}
@@ -215,13 +229,13 @@ export default function AmazonBannerCard({
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '3px',
-                height: '16px',
+                gap: '2px',
+                height: '13px',
               }}
             >
               <span
                 style={{
-                  fontSize: '11px',
+                  fontSize: '10px',
                   color: '#FFD700',
                   lineHeight: '1',
                 }}
@@ -230,7 +244,7 @@ export default function AmazonBannerCard({
               </span>
               <span
                 style={{
-                  fontSize: '10px',
+                  fontSize: '9px',
                   color: isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.5)',
                 }}
               >
@@ -242,9 +256,9 @@ export default function AmazonBannerCard({
           {/* 제품명 */}
           <h3
             style={{
-              fontSize: '13px',
+              fontSize: '12px',
               fontWeight: '700',
-              lineHeight: '1.25',
+              lineHeight: '1.2',
               margin: '0',
               color: isDark ? '#FFFFFF' : '#1a1a2e',
               wordBreak: 'break-word',
@@ -253,15 +267,14 @@ export default function AmazonBannerCard({
             {productName}
           </h3>
 
-          {/* 설명 */}
+          {/* 설명 - 선택적으로 표시 */}
           {description && (
             <p
               style={{
-                fontSize: '10px',
-                lineHeight: '1.3',
+                fontSize: '9px',
+                lineHeight: '1.25',
                 margin: '0',
-                color: isDark ? 'rgba(255, 255, 255, 0.65)' : 'rgba(0, 0, 0, 0.6)',
-                flex: 1,
+                color: isDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.55)',
               }}
             >
               {description}
@@ -273,23 +286,22 @@ export default function AmazonBannerCard({
         <button
           style={{
             width: '100%',
-            padding: '8px 10px',
+            padding: '7px 9px',
             backgroundColor: isHovered ? scheme.accent : '#FF9933',
             color: isHovered ? '#1a1a2e' : '#FFFFFF',
             border: 'none',
             borderRadius: '5px',
-            fontSize: '10px',
+            fontSize: '9px',
             fontWeight: '700',
             cursor: 'pointer',
             transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
             textTransform: 'uppercase',
-            letterSpacing: '0.4px',
+            letterSpacing: '0.3px',
             boxShadow: isHovered
               ? `0 6px 14px ${scheme.accent}50`
               : `0 2px 5px ${scheme.accent}25`,
             transform: isHovered ? 'translateY(-1px)' : 'translateY(0)',
-            marginTop: '6px',
-            marginBottom: '4px',
+            marginTop: '2px',
           }}
           onClick={(e) => {
             e.preventDefault()
@@ -303,10 +315,10 @@ export default function AmazonBannerCard({
         <p
           style={{
             fontSize: '7px',
-            color: isDark ? 'rgba(255, 255, 255, 0.4)' : 'rgba(0, 0, 0, 0.3)',
-            margin: '0',
+            color: isDark ? 'rgba(255, 255, 255, 0.35)' : 'rgba(0, 0, 0, 0.25)',
+            margin: '1px 0 0 0',
             textAlign: 'center',
-            lineHeight: '1.15',
+            lineHeight: '1.1',
           }}
         >
           As an Amazon Associate, we earn from qualifying purchases.
