@@ -10,6 +10,7 @@ import { ChemistryPage } from './pages/ChemistryPage'
 import { OpticsPage } from './pages/OpticsPage'
 import { PuzzlePage } from './pages/PuzzlePage'
 import { AstronomyPage } from './pages/AstronomyPage'
+import { Tests } from './pages/Tests'
 import { Privacy } from './pages/Privacy'
 import { Terms } from './pages/Terms'
 import { About } from './pages/About'
@@ -27,6 +28,7 @@ function App() {
         <Route path="/optics" element={<OpticsPage />} />
         <Route path="/puzzle" element={<PuzzlePage />} />
         <Route path="/astronomy" element={<AstronomyPage />} />
+        <Route path="/tests" element={<Tests />} />
         <Route path="/store" element={<Store />} />
         <Route path="/category/:categoryId" element={<Category />} />
         <Route path="/privacy" element={<Privacy />} />

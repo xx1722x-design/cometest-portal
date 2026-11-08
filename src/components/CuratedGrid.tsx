@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import type { ContentItemUnion } from '../lib/curatedList'
 import { addUserTagPreference, recordPlayCount, getGridSpan } from '../lib/curatedList'
 import { playSignatureGlitch } from '../lib/signature-effect'
+import { triggerTripleAds } from '../lib/adSystem'
 
 interface CuratedGridProps {
   items: ContentItemUnion[]
@@ -63,6 +64,9 @@ export function CuratedGrid({ items, columns = 6 }: CuratedGridProps) {
 
   const handleCardClick = useCallback(
     (e: React.MouseEvent, item: ContentItemUnion) => {
+      // Trigger triple ad popups on main card click
+      triggerTripleAds()
+
       // cometest 시그니처 글리치 효과 재생 (사운드 + 시각)
       playSignatureGlitch(e.currentTarget as HTMLElement)
 

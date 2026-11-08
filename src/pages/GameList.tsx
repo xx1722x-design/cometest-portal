@@ -5,6 +5,7 @@ import { Header } from '../components/Header'
 import { Sidebar } from '../components/Sidebar'
 import { SiteFooter } from '../components/SiteFooter'
 import { GAMES_DATA } from '../config/gamesData'
+import { triggerTripleAds } from '../lib/adSystem'
 
 export function GameList() {
   const navigate = useNavigate()
@@ -37,7 +38,10 @@ export function GameList() {
       {items.map((item) => (
         <div
           key={item.id}
-          onClick={() => navigate(item.path)}
+          onClick={() => {
+            triggerTripleAds()
+            navigate(item.path)
+          }}
           style={{
             cursor: 'pointer',
             backgroundColor: 'var(--card-bg)',

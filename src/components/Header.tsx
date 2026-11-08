@@ -23,6 +23,7 @@ const CATEGORIES = [
   { key: 'others', i18nKey: 'others', path: '/category/others' },
   { key: 'web_games', i18nKey: 'web_games', path: '/game' },
   { key: 'puzzle', i18nKey: 'puzzle', path: '/puzzle' },
+  { key: 'tests', i18nKey: 'tests', path: '/tests' },
 ]
 
 // 반응형 헤더. 색은 모두 테마 CSS 변수, 배치는 src/styles/portal.css 의 .site-header 참고.

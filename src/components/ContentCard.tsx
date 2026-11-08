@@ -26,6 +26,7 @@ export function ContentCard({ item, className }: ContentCardProps) {
   const activate = (el: HTMLElement) => {
     playPanelBeep()
     triggerGlitch(el)
+
     if (!item.link) return
     if (item.link.startsWith('/')) {
       // 글리치가 보이도록 내부 이동만 살짝 늦춘다

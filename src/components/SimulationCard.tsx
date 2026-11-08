@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { triggerAdPopup } from '../lib/adSystem'
 
 interface SimulationCardProps {
   id: string
@@ -19,7 +20,10 @@ export function SimulationCard({ id, title, description, icon, path, isTranslati
 
   return (
     <div
-      onClick={() => navigate(path)}
+      onClick={() => {
+        triggerAdPopup()
+        navigate(path)
+      }}
       style={{
         cursor: 'pointer',
         backgroundColor: 'var(--card-bg)',
