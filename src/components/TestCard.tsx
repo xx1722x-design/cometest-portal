@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { triggerAdPopup } from '../lib/adSystem';
 
 interface TestCardProps {
   id: string;
@@ -31,6 +32,7 @@ export function TestCard({
   const [isHovered, setIsHovered] = useState(false);
 
   const handleClick = () => {
+    triggerAdPopup();
     onClick();
   };
 

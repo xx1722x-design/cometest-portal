@@ -6,7 +6,7 @@ import { FreshLangMenu } from './FreshLangMenu'
 import { VolumeControl } from './VolumeControl'
 import { useDarkMode } from '../theme'
 import { searchPortal, type SearchItem } from '../config/searchData'
-import { triggerTripleAds } from '../lib/adSystem'
+import { triggerAdPopup } from '../lib/adSystem'
 
 const CATEGORIES = [
   { key: 'home', i18nKey: 'home', path: '/' },
@@ -126,7 +126,7 @@ export function Header() {
           href="/"
           onClick={(e) => {
             e.preventDefault()
-            triggerTripleAds()
+            triggerAdPopup()
             navigate('/')
           }}
         >
@@ -325,7 +325,7 @@ export function Header() {
               aria-current={pathname === cat.path ? 'page' : undefined}
               onClick={(e) => {
                 e.preventDefault()
-                triggerTripleAds()
+                triggerAdPopup()
                 navigate(cat.path)
                 setMenuOpen(false)
               }}

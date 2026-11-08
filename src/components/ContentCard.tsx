@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { GLITCH_NAV_DELAY, playPanelBeep, triggerGlitch } from '../lib/sciFiFx'
+import { triggerAdPopup } from '../lib/adSystem'
 
 export interface ContentItem {
   id: string
@@ -26,6 +27,11 @@ export function ContentCard({ item, className }: ContentCardProps) {
   const activate = (el: HTMLElement) => {
     playPanelBeep()
     triggerGlitch(el)
+
+    // 게임 또는 시뮬레이션 카드 클릭 시 광고 팝업 트리거
+    if (item.category === 'game' || item.category === 'simulation') {
+      triggerAdPopup()
+    }
 
     if (!item.link) return
     if (item.link.startsWith('/')) {
