@@ -22,6 +22,18 @@ const STORE_CARD: ContentItemUnion = {
   play_count: 0,
 } as any
 
+// Ripavid 배너 카드 데이터
+const RIPAVID_BANNER: ContentItemUnion = {
+  id: 'ripavid-banner',
+  title: 'YouTube Video Downloader',
+  description: 'All platforms videos in 90 seconds',
+  category: 'ripavid',
+  icon: '⬇️',
+  path: 'https://www.ripavid.com',
+  tags: ['ripavid', 'downloader'],
+  play_count: 0,
+} as any
+
 export function CuratedGrid({ items, columns = 6 }: CuratedGridProps) {
   const navigate = useNavigate()
   const [visibleCount, setVisibleCount] = useState(20)
@@ -74,9 +86,9 @@ export function CuratedGrid({ items, columns = 6 }: CuratedGridProps) {
       playSignatureGlitch(e.currentTarget as HTMLElement)
 
       setTimeout(() => {
-        // 스토어 카드는 새 탭에서 열기
-        if (item.id === 'store-hero') {
-          window.open(item.path, '_blank')
+        // 스토어 카드와 배너 카드는 새 탭에서 열기
+        if (item.id === 'store-hero' || item.id === 'ripavid-banner') {
+          window.open(item.path, '_blank', 'noopener,noreferrer')
           return
         }
 
@@ -93,8 +105,8 @@ export function CuratedGrid({ items, columns = 6 }: CuratedGridProps) {
     [navigate]
   )
 
-  // Store 카드를 맨 앞에 추가
-  const allItems = [STORE_CARD, ...items]
+  // Store 카드와 Ripavid 배너를 맨 앞에 추가
+  const allItems = [STORE_CARD, RIPAVID_BANNER, ...items]
   const visibleItems = allItems.slice(0, visibleCount)
 
   return (
@@ -110,7 +122,10 @@ export function CuratedGrid({ items, columns = 6 }: CuratedGridProps) {
       } as React.CSSProperties}
     >
       {visibleItems.map((item, idx) => {
-        const { col, row } = item.id === 'store-hero' ? { col: 2, row: 2 } : getGridSpan(idx, visibleItems.length)
+        const { col, row } =
+          item.id === 'store-hero' || item.id === 'ripavid-banner'
+            ? { col: 2, row: 2 }
+            : getGridSpan(idx, visibleItems.length)
 
         return (
           <div
@@ -132,14 +147,20 @@ export function CuratedGrid({ items, columns = 6 }: CuratedGridProps) {
               padding: '20px',
               textAlign: 'center',
             }}
-            className={item.id === 'store-hero' ? 'store-card' : 'curated-grid-card'}
+            className={item.id === 'store-hero' ? 'store-card' : item.id === 'ripavid-banner' ? 'ripavid-card' : 'curated-grid-card'}
             onMouseEnter={(e) => {
-              if (item.id !== 'store-hero') {
+              if (item.id === 'ripavid-banner') {
+                e.currentTarget.style.transform = 'scale(1.05)'
+                e.currentTarget.style.boxShadow = '0 12px 32px rgba(255, 0, 0, 0.4)'
+              } else if (item.id !== 'store-hero') {
                 e.currentTarget.classList.add('fire-hover')
               }
             }}
             onMouseLeave={(e) => {
-              if (item.id !== 'store-hero') {
+              if (item.id === 'ripavid-banner') {
+                e.currentTarget.style.transform = 'scale(1)'
+                e.currentTarget.style.boxShadow = 'none'
+              } else if (item.id !== 'store-hero') {
                 e.currentTarget.classList.remove('fire-hover')
               }
             }}
@@ -160,6 +181,28 @@ export function CuratedGrid({ items, columns = 6 }: CuratedGridProps) {
                     position: 'absolute',
                     inset: 0,
                     background: 'radial-gradient(circle at 30% 20%, rgba(255, 255, 255, 0.3), transparent 50%)',
+                    zIndex: 2,
+                  }}
+                />
+              </>
+            )}
+
+            {/* Ripavid 배너 배경 */}
+            {item.id === 'ripavid-banner' && (
+              <>
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'linear-gradient(135deg, #FF0000 0%, #FF6B35 50%, #FFD700 100%)',
+                    zIndex: 1,
+                  }}
+                />
+                <div
+                  style={{
+                    position: 'absolute',
+                    inset: 0,
+                    background: 'radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.4), transparent 60%)',
                     zIndex: 2,
                   }}
                 />
@@ -205,53 +248,126 @@ export function CuratedGrid({ items, columns = 6 }: CuratedGridProps) {
             )}
 
             {/* 콘텐츠 */}
-            <div style={{ position: 'relative', zIndex: item.id === 'store-hero' ? 3 : 10 }}>
-              <div
-                style={{
-                  fontSize: item.id === 'store-hero' ? '80px' : `${Math.min(60, 20 + col * 10 + row * 10)}px`,
-                }}
-                aria-hidden="true"
-              >
-                {item.icon}
-              </div>
+            <div
+              style={{
+                position: 'relative',
+                zIndex: item.id === 'store-hero' || item.id === 'ripavid-banner' ? 3 : 10,
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: item.id === 'ripavid-banner' ? '8px' : '4px',
+                width: '100%',
+              }}
+            >
+              {/* Ripavid 배너: 아이콘 조합 */}
+              {item.id === 'ripavid-banner' ? (
+                <div
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '12px',
+                    fontSize: '48px',
+                    marginBottom: '8px',
+                  }}
+                >
+                  <span>🎥</span>
+                  <span>➡️</span>
+                  <span>{item.icon}</span>
+                </div>
+              ) : (
+                <div
+                  style={{
+                    fontSize: item.id === 'store-hero' ? '80px' : `${Math.min(60, 20 + col * 10 + row * 10)}px`,
+                  }}
+                  aria-hidden="true"
+                >
+                  {item.icon}
+                </div>
+              )}
 
-              <h3
-                style={{
-                  margin: '8px 0 4px 0',
-                  fontSize: item.id === 'store-hero' ? '28px' : `${Math.max(12, 14 + (col - 1) * 2)}px`,
-                  fontWeight: item.id === 'store-hero' ? '800' : '600',
-                  color: item.id === 'store-hero' ? '#ffffff' : 'var(--text-primary)',
-                  lineHeight: 1.2,
-                  textShadow: item.id === 'store-hero' ? '0 2px 8px rgba(0, 0, 0, 0.3)' : 'none',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  display: '-webkit-box',
-                  WebkitLineClamp: windowWidth < 640 ? 1 : 2,
-                  WebkitBoxOrient: 'vertical',
-                  wordBreak: 'break-word',
-                }}
-              >
-                {item.title}
-              </h3>
+              {/* Ripavid 배너: 메인 텍스트 */}
+              {item.id === 'ripavid-banner' && (
+                <div
+                  style={{
+                    fontSize: '22px',
+                    fontWeight: '800',
+                    color: '#ffffff',
+                    lineHeight: 1.3,
+                    textShadow: '0 2px 8px rgba(0, 0, 0, 0.4)',
+                    textAlign: 'center',
+                    maxWidth: '90%',
+                    margin: '0',
+                  }}
+                >
+                  유튜브 주소 앞에
+                  <br />
+                  <span style={{ fontSize: '26px', fontWeight: '900', color: '#FFD700' }}>rrr</span>
+                  {' '}누르고 엔터!
+                </div>
+              )}
 
-              <p
-                style={{
-                  margin: 0,
-                  fontSize: item.id === 'store-hero' ? '16px' : `${Math.max(11, 12 + (col - 1) * 1)}px`,
-                  color: item.id === 'store-hero' ? 'rgba(255, 255, 255, 0.9)' : 'var(--text-secondary)',
-                  opacity: item.id === 'store-hero' ? 1 : 0.8,
-                  lineHeight: 1.3,
-                  textShadow: item.id === 'store-hero' ? '0 1px 4px rgba(0, 0, 0, 0.2)' : 'none',
-                  overflow: 'hidden',
-                  textOverflow: 'ellipsis',
-                  display: '-webkit-box',
-                  WebkitLineClamp: windowWidth < 640 ? 1 : 2,
-                  WebkitBoxOrient: 'vertical',
-                  wordBreak: 'break-word',
-                }}
-              >
-                {item.description}
-              </p>
+              {/* 일반 카드: 제목 */}
+              {item.id !== 'ripavid-banner' && (
+                <h3
+                  style={{
+                    margin: '8px 0 4px 0',
+                    fontSize: item.id === 'store-hero' ? '28px' : `${Math.max(12, 14 + (col - 1) * 2)}px`,
+                    fontWeight: item.id === 'store-hero' ? '800' : '600',
+                    color: item.id === 'store-hero' ? '#ffffff' : 'var(--text-primary)',
+                    lineHeight: 1.2,
+                    textShadow: item.id === 'store-hero' ? '0 2px 8px rgba(0, 0, 0, 0.3)' : 'none',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    display: '-webkit-box',
+                    WebkitLineClamp: windowWidth < 640 ? 1 : 2,
+                    WebkitBoxOrient: 'vertical',
+                    wordBreak: 'break-word',
+                  }}
+                >
+                  {item.title}
+                </h3>
+              )}
+
+              {/* Ripavid 배너: 서브 텍스트 */}
+              {item.id === 'ripavid-banner' && (
+                <p
+                  style={{
+                    margin: '8px 0 0 0',
+                    fontSize: '14px',
+                    color: 'rgba(255, 255, 255, 0.95)',
+                    lineHeight: 1.3,
+                    textShadow: '0 1px 4px rgba(0, 0, 0, 0.3)',
+                    textAlign: 'center',
+                    maxWidth: '90%',
+                    fontWeight: '600',
+                  }}
+                >
+                  {item.description}
+                </p>
+              )}
+
+              {/* 일반 카드: 설명 */}
+              {item.id !== 'ripavid-banner' && (
+                <p
+                  style={{
+                    margin: 0,
+                    fontSize: item.id === 'store-hero' ? '16px' : `${Math.max(11, 12 + (col - 1) * 1)}px`,
+                    color: item.id === 'store-hero' ? 'rgba(255, 255, 255, 0.9)' : 'var(--text-secondary)',
+                    opacity: item.id === 'store-hero' ? 1 : 0.8,
+                    lineHeight: 1.3,
+                    textShadow: item.id === 'store-hero' ? '0 1px 4px rgba(0, 0, 0, 0.2)' : 'none',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
+                    display: '-webkit-box',
+                    WebkitLineClamp: windowWidth < 640 ? 1 : 2,
+                    WebkitBoxOrient: 'vertical',
+                    wordBreak: 'break-word',
+                  }}
+                >
+                  {item.description}
+                </p>
+              )}
             </div>
 
             {item.id !== 'store-hero' && (item.play_count || 0) > 0 && (
