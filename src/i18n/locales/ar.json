@@ -148,5 +148,9 @@
   "laser_controls": "التحكم بالليزر",
   "left_drag": "السحب الأيسر: تحريك الليزر",
   "right_drag": "السحب الأيمن: تدوير الليزر",
-  "slider_adjust": "المنزلق: ضبط الزاوية"
+  "slider_adjust": "المنزلق: ضبط الزاوية",
+  "ripavid_title": "محمل الفيديو",
+  "ripavid_desc": "قم بتنزيل مقاطع فيديو من جميع المنصات في 90 ثانية",
+  "ripavid_main": "أدخل 'rrr' قبل رابط YouTube واضغط Enter",
+  "ripavid_platforms": "YouTube • Instagram • TikTok • Douyin • Xiaohongshu"
 }

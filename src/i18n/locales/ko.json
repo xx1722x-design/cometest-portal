@@ -151,5 +151,9 @@
   "laser_controls": "Laser Controls",
   "left_drag": "Left Drag: Move laser",
   "right_drag": "Right Drag: Rotate laser",
-  "slider_adjust": "Slider: Fine-tune angle"
+  "slider_adjust": "Slider: Fine-tune angle",
+  "ripavid_title": "동영상 다운로더",
+  "ripavid_desc": "모든 플랫폼 영상 90초에 다운로드",
+  "ripavid_main": "유튜브 주소 앞에 'rrr' 입력 후 엔터",
+  "ripavid_platforms": "유튜브 • 인스타그램 • 틱톡 • 더우인 • 샤오홍슈"
 }

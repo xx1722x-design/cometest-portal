@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import type { ContentItemUnion } from '../lib/curatedList'
 import { addUserTagPreference, recordPlayCount, getGridSpan } from '../lib/curatedList'
 import { playSignatureGlitch } from '../lib/signature-effect'
@@ -10,32 +11,33 @@ interface CuratedGridProps {
   columns?: number
 }
 
-// Store 히어로 카드 데이터
-const STORE_CARD: ContentItemUnion = {
-  id: 'store-hero',
-  title: 'Premium Store',
-  description: 'Premium 3D Assets & Exclusive Skins',
-  category: 'store',
-  icon: '🛍️',
-  path: 'https://store.cometest.com',
-  tags: ['store', 'premium'],
-  play_count: 0,
-} as any
-
-// Ripavid 배너 카드 데이터
-const RIPAVID_BANNER: ContentItemUnion = {
-  id: 'ripavid-banner',
-  title: 'YouTube Video Downloader',
-  description: 'All platforms videos in 90 seconds',
-  category: 'ripavid',
-  icon: '⬇️',
-  path: 'https://www.ripavid.com',
-  tags: ['ripavid', 'downloader'],
-  play_count: 0,
-} as any
-
 export function CuratedGrid({ items, columns = 6 }: CuratedGridProps) {
   const navigate = useNavigate()
+  const { t } = useTranslation()
+
+  // Store 히어로 카드 데이터
+  const STORE_CARD: ContentItemUnion = {
+    id: 'store-hero',
+    title: 'Premium Store',
+    description: 'Premium 3D Assets & Exclusive Skins',
+    category: 'store',
+    icon: '🛍️',
+    path: 'https://store.cometest.com',
+    tags: ['store', 'premium'],
+    play_count: 0,
+  } as any
+
+  // Ripavid 배너 카드 데이터 (i18n 적용)
+  const RIPAVID_BANNER: ContentItemUnion = {
+    id: 'ripavid-banner',
+    title: t('ripavid_title'),
+    description: t('ripavid_desc'),
+    category: 'ripavid',
+    icon: '⬇️',
+    path: 'https://www.ripavid.com',
+    tags: ['ripavid', 'downloader'],
+    play_count: 0,
+  } as any
   const [visibleCount, setVisibleCount] = useState(20)
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
   const observerTarget = useRef<HTMLDivElement>(null)
@@ -288,23 +290,36 @@ export function CuratedGrid({ items, columns = 6 }: CuratedGridProps) {
 
               {/* Ripavid 배너: 메인 텍스트 */}
               {item.id === 'ripavid-banner' && (
-                <div
-                  style={{
-                    fontSize: '22px',
-                    fontWeight: '800',
-                    color: '#ffffff',
-                    lineHeight: 1.3,
-                    textShadow: '0 2px 8px rgba(0, 0, 0, 0.4)',
-                    textAlign: 'center',
-                    maxWidth: '90%',
-                    margin: '0',
-                  }}
-                >
-                  유튜브 주소 앞에
-                  <br />
-                  <span style={{ fontSize: '26px', fontWeight: '900', color: '#FFD700' }}>rrr</span>
-                  {' '}누르고 엔터!
-                </div>
+                <>
+                  <div
+                    style={{
+                      fontSize: '20px',
+                      fontWeight: '800',
+                      color: '#ffffff',
+                      lineHeight: 1.3,
+                      textShadow: '0 2px 8px rgba(0, 0, 0, 0.4)',
+                      textAlign: 'center',
+                      maxWidth: '90%',
+                      margin: '0',
+                    }}
+                  >
+                    {t('ripavid_main')}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '12px',
+                      fontWeight: '600',
+                      color: 'rgba(255, 255, 255, 0.9)',
+                      lineHeight: 1.2,
+                      textShadow: '0 1px 4px rgba(0, 0, 0, 0.3)',
+                      textAlign: 'center',
+                      maxWidth: '90%',
+                      margin: '4px 0 0 0',
+                    }}
+                  >
+                    {t('ripavid_platforms')}
+                  </div>
+                </>
               )}
 
               {/* 일반 카드: 제목 */}

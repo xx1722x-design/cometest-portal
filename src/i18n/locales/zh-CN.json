@@ -148,5 +148,9 @@
   "laser_controls": "激光控制",
   "left_drag": "左拖: 移动激光",
   "right_drag": "右拖: 旋转激光",
-  "slider_adjust": "滑块: 微调角度"
+  "slider_adjust": "滑块: 微调角度",
+  "ripavid_title": "视频下载器",
+  "ripavid_desc": "90秒内下载所有平台视频",
+  "ripavid_main": "在YouTube网址前输入 'rrr' 后按回车",
+  "ripavid_platforms": "YouTube • Instagram • TikTok • 抖音 • 小红书"
 }

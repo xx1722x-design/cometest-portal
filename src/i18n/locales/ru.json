@@ -148,5 +148,9 @@
   "laser_controls": "Управление лазером",
   "left_drag": "Лев. перетасканием: Переместить лазер",
   "right_drag": "Пр. перетасканием: Повернуть лазер",
-  "slider_adjust": "Ползунок: Настройка угла"
+  "slider_adjust": "Ползунок: Настройка угла",
+  "ripavid_title": "Загрузчик видео",
+  "ripavid_desc": "Загружайте видео со всех платформ за 90 секунд",
+  "ripavid_main": "Введите 'rrr' перед URL YouTube и нажмите Enter",
+  "ripavid_platforms": "YouTube • Instagram • TikTok • Douyin • Xiaohongshu"
 }

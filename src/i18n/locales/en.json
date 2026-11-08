@@ -151,5 +151,9 @@
   "laser_controls": "Laser Controls",
   "left_drag": "Left drag: Move laser",
   "right_drag": "Right drag: Rotate laser",
-  "slider_adjust": "Slider: Fine adjust angle"
+  "slider_adjust": "Slider: Fine adjust angle",
+  "ripavid_title": "Video Downloader",
+  "ripavid_desc": "Download from all platforms in 90 seconds",
+  "ripavid_main": "Add 'rrr' before YouTube URL then Enter",
+  "ripavid_platforms": "YouTube • Instagram • TikTok • Douyin • Xiaohongshu"
 }

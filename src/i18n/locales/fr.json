@@ -148,5 +148,9 @@
   "laser_controls": "Commandes Laser",
   "left_drag": "Glisser gauche: Déplacer laser",
   "right_drag": "Glisser droit: Faire pivoter laser",
-  "slider_adjust": "Curseur: Ajuster l'angle"
+  "slider_adjust": "Curseur: Ajuster l'angle",
+  "ripavid_title": "Téléchargeur de Vidéos",
+  "ripavid_desc": "Télécharger les vidéos de toutes les plateformes en 90 secondes",
+  "ripavid_main": "Entrez 'rrr' avant l'URL YouTube et appuyez sur Entrée",
+  "ripavid_platforms": "YouTube • Instagram • TikTok • Douyin • Xiaohongshu"
 }
