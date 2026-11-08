@@ -152,5 +152,6 @@
   "ripavid_title": "ビデオダウンローダー",
   "ripavid_desc": "90秒で全プラットフォームのビデオをダウンロード",
   "ripavid_main": "YouTubeのURLの前に 'rrr' を入力してEnter",
-  "ripavid_platforms": "YouTube • Instagram • TikTok • 抖音 • 小紅書"
+  "ripavid_platforms": "YouTube • Instagram • TikTok • 抖音 • 小紅書 • Kuaishou • Bilibili • Weibo • Baidu • Pinduoduo",
+  "ripavid_howto": "ripavid.com にビデオURLを貼り付けてEnterをクリック。90秒でダウンロード完了。"
 }

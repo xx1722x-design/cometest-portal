@@ -152,5 +152,6 @@
   "ripavid_title": "視頻下載器",
   "ripavid_desc": "90秒內下載所有平台視頻",
   "ripavid_main": "在YouTube網址前輸入 'rrr' 後按回車",
-  "ripavid_platforms": "YouTube • Instagram • TikTok • 抖音 • 小紅書"
+  "ripavid_platforms": "YouTube • Instagram • TikTok • 抖音 • 小紅書 • 快手 • B站 • 微博 • 百度 • 拼多多",
+  "ripavid_howto": "將視頻地址貼上到 ripavid.com 點擊回車。90秒內完成下載。"
 }

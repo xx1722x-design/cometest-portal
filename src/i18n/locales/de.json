@@ -152,5 +152,6 @@
   "ripavid_title": "Video-Downloader",
   "ripavid_desc": "Videos von allen Plattformen in 90 Sekunden herunterladen",
   "ripavid_main": "Geben Sie 'rrr' vor die YouTube-URL ein und drücken Sie Enter",
-  "ripavid_platforms": "YouTube • Instagram • TikTok • Douyin • Xiaohongshu"
+  "ripavid_platforms": "YouTube • Instagram • TikTok • Douyin • Xiaohongshu • Kuaishou • Bilibili • Weibo • Baidu • Pinduoduo",
+  "ripavid_howto": "Fügen Sie die Video-URL in ripavid.com ein und drücken Sie Enter. Download in 90 Sekunden."
 }

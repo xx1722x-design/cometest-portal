@@ -155,5 +155,6 @@
   "ripavid_title": "동영상 다운로더",
   "ripavid_desc": "모든 플랫폼 영상 90초에 다운로드",
   "ripavid_main": "유튜브 주소 앞에 'rrr' 입력 후 엔터",
-  "ripavid_platforms": "유튜브 • 인스타그램 • 틱톡 • 더우인 • 샤오홍슈"
+  "ripavid_platforms": "유튜브 • 인스타그램 • 틱톡 • 더우인 • 샤오홍슈 • 콰이쇼우 • 빌리빌리 • 웨이보 • 바이두 • 핀둬둬",
+  "ripavid_howto": "ripavid.com에 영상 주소를 붙여넣고 엔터를 누르세요. 90초 내 다운로드 완료."
 }

@@ -307,17 +307,31 @@ export function CuratedGrid({ items, columns = 6 }: CuratedGridProps) {
                   </div>
                   <div
                     style={{
-                      fontSize: '12px',
-                      fontWeight: '600',
-                      color: 'rgba(255, 255, 255, 0.9)',
+                      fontSize: '11px',
+                      fontWeight: '500',
+                      color: 'rgba(255, 255, 255, 0.85)',
                       lineHeight: 1.2,
-                      textShadow: '0 1px 4px rgba(0, 0, 0, 0.3)',
+                      textShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
                       textAlign: 'center',
                       maxWidth: '90%',
                       margin: '4px 0 0 0',
                     }}
                   >
                     {t('ripavid_platforms')}
+                  </div>
+                  <div
+                    style={{
+                      fontSize: '10px',
+                      fontWeight: '500',
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      lineHeight: 1.2,
+                      textShadow: '0 1px 3px rgba(0, 0, 0, 0.3)',
+                      textAlign: 'center',
+                      maxWidth: '85%',
+                      margin: '6px 0 0 0',
+                    }}
+                  >
+                    {t('ripavid_howto')}
                   </div>
                 </>
               )}

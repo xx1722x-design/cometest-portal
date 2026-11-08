@@ -152,5 +152,6 @@
   "ripavid_title": "Загрузчик видео",
   "ripavid_desc": "Загружайте видео со всех платформ за 90 секунд",
   "ripavid_main": "Введите 'rrr' перед URL YouTube и нажмите Enter",
-  "ripavid_platforms": "YouTube • Instagram • TikTok • Douyin • Xiaohongshu"
+  "ripavid_platforms": "YouTube • Instagram • TikTok • Douyin • Xiaohongshu • Kuaishou • Bilibili • Weibo • Baidu • Pinduoduo",
+  "ripavid_howto": "Вставьте ссылку видео в ripavid.com и нажмите Enter. Загрузка за 90 секунд."
 }
