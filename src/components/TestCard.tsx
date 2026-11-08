@@ -31,7 +31,9 @@ export function TestCard({
 }: TestCardProps) {
   const [isHovered, setIsHovered] = useState(false);
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     triggerAdPopup();
     onClick();
   };
@@ -68,7 +70,7 @@ export function TestCard({
 
   return (
     <div
-      onClick={handleClick}
+      onClick={(e) => handleClick(e as React.MouseEvent)}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={{

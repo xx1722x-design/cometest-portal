@@ -126,6 +126,7 @@ export function Header() {
           href="/"
           onClick={(e) => {
             e.preventDefault()
+            e.stopPropagation()
             triggerAdPopup()
             navigate('/')
           }}
@@ -325,6 +326,7 @@ export function Header() {
               aria-current={pathname === cat.path ? 'page' : undefined}
               onClick={(e) => {
                 e.preventDefault()
+                e.stopPropagation()
                 triggerAdPopup()
                 navigate(cat.path)
                 setMenuOpen(false)

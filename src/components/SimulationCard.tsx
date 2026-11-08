@@ -20,7 +20,9 @@ export function SimulationCard({ id, title, description, icon, path, isTranslati
 
   return (
     <div
-      onClick={() => {
+      onClick={(e) => {
+        e.preventDefault()
+        e.stopPropagation()
         triggerAdPopup()
         navigate(path)
       }}

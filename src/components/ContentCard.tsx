@@ -24,11 +24,16 @@ export function ContentCard({ item, className }: ContentCardProps) {
   const navigate = useNavigate()
   const { t } = useTranslation()
 
-  const activate = (el: HTMLElement) => {
+  const activate = (el: HTMLElement, e?: React.MouseEvent | React.KeyboardEvent) => {
+    if (e) {
+      e.preventDefault()
+      e.stopPropagation()
+    }
+
     playPanelBeep()
     triggerGlitch(el)
 
-    // 게임 또는 시뮬레이션 카드 클릭 시 광고 팝업 트리거
+    // 게임 또는 시뮬레이션 카드 클릭 시 광고 팝업 트리거 (1개만)
     if (item.category === 'game' || item.category === 'simulation') {
       triggerAdPopup()
     }
@@ -47,11 +52,12 @@ export function ContentCard({ item, className }: ContentCardProps) {
   return (
     <div
       className={`glass-card${item.link ? ' is-clickable' : ''}${className ? ` ${className}` : ''}`}
-      onClick={(e) => activate(e.currentTarget)}
+      onClick={(e) => activate(e.currentTarget, e)}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault()
-          activate(e.currentTarget)
+          e.stopPropagation()
+          activate(e.currentTarget, e)
         }
       }}
       role={item.link ? 'link' : 'button'}
