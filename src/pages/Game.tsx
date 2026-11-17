@@ -12,6 +12,8 @@ import { BreakoutArcadePhaser } from '../components/games/BreakoutArcadePhaser'
 import { NeonDodgePhaser } from '../components/games/NeonDodgePhaser'
 import { getGameById } from '../config/gamesData'
 import AmazonBannerCard from '../components/AmazonBannerCard'
+import AmazonAffiliateCard from '../components/AmazonAffiliateCard'
+import { getRandomAmazonLinks } from '../config/amazonAffiliateLinks'
 
 // Dynamic import for AllYouCanTycoon (JSX file)
 // @ts-ignore - importing JSX file is intentional for game compatibility
@@ -26,6 +28,7 @@ export function Game() {
   const [windowWidth, setWindowWidth] = useState(typeof window !== 'undefined' ? window.innerWidth : 1024)
   const [country, setCountry] = useState<string>('US')
   const [countryLoading, setCountryLoading] = useState(true)
+  const [amazonLinks] = useState(() => getRandomAmazonLinks(6))
 
   const game = gameId ? getGameById(gameId) : null
 
@@ -489,46 +492,23 @@ export function Game() {
               <div style={{ marginTop: '6px', textAlign: 'center', fontSize: '10px', color: '#555555', lineHeight: '1.3' }}>이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div>
             </>
           ) : (
-            /* International User: Amazon Luxury Beauty Cards - Left Sidebar */
+            /* International User: Amazon Affiliate Cards - Left Sidebar (3 cards) */
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '12px',
                 width: '100%',
-                maxWidth: '300px',
+                maxWidth: '280px',
                 padding: '8px 0',
               }}
             >
-              {[
-                {
-                  productId: 'B08MJZYW8P',
-                  productName: 'Premium Luxury Beauty',
-                  affiliateUrl: 'https://www.amazon.com/dp/B08MJZYW8P?tag=cometest20-20',
-                  description: 'Exclusive beauty collection',
-                  rating: 4.5,
-                  imageUrl: 'https://images-na.ssl-images-amazon.com/images/P/B08MJZYW8P.01.jpg',
-                  fallbackImageUrl: 'https://images-na.ssl-images-amazon.com/images/P/B08MJZYW8P.01._SL200_.jpg',
-                },
-                {
-                  productId: 'B07XCYBCCN',
-                  productName: 'Premium Beauty Essentials',
-                  affiliateUrl: 'https://www.amazon.com/dp/B07XCYBCCN?tag=cometest20-20',
-                  description: 'Premium beauty skincare',
-                  rating: 4.6,
-                  imageUrl: 'https://m.media-amazon.com/images/I/71sXglSV3QL.jpg',
-                  fallbackImageUrl: 'https://images-na.ssl-images-amazon.com/images/P/B07XCYBCCN.01.jpg',
-                },
-              ].map((product, idx) => (
-                <AmazonBannerCard
+              {amazonLinks.slice(0, 3).map((link, idx) => (
+                <AmazonAffiliateCard
                   key={`left-card-${idx}`}
-                  productId={product.productId}
-                  productName={product.productName}
-                  affiliateUrl={product.affiliateUrl}
-                  description={product.description}
-                  rating={product.rating}
-                  imageUrl={product.imageUrl}
-                  fallbackImageUrl={product.fallbackImageUrl}
+                  emoji={link.emoji}
+                  productName={link.productName}
+                  affiliateUrl={link.url}
                 />
               ))}
             </div>
@@ -842,46 +822,23 @@ export function Game() {
               <div style={{ marginTop: '6px', textAlign: 'center', fontSize: '10px', color: '#555555', lineHeight: '1.3' }}>이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div>
             </>
           ) : (
-            /* International User: Amazon Luxury Beauty Cards - Right Sidebar */
+            /* International User: Amazon Affiliate Cards - Right Sidebar (3 cards) */
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '12px',
                 width: '100%',
-                maxWidth: '300px',
+                maxWidth: '280px',
                 padding: '8px 0',
               }}
             >
-              {[
-                {
-                  productId: 'B07BMBQG73',
-                  productName: 'Luxury Beauty Essentials',
-                  affiliateUrl: 'https://www.amazon.com/dp/B07BMBQG73?tag=cometest20-20',
-                  description: 'Premium skincare range',
-                  rating: 4.7,
-                  imageUrl: 'https://images-na.ssl-images-amazon.com/images/P/B07BMBQG73.01.jpg',
-                  fallbackImageUrl: 'https://images-na.ssl-images-amazon.com/images/P/B07BMBQG73.01._SL200_.jpg',
-                },
-                {
-                  productId: 'B0714LK2WT',
-                  productName: 'Elite Beauty Collection',
-                  affiliateUrl: 'https://www.amazon.com/dp/B0714LK2WT?tag=cometest20-20',
-                  description: 'Luxury beauty products',
-                  rating: 4.6,
-                  imageUrl: 'https://images-na.ssl-images-amazon.com/images/P/B0714LK2WT.01.jpg',
-                  fallbackImageUrl: 'https://images-na.ssl-images-amazon.com/images/P/B0714LK2WT.01._SL200_.jpg',
-                },
-              ].map((product, idx) => (
-                <AmazonBannerCard
+              {amazonLinks.slice(3, 6).map((link, idx) => (
+                <AmazonAffiliateCard
                   key={`right-card-${idx}`}
-                  productId={product.productId}
-                  productName={product.productName}
-                  affiliateUrl={product.affiliateUrl}
-                  description={product.description}
-                  rating={product.rating}
-                  imageUrl={product.imageUrl}
-                  fallbackImageUrl={product.fallbackImageUrl}
+                  emoji={link.emoji}
+                  productName={link.productName}
+                  affiliateUrl={link.url}
                 />
               ))}
             </div>
