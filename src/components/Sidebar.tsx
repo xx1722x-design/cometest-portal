@@ -1,5 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useMemo } from 'react'
+import { getRandomProducts } from '../data/amazonProducts'
+import AmazonProductCard from './AmazonProductCard'
 
 interface SidebarLink {
   id: string
@@ -17,6 +20,7 @@ interface SidebarProps {
 export function Sidebar({ links }: SidebarProps) {
   const navigate = useNavigate()
   const { t } = useTranslation()
+  const amazonProducts = useMemo(() => getRandomProducts(3), [])
 
   // 번역 문구에 이모지가 이미 들어 있으므로 아이콘을 따로 붙이지 않는다
   const defaultLinks: SidebarLink[] = [
@@ -53,6 +57,46 @@ export function Sidebar({ links }: SidebarProps) {
       <div className="portal-sidebar__notice">
         <h4>{t('notice')}</h4>
         <p>{t('notice_content')}</p>
+      </div>
+
+      {/* Amazon Product Cards Section */}
+      <div
+        style={{
+          marginTop: '20px',
+          paddingTop: '16px',
+          borderTop: '1px solid rgba(100, 181, 246, 0.2)',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '12px',
+        }}
+      >
+        <h4
+          style={{
+            margin: '0 0 12px 0',
+            fontSize: '14px',
+            fontWeight: '600',
+            color: 'rgba(100, 181, 246, 0.9)',
+          }}
+        >
+          ⭐ Featured Deals
+        </h4>
+        {amazonProducts.map((product, idx) => (
+          <AmazonProductCard
+            key={`sidebar-product-${idx}`}
+            product={product}
+            variant="vertical"
+          />
+        ))}
+        <div
+          style={{
+            fontSize: '8px',
+            color: '#999999',
+            textAlign: 'center',
+            marginTop: '8px',
+          }}
+        >
+          As an Amazon Associate I earn from qualifying purchases.
+        </div>
       </div>
     </aside>
   )

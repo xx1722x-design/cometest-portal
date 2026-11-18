@@ -7,11 +7,15 @@ import { GAMES_DATA } from '../config/gamesData'
 import { SIMULATIONS_DATA } from '../config/simulationsData'
 import { type ContentItemUnion } from '../lib/curatedList'
 import { PRIMARY_CATEGORIES, SECONDARY_CATEGORIES } from '../data/gameCategories'
+import { getRandomProducts } from '../data/amazonProducts'
+import AmazonProductCard from '../components/AmazonProductCard'
 
 export function Index() {
   const { t } = useTranslation()
   const [activeCategory, setActiveCategory] = useState('all')
   const [activeSecondaryCategory, setActiveSecondaryCategory] = useState<string | null>(null)
+  const topBannerProducts = useMemo(() => getRandomProducts(2), [])
+  const recommendedProducts = useMemo(() => getRandomProducts(4), [])
 
   // 게임과 시뮬레이션 통합 - 최신 항목이 맨 앞에 오도록 배치
   const allItems: ContentItemUnion[] = useMemo(() => {
@@ -145,10 +149,86 @@ export function Index() {
       {/* Add margin after tabs */}
       <div style={{ marginBottom: '20px' }} />
 
+      {/* Top Slim Banner - 2 cards desktop, 1 mobile */}
+      <div
+        style={{
+          padding: '0 20px 20px 20px',
+        }}
+      >
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+            gap: '12px',
+            maxWidth: '100%',
+          }}
+        >
+          {topBannerProducts.map((product, idx) => (
+            <AmazonProductCard
+              key={`top-banner-${idx}`}
+              product={product}
+              variant="compact"
+            />
+          ))}
+        </div>
+      </div>
+
       {/* Main Grid */}
       <main style={{ flex: 1, padding: '0 20px' }}>
         {filteredItems.length > 0 ? (
-          <CuratedGrid items={filteredItems} columns={6} />
+          <>
+            <CuratedGrid items={filteredItems} columns={6} />
+
+            {/* Recommended Products Row - After first grid */}
+            <div
+              style={{
+                marginTop: '40px',
+                marginBottom: '40px',
+                paddingBottom: '20px',
+                borderTop: '1px solid rgba(100, 181, 246, 0.2)',
+                borderBottom: '1px solid rgba(100, 181, 246, 0.2)',
+              }}
+            >
+              <h2
+                style={{
+                  fontSize: '18px',
+                  fontWeight: '700',
+                  color: 'rgba(100, 181, 246, 0.9)',
+                  marginBottom: '20px',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '8px',
+                }}
+              >
+                ⭐ Featured Products
+              </h2>
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
+                  gap: '16px',
+                }}
+              >
+                {recommendedProducts.map((product, idx) => (
+                  <AmazonProductCard
+                    key={`recommended-${idx}`}
+                    product={product}
+                    variant="vertical"
+                  />
+                ))}
+              </div>
+              <div
+                style={{
+                  fontSize: '8px',
+                  color: '#999999',
+                  textAlign: 'center',
+                  marginTop: '12px',
+                }}
+              >
+                As an Amazon Associate I earn from qualifying purchases.
+              </div>
+            </div>
+          </>
         ) : (
           <div
             style={{

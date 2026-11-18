@@ -13,7 +13,9 @@ import { NeonDodgePhaser } from '../components/games/NeonDodgePhaser'
 import { getGameById } from '../config/gamesData'
 import AmazonBannerCard from '../components/AmazonBannerCard'
 import AmazonAffiliateCard from '../components/AmazonAffiliateCard'
+import AmazonProductCard from '../components/AmazonProductCard'
 import { getRandomAmazonLinks } from '../config/amazonAffiliateLinks'
+import { AMAZON_PRODUCTS, getRandomProducts } from '../data/amazonProducts'
 
 // Dynamic import for AllYouCanTycoon (JSX file)
 // @ts-ignore - importing JSX file is intentional for game compatibility
@@ -29,6 +31,7 @@ export function Game() {
   const [country, setCountry] = useState<string>('US')
   const [countryLoading, setCountryLoading] = useState(true)
   const [amazonLinks] = useState(() => getRandomAmazonLinks(6))
+  const [amazonProducts] = useState(() => getRandomProducts(6))
 
   const game = gameId ? getGameById(gameId) : null
 
@@ -492,25 +495,27 @@ export function Game() {
               <div style={{ marginTop: '6px', textAlign: 'center', fontSize: '10px', color: '#555555', lineHeight: '1.3' }}>이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div>
             </>
           ) : (
-            /* International User: Amazon Affiliate Cards - Left Sidebar (3 cards) */
+            /* International User: Amazon Product Cards - Left Sidebar (3 cards) */
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '12px',
                 width: '100%',
-                maxWidth: '280px',
+                maxWidth: '170px',
                 padding: '8px 0',
               }}
             >
-              {amazonLinks.slice(0, 3).map((link, idx) => (
-                <AmazonAffiliateCard
+              {amazonProducts.slice(0, 3).map((product, idx) => (
+                <AmazonProductCard
                   key={`left-card-${idx}`}
-                  emoji={link.emoji}
-                  productName={link.productName}
-                  affiliateUrl={link.url}
+                  product={product}
+                  variant="vertical"
                 />
               ))}
+              <div style={{ fontSize: '8px', color: '#999999', textAlign: 'center', marginTop: '4px' }}>
+                As an Amazon Associate I earn from qualifying purchases.
+              </div>
             </div>
           )}
         </div>
@@ -822,25 +827,27 @@ export function Game() {
               <div style={{ marginTop: '6px', textAlign: 'center', fontSize: '10px', color: '#555555', lineHeight: '1.3' }}>이 포스팅은 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div>
             </>
           ) : (
-            /* International User: Amazon Affiliate Cards - Right Sidebar (3 cards) */
+            /* International User: Amazon Product Cards - Right Sidebar (3 cards) */
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
                 gap: '12px',
                 width: '100%',
-                maxWidth: '280px',
+                maxWidth: '170px',
                 padding: '8px 0',
               }}
             >
-              {amazonLinks.slice(3, 6).map((link, idx) => (
-                <AmazonAffiliateCard
+              {amazonProducts.slice(3, 6).map((product, idx) => (
+                <AmazonProductCard
                   key={`right-card-${idx}`}
-                  emoji={link.emoji}
-                  productName={link.productName}
-                  affiliateUrl={link.url}
+                  product={product}
+                  variant="vertical"
                 />
               ))}
+              <div style={{ fontSize: '8px', color: '#999999', textAlign: 'center', marginTop: '4px' }}>
+                As an Amazon Associate I earn from qualifying purchases.
+              </div>
             </div>
           )}
         </div>
