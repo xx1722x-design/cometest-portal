@@ -15,7 +15,7 @@ export function Index() {
   const [activeCategory, setActiveCategory] = useState('all')
   const [activeSecondaryCategory, setActiveSecondaryCategory] = useState<string | null>(null)
   const topBannerProducts = useMemo(() => getRandomProducts(2), [])
-  const recommendedProducts = useMemo(() => getRandomProducts(4), [])
+  const recommendedProducts = useMemo(() => getRandomProducts(8), [])
 
   // 게임과 시뮬레이션 통합 - 최신 항목이 맨 앞에 오도록 배치
   const allItems: ContentItemUnion[] = useMemo(() => {
@@ -149,17 +149,19 @@ export function Index() {
       {/* Add margin after tabs */}
       <div style={{ marginBottom: '20px' }} />
 
-      {/* Top Slim Banner - 2 cards desktop, 1 mobile */}
+      {/* Top Slim Banner - 2 cards desktop, 1 mobile - FIX 1: Added breathing room */}
       <div
         style={{
-          padding: '0 20px 20px 20px',
+          padding: '16px 20px 24px 20px',
+          marginTop: '12px',
+          marginBottom: '16px',
         }}
       >
         <div
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '12px',
+            gap: '16px',
             maxWidth: '100%',
           }}
         >
@@ -179,14 +181,14 @@ export function Index() {
           <>
             <CuratedGrid items={filteredItems} columns={6} />
 
-            {/* Recommended Products Row - After first grid */}
+            {/* Recommended Products Row - After first grid - FIX 3: Expanded to 8 cards (2 rows) */}
             <div
               style={{
                 marginTop: '40px',
                 marginBottom: '40px',
-                paddingBottom: '20px',
+                paddingBottom: '24px',
                 borderTop: '1px solid rgba(100, 181, 246, 0.2)',
-                borderBottom: '1px solid rgba(100, 181, 246, 0.2)',
+                borderBottom: 'none',
               }}
             >
               <h2
@@ -194,7 +196,7 @@ export function Index() {
                   fontSize: '18px',
                   fontWeight: '700',
                   color: 'rgba(100, 181, 246, 0.9)',
-                  marginBottom: '20px',
+                  marginBottom: '24px',
                   display: 'flex',
                   alignItems: 'center',
                   gap: '8px',
@@ -206,7 +208,7 @@ export function Index() {
                 style={{
                   display: 'grid',
                   gridTemplateColumns: 'repeat(auto-fit, minmax(160px, 1fr))',
-                  gap: '16px',
+                  gap: '20px',
                 }}
               >
                 {recommendedProducts.map((product, idx) => (
@@ -222,7 +224,7 @@ export function Index() {
                   fontSize: '8px',
                   color: '#999999',
                   textAlign: 'center',
-                  marginTop: '12px',
+                  marginTop: '20px',
                 }}
               >
                 As an Amazon Associate I earn from qualifying purchases.

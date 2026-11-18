@@ -27,28 +27,28 @@ export default function AmazonProductCard({
           display: 'flex',
           flexDirection: 'column',
           width: '100%',
-          maxWidth: '160px',
+          maxWidth: '185px',
           backgroundColor: '#ffffff',
-          borderRadius: '12px',
+          borderRadius: '14px',
           overflow: 'hidden',
           textDecoration: 'none',
           color: '#1a1a2e',
           cursor: 'pointer',
           transition: 'all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
           boxShadow: isHovered
-            ? '0 12px 24px rgba(0, 0, 0, 0.15)'
-            : '0 4px 12px rgba(0, 0, 0, 0.08)',
-          transform: isHovered ? 'translateY(-4px)' : 'translateY(0)',
+            ? '0 16px 32px rgba(0, 0, 0, 0.18)'
+            : '0 6px 16px rgba(0, 0, 0, 0.1)',
+          transform: isHovered ? 'translateY(-6px) scale(1.02)' : 'translateY(0) scale(1)',
           border: '1px solid #e0e0e0',
         }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
       >
-        {/* Product Image - 100px fixed height */}
+        {/* Product Image - 140px fixed height for better presence */}
         <div
           style={{
             width: '100%',
-            height: '100px',
+            height: '140px',
             backgroundColor: '#f5f5f5',
             display: 'flex',
             alignItems: 'center',
@@ -102,40 +102,41 @@ export default function AmazonProductCard({
           {/* Title - 2 lines max */}
           <h3
             style={{
-              fontSize: '12px',
-              fontWeight: '700',
-              lineHeight: '1.2',
+              fontSize: '13px',
+              fontWeight: '800',
+              lineHeight: '1.25',
               margin: '0',
               color: '#1a1a2e',
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
               overflow: 'hidden',
-              minHeight: '24px',
+              minHeight: '26px',
             }}
           >
             {product.title}
           </h3>
 
-          {/* CTA Button */}
+          {/* CTA Button - Bold & Prominent */}
           <button
             style={{
               width: '100%',
-              padding: '6px 8px',
-              backgroundColor: isHovered ? '#FF9900' : '#FF9900',
+              padding: '8px 10px',
+              backgroundColor: '#FF9900',
               color: '#ffffff',
               border: 'none',
-              borderRadius: '6px',
-              fontSize: '10px',
-              fontWeight: '700',
+              borderRadius: '7px',
+              fontSize: '11px',
+              fontWeight: '800',
               cursor: 'pointer',
               transition: 'all 0.2s ease',
               textTransform: 'uppercase',
-              letterSpacing: '0.3px',
-              marginTop: '4px',
+              letterSpacing: '0.4px',
+              marginTop: '6px',
               boxShadow: isHovered
-                ? '0 4px 12px rgba(255, 153, 0, 0.3)'
-                : '0 2px 6px rgba(255, 153, 0, 0.15)',
+                ? '0 6px 16px rgba(255, 153, 0, 0.35)'
+                : '0 3px 8px rgba(255, 153, 0, 0.2)',
+              transform: isHovered ? 'scale(1.05)' : 'scale(1)',
             }}
             onClick={(e) => {
               e.preventDefault()
