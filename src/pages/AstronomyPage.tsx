@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { Header } from '../components/Header'
 import { SiteFooter } from '../components/SiteFooter'
+import { Sidebar } from '../components/Sidebar'
 import { SimulationCard } from '../components/SimulationCard'
 import { getSimulationsByCategory } from '../config/simulationsData'
 
@@ -15,7 +16,8 @@ export function AstronomyPage() {
     <div className="portal-bg" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
       <Header />
 
-      <main style={{ flex: 1, padding: '40px 20px' }}>
+      <div style={{ display: 'flex', flex: 1, gap: '20px', padding: '0 20px' }}>
+        <main style={{ flex: 1, padding: '40px 0' }}>
         {/* Hero section */}
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <h1 style={{ fontSize: '36px', fontWeight: '700', color: '#fff', margin: '0 0 16px 0' }}>
@@ -77,6 +79,9 @@ export function AstronomyPage() {
           </button>
         </div>
       </main>
+
+        <Sidebar />
+      </div>
 
       <SiteFooter />
     </div>

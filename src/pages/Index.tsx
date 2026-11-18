@@ -161,7 +161,7 @@ export function Index() {
           style={{
             display: 'grid',
             gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-            gap: '16px',
+            gap: '24px',
             maxWidth: '100%',
           }}
         >

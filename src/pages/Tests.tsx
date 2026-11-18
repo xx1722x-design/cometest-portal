@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Header } from '../components/Header';
 import { SiteFooter } from '../components/SiteFooter';
+import { Sidebar } from '../components/Sidebar';
 import { TestCard } from '../components/TestCard';
 import { QuizModal } from '../components/QuizModal';
 import { TESTS_DATA, type Test } from '../config/testsData';
@@ -130,16 +131,17 @@ export function Tests() {
         </div>
       </div>
 
-      {/* Main Content */}
-      <main
-        style={{
-          flex: 1,
-          padding: '40px 20px',
-          maxWidth: '1400px',
-          width: '100%',
-          margin: '0 auto',
-        }}
-      >
+      <div style={{ display: 'flex', flex: 1, gap: '20px', padding: '0 20px' }}>
+        {/* Main Content */}
+        <main
+          style={{
+            flex: 1,
+            padding: '40px 0',
+            maxWidth: '1400px',
+            width: '100%',
+            margin: '0 auto',
+          }}
+        >
         {/* Category Header with Atmospheric Design */}
         <div
           style={{
@@ -232,6 +234,9 @@ export function Tests() {
           </div>
         )}
       </main>
+
+        <Sidebar />
+      </div>
 
       <SiteFooter />
 
